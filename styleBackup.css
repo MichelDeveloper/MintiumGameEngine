@@ -1,0 +1,60 @@
+/* Existing Game Canvas Styling */
+body {
+    background-color: #000;
+    margin: 0;
+    display: flex;
+    flex-direction: column; /* Stack game and editor vertically */
+    align-items: center;
+    min-height: 100vh;
+}
+
+#gameCanvas {
+    display: block;
+    margin: 20px auto; /* Add some space around the canvas */
+    width: 640px;
+    height: 640px;
+    image-rendering: pixelated;
+}
+
+/* Sprite Editor Styling */
+#spriteEditorSection {
+    text-align: center; /* Center the editor's content */
+    margin-top: 20px; /* Add space above the editor section */
+}
+
+.grid {
+    display: grid;
+    grid-template-columns: repeat(8, 20px);
+    grid-template-rows: repeat(8, 20px);
+    gap: 1px;
+    margin: 0 auto; /* Center the grid */
+}
+
+.grid div {
+    width: 20px;
+    height: 20px;
+    background-color: #fff;
+    border: 1px solid #ddd;
+}
+
+.grid div.active {
+    background-color: #000;
+}
+
+#spriteCode {
+    margin-top: 20px;
+    width: 100%;
+}
+
+.tool-active {
+    background-color: #4CAF50; /* Green background for the active tool */
+    color: white;
+}
+
+.toolSelection {
+    margin-bottom: 10px;
+}
+
+.toolSelection button {
+    margin-right: 5px;
+}

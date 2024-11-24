@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>VR Game Engine</title>
+    <script src="https://aframe.io/releases/1.2.0/aframe.min.js"></script>
+    <script src="https://unpkg.com/aframe-extras/dist/aframe-extras.min.js"></script>
+    <script type="module" src="./GameEngine/gameEngine.js" defer></script>
+</head>
+<body>
+    <a-scene>
+        
+        <a-entity id="player" position="0 1.5 0">
+            <a-camera></a-camera>
+            <!-- <a-entity hand-controls="hand: left"></a-entity> -->
+            <!-- <a-entity hand-controls="hand: right"></a-entity> -->
+            <a-entity id="leftHand" oculus-touch-controls="hand: left"></a-entity>
+            <a-entity id="rightHand" oculus-touch-controls="hand: right"></a-entity>
+        </a-entity>
+        
+
+        <a-light type="ambient" color="#FFF"></a-light>
+    </a-scene>
+</body>
+</html>

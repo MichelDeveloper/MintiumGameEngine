@@ -1,0 +1,46 @@
+/* styles.css */
+#toggleButton {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  padding: 10px 20px;
+  background-color: #b0bec5; /* Medium grey */
+  color: white;
+  border: none;
+  cursor: pointer;
+  z-index: 999; /* Ensure button is always on top */
+}
+
+#enterVRButton {
+  position: absolute;
+  top: 10px;
+  right: 200px;
+  padding: 10px 20px;
+  background-color: #b0bec5; /* Medium grey */
+  color: white;
+  border: none;
+  cursor: pointer;
+  z-index: 999; /* Ensure button is always on top */
+}
+
+#exportProjectBtn {
+  position: relative;
+  padding: 10px 20px;
+  margin-bottom: 16px;
+  background-color: #b0bec5; /* Medium grey */
+  color: white;
+  border: none;
+  cursor: pointer;
+  z-index: 999; /* Ensure button is always on top */
+}
+
+#importProjectBtn {
+  position: relative;
+  padding: 10px 20px;
+  margin-bottom: 16px;
+  background-color: #b0bec5; /* Medium grey */
+  color: white;
+  border: none;
+  cursor: pointer;
+  z-index: 999; /* Ensure button is always on top */
+}

@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>VR Game Editor & Viewer</title>
+    <link rel="stylesheet" href="./styles.css" />
+    <link rel="stylesheet" href="./editorStyles.css" />
+    <script src="https://aframe.io/releases/1.5.0/aframe.min.js"></script>
+    <script src="https://unpkg.com/aframe-extras/dist/aframe-extras.min.js"></script>
+    <script type="module" src="./GameEngine/gameEngine.js" defer></script>
+    <script type="module" src="./GameEditor/spriteEditor.js" defer></script>
+    <script type="module" src="./GameEditor/mapEditor.js" defer></script>
+    <script type="module" src="./GameEditor/gameEditor.js" defer></script>
+  </head>
+  <body>
+    <!-- Editor Section -->
+    <div id="editorContainer" style="display: none">
+      <div id="editorScrollContainer">
+        <h1>Game Editor</h1>
+        <p>Editor functionalities go here...</p>
+        <button id="exportProjectBtn">Export Project</button>
+        <input
+          type="file"
+          id="importGameData"
+          accept=".json"
+          style="display: none"
+        />
+        <button id="importProjectBtn">Import Project</button>
+
+        <div id="mapEditorSection" class="section">
+          <div class="section-header">
+            <h2>Map Editor</h2>
+            <span>Hide/Show</span>
+          </div>
+          <div class="section-content">
+            <select id="sceneSelector">
+              <!-- Scenes will be added dynamically -->
+            </select>
+            <select id="layerSelector">
+              <!-- Added dynamically inside of script -->
+            </select>
+            <select id="spriteSelector">
+              <!-- Added dynamically inside of script -->
+            </select>
+            <button id="loadMap">Load Map</button>
+            <button id="saveMap">Save Map</button>
+            <div class="mapGrid"></div>
+            <button id="generateMapCode">Generate Map Code</button>
+            <button id="resetMapGrid">Reset</button>
+            <textarea id="mapCode" rows="10" readonly></textarea>
+          </div>
+        </div>
+
+        <div id="spriteEditorSection" class="section">
+          <div class="section-header">
+            <h2>Sprite Editor</h2>
+            <span>Hide/Show</span>
+          </div>
+          <div class="section-content">
+            <div class="toolSelection">
+              <button id="pen">Pen</button>
+              <button id="eraser">Eraser</button>
+              <button id="fill">Fill</button>
+              <input type="color" id="colorPicker" value="#000000" />
+              <input type="text" id="spriteIdInput" placeholder="Sprite ID" />
+              <select id="spriteEditorSelector">
+                <!-- Options will be added dynamically -->
+              </select>
+              <select id="spriteTypeSelector">
+                <option value="block">Block</option>
+                <option value="billboard">Billboard</option>
+                <!-- Add more types as needed -->
+              </select>
+              <label>
+                Collision:
+                <input type="checkbox" id="spriteCollisionCheckbox" />
+              </label>
+              <label>
+                ChangeScene:
+                <select id="changeSceneSelector">
+                  <option value="">None</option>
+                  <!-- Scene options will be added dynamically -->
+                </select>
+              </label>
+              <button id="loadSprite">Load Sprite</button>
+              <button id="saveSprite">Save Sprite</button>
+            </div>
+            <div class="grid"></div>
+            <button id="generateCode">Generate Sprite Code</button>
+            <button id="resetGrid">Reset</button>
+            <textarea id="spriteCode" rows="10" readonly></textarea>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Game Viewer Section -->
+    <div id="gameContainer">
+      <a-scene xr-mode-ui="enabled: true">
+        <!-- <a-entity id="player" position="0 1.5 0">
+          <a-camera></a-camera>
+          <a-entity id="leftHand" oculus-touch-controls="hand: left"></a-entity>
+          <a-entity
+            id="rightHand"
+            oculus-touch-controls="hand: right"
+          ></a-entity>
+        </a-entity>
+        <a-light type="ambient" color="#FFF"></a-light> -->
+      </a-scene>
+    </div>
+
+    <!-- Toggle Button -->
+    <button id="toggleButton">Switch to Editor View</button>
+
+    <button id="enterVRButton">Enter VR</button>
+
+    <script>
+      document.addEventListener("DOMContentLoaded", function () {
+        var enterVRButton = document.getElementById("enterVRButton");
+        var sceneEl = document.querySelector("a-scene");
+
+        enterVRButton.addEventListener("click", function () {
+          if (sceneEl.is("vr-mode")) {
+            console.log("Already in VR mode");
+          } else {
+            sceneEl.enterVR();
+          }
+        });
+      });
+    </script>
+
+    <script>
+      document.addEventListener("DOMContentLoaded", () => {
+        const toggleButton = document.getElementById("toggleButton");
+        const editorContainer = document.getElementById("editorContainer");
+        const gameContainer = document.getElementById("gameContainer");
+
+        let isInEditorMode = false;
+
+        toggleButton.addEventListener("click", () => {
+          isInEditorMode = !isInEditorMode;
+          editorContainer.style.display = isInEditorMode ? "block" : "none";
+          gameContainer.style.display = isInEditorMode ? "none" : "block";
+          toggleButton.textContent = isInEditorMode
+            ? "Switch to Game View"
+            : "Switch to Editor View";
+        });
+      });
+    </script>
+    <script>
+      document.addEventListener("DOMContentLoaded", () => {
+        const headers = document.querySelectorAll(".section-header");
+
+        headers.forEach((header) => {
+          header.addEventListener("click", () => {
+            const content = header.nextElementSibling;
+            content.style.display =
+              content.style.display === "none" ? "block" : "none";
+          });
+        });
+      });
+
+      document.addEventListener("DOMContentLoaded", function () {
+        const importProjectBtn = document.getElementById("importProjectBtn");
+        const importGameDataInput = document.getElementById("importGameData");
+
+        // Add an event listener to the button
+        importProjectBtn.addEventListener("click", function () {
+          // Trigger the click event on the hidden file input
+          importGameDataInput.click();
+        });
+
+        importGameDataInput.addEventListener("change", function () {
+          const file = this.files[0];
+          if (file) {
+            const reader = new FileReader();
+            reader.onload = function (e) {
+              // Here you can parse the JSON and do what's needed with it
+              const importedGameData = JSON.parse(e.target.result);
+              console.log(importedGameData);
+              // Update your game's data with the imported data
+            };
+            reader.readAsText(file);
+          }
+        });
+      });
+    </script>
+  </body>
+</html>
