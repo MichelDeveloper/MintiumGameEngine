@@ -60,7 +60,9 @@ AFRAME.registerComponent("grid-move", {
     directionVector.multiplyScalar(gridBlockSize);
 
     // Calculate potential new position
-    const currentPosition = new THREE.Vector3().copy(playerAux.object3D.position);
+    const currentPosition = new THREE.Vector3().copy(
+      playerAux.object3D.position
+    );
     const potentialPosition = currentPosition.add(directionVector);
 
     const baseLayer = currentScene.data.find(
@@ -72,22 +74,33 @@ AFRAME.registerComponent("grid-move", {
     }
 
     // Check for collision at the potential new position
-    const gridX = Math.round((potentialPosition.x / gridBlockSize) + (baseLayer.layerData[0].length / 2));
-    const gridZ = Math.round((potentialPosition.z / gridBlockSize) + (baseLayer.layerData.length / 2));
+    const gridX = Math.round(
+      potentialPosition.x / gridBlockSize + baseLayer.layerData[0].length / 2
+    );
+    const gridZ = Math.round(
+      potentialPosition.z / gridBlockSize + baseLayer.layerData.length / 2
+    );
 
-    if (gridZ < 0 || gridZ >= baseLayer.layerData.length || gridX < 0 || gridX >= baseLayer.layerData[gridZ].length) {
-        console.error("Grid position out of bounds");
-        return;
+    if (
+      gridZ < 0 ||
+      gridZ >= baseLayer.layerData.length ||
+      gridX < 0 ||
+      gridX >= baseLayer.layerData[gridZ].length
+    ) {
+      console.error("Grid position out of bounds");
+      return;
     }
 
-    const tileType = baseLayer.layerData[gridZ][gridX];  // Directly access the tile type using array indexing
+    const tileType = baseLayer.layerData[gridZ][gridX]; // Directly access the tile type using array indexing
 
     if (!tileType) {
       console.error("Tile type is undefined");
       return;
     }
 
-    const tileData = globalGameData.sprites.find(sprite => sprite.id === tileType);
+    const tileData = globalGameData.sprites.find(
+      (sprite) => sprite.id === tileType
+    );
 
     // If the tile has collision, prevent movement
     if (tileData && tileData.collision) {
@@ -107,7 +120,6 @@ AFRAME.registerComponent("grid-move", {
     this.canExecuteEvent = false;
     setTimeout(() => (this.canExecuteEvent = true), 500); // Delay for executing the events associated with the joystick movement
   },
-
 });
 
 AFRAME.registerComponent("face-camera-3d", {
@@ -132,6 +144,48 @@ AFRAME.registerComponent("face-camera-2d", {
 
     // Set the Y rotation of the billboard to match the camera's Y rotation
     this.el.object3D.rotation.y = cameraRotation.y;
+  },
+});
+
+AFRAME.registerComponent("rotation-control", {
+  schema: {
+    rotationAngle: { type: "number", default: 90 }, // Degrees per rotation
+  },
+
+  init: function () {
+    this.el.addEventListener("axismove", this.onAxisMove.bind(this));
+    this.canExecuteEvent = true;
+  },
+
+  onAxisMove: function (evt) {
+    if (!this.canExecuteEvent) return;
+
+    var playerAux = document.getElementById("player");
+    if (!playerAux) {
+      console.error("Player entity not found");
+      return;
+    }
+
+    const axis = evt.detail.axis;
+    const x = axis[2]; // X-axis of the right thumbstick
+
+    // Only rotate if thumbstick is moved significantly
+    if (Math.abs(x) > 0.7) {
+      // Higher threshold for snap rotation
+      const currentRotation = playerAux.getAttribute("rotation");
+      const rotationAmount =
+        x > 0 ? this.data.rotationAngle : -this.data.rotationAngle;
+
+      playerAux.setAttribute("rotation", {
+        x: currentRotation.x,
+        y: currentRotation.y + rotationAmount,
+        z: currentRotation.z,
+      });
+
+      // Add cooldown like in the grid-move component
+      this.canExecuteEvent = false;
+      setTimeout(() => (this.canExecuteEvent = true), 500);
+    }
   },
 });
 
@@ -338,5 +392,7 @@ document.addEventListener("DOMContentLoaded", () => {
   console.log("--- Game Start ---");
   loadScene(currentScene.sceneId);
   const leftHand = document.getElementById("leftHand");
+  const rightHand = document.getElementById("rightHand");
   leftHand.setAttribute("grid-move", "");
+  rightHand.setAttribute("rotation-control", "");
 });
