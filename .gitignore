@@ -46,3 +46,24 @@ coverage/
 # Project specific
 gameData.json
 build-configs/
+
+# Server
+cert.pem
+key.pem
+csr.pem
+*.pem
+server.js
+server.config.js
+server.log
+
+# SSL/TLS
+ssl/
+certificates/
+*.crt
+*.key
+*.csr
+
+# Server logs
+logs/
+*.log
+server/*.log
