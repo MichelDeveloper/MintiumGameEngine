@@ -1,6 +1,6 @@
 import { globalGameData } from "./gameEditor.js";
 import { loadSpriteList } from "./mapEditor.js";
-import { reloadGame } from "../GameEngine/gameEngine.js";
+import { reloadGame } from "../GameEngine/core/scene-manager.js";
 
 document.addEventListener("DOMContentLoaded", function () {
   const grid = document.querySelector(".grid");

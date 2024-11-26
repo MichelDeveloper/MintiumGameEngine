@@ -1,5 +1,5 @@
 import { globalGameData, exportGlobalGameData } from "./gameEditor.js";
-import { reloadGame } from "../GameEngine/gameEngine.js";
+import { reloadGame } from "../GameEngine/core/scene-manager.js";
 
 export function loadSpriteList() {
   const spriteSelector = document.getElementById("spriteSelector"); // Make sure this ID matches your HTML
@@ -41,19 +41,20 @@ document.addEventListener("DOMContentLoaded", function () {
     });
   }
 
-  loadSceneSelector()
+  loadSceneSelector();
 
   sceneSelector.addEventListener("change", () => {
     loadMapEditorScene(); // Load map data when a new scene is selected
   });
 
-  function loadMapEditorScene(){
+  function loadMapEditorScene() {
     // Clear existing map grid cells
     mapGrid.innerHTML = "";
 
     const selectedSceneIndex = sceneSelector.value;
     const selectedLayerIndex = layerSelector.selectedIndex;
-    const selectedLayer = globalGameData.scenes[selectedSceneIndex].data[selectedLayerIndex];
+    const selectedLayer =
+      globalGameData.scenes[selectedSceneIndex].data[selectedLayerIndex];
 
     // Populate the map grid with the selected layer's map data
     selectedLayer.layerData.forEach((row) => {

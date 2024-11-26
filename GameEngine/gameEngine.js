@@ -23,5 +23,3 @@ document.addEventListener("DOMContentLoaded", () => {
     console.warn("VR controllers not found");
   }
 });
-
-export { reloadGame } from "./core/scene-manager.js";
