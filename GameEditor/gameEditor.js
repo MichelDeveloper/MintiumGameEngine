@@ -135,6 +135,16 @@ export async function exportGame() {
         "GameEngine/components/movement/rotation-control.js",
       ],
 
+      // GameEditor files needed for runtime
+      ["/GameEditor/gameEditor.js", "GameEditor/gameEditor.js"],
+      ["/gameData.js", "gameData.js"],
+
+      // Utils
+      [
+        "/GameEngine/utils/texture-utils.js",
+        "GameEngine/utils/texture-utils.js",
+      ],
+
       // Styles
       ["/styles.css", "styles.css"],
     ];
