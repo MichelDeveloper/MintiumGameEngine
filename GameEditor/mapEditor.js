@@ -158,6 +158,8 @@ document.addEventListener("DOMContentLoaded", function () {
   // Save Map
   saveMapBtn.addEventListener("click", () => {
     const selectedLayerIndex = layerSelector.value;
+    const selectedSceneIndex = sceneSelector.value;
+    const selectedScene = globalGameData.scenes[selectedSceneIndex];
     const cells = Array.from(mapGrid.children);
     const newLayerData = [];
 
@@ -167,15 +169,17 @@ document.addEventListener("DOMContentLoaded", function () {
       newLayerData.push(row);
     }
 
-    console.log(newLayerData);
-
     // Update the selected layer in the global game data
     updateMapLayer(
-      globalGameData.scenes[0].sceneId,
+      selectedScene.sceneId,
       parseInt(selectedLayerIndex, 10),
       newLayerData
     );
-    reloadGame();
+
+    // Save to localStorage
+    localStorage.setItem("gameData", JSON.stringify(globalGameData));
+
+    reloadGame(selectedScene.sceneId);
     alert("Map saved successfully!");
   });
 

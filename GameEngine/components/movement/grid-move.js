@@ -1,4 +1,4 @@
-import { currentScene, loadScene } from "../../core/scene-manager.js";
+import { getCurrentScene, loadScene } from "../../core/scene-manager.js";
 import { globalGameData } from "../../../GameEditor/gameEditor.js";
 
 AFRAME.registerComponent("grid-move", {
@@ -46,7 +46,7 @@ AFRAME.registerComponent("grid-move", {
     );
     const potentialPosition = currentPosition.add(directionVector);
 
-    const baseLayer = currentScene.data.find(
+    const baseLayer = getCurrentScene().data.find(
       (sceneLayer) => sceneLayer.layer === 0
     );
 

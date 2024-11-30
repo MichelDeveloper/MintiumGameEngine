@@ -1,5 +1,5 @@
 {
-    "name": "vr-game",
+    "name": "mintium",
     "version": "1.0.0",
     "main": "electron/main.js",
     "scripts": {
@@ -8,23 +8,23 @@
         "pack-mac": "electron-builder --mac"
     },
     "build": {
-        "appId": "com.vrgame.app",
+        "appId": "com.mintium.app",
+        "productName": "Mintium",
         "mac": {
             "category": "public.app-category.games",
-            "target": "dmg"
+            "target": "dmg",
+            "icon": "icon.icns"
+        },
+        "win": {
+            "icon": "icon.ico"
+        },
+        "linux": {
+            "icon": "icon.png"
         },
         "files": [
             "**/*",
             "!**/node_modules/*/{CHANGELOG.md,README.md,README,readme.md,readme}",
-            "!**/node_modules/*/{test,__tests__,tests,powered-test,example,examples}",
-            "!**/node_modules/.bin",
-            "!**/*.{iml,o,hprof,orig,pyc,pyo,rbc,swp,csproj,sln,xproj}",
-            "!.editorconfig",
-            "!**/._*",
-            "!**/{.DS_Store,.git,.hg,.svn,CVS,RCS,SCCS,__pycache__,thumbs.db,.gitignore,.gitattributes}",
-            "!**/{__pycache__,thumbs.db,.flowconfig,.idea,.vs,.nyc_output}",
-            "!**/{appveyor.yml,.travis.yml,circle.yml}",
-            "!**/{npm-debug.log,yarn.lock,.yarn-integrity,.yarn-metadata.json}"
+            "!**/node_modules/*/{test,__tests__,tests,powered-test,example,examples}"
         ]
     },
     "devDependencies": {

@@ -9,7 +9,9 @@
 import { gameData } from "../gameData.js";
 
 // Deep copy to avoid mutating the original base data
-export let globalGameData = JSON.parse(JSON.stringify(gameData));
+export let globalGameData =
+  JSON.parse(localStorage.getItem("gameData")) ||
+  JSON.parse(JSON.stringify(gameData));
 
 // // Function to update a specific part of globalGameData
 // export function updateGlobalGameData(key, newData) {

@@ -1,5 +1,4 @@
-import { currentScene } from "../../core/scene-manager.js";
-import { loadScene } from "../../core/scene-manager.js";
+import { getCurrentScene, loadScene } from "../../core/scene-manager.js";
 import { globalGameData } from "../../../GameEditor/gameEditor.js";
 
 AFRAME.registerComponent("custom-keyboard-controls", {

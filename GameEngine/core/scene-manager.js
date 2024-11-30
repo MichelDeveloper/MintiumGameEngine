@@ -7,11 +7,53 @@ import {
 } from "./entity-factory.js";
 import { findSpriteById } from "./sprite-manager.js";
 
-export let currentScene = globalGameData.scenes[0];
+let currentScene;
+
+export function initializeGameState(initialGameData) {
+  currentScene = initialGameData.scenes[0];
+}
+
+export function setCurrentScene(scene) {
+  currentScene = scene;
+}
+
+export function getCurrentScene() {
+  return currentScene;
+}
 
 export function loadScene(sceneId) {
-  console.log("loadScene");
+  console.log("loadScene:", sceneId);
+
+  // Wait for DOM to be ready
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", () => initScene(sceneId));
+  } else {
+    initScene(sceneId);
+  }
+}
+
+function initScene(sceneId) {
   const sceneEl = document.querySelector("a-scene");
+  if (!sceneEl) {
+    console.error("A-Scene not found");
+    return;
+  }
+
+  // Update current scene
+  const newScene = globalGameData.scenes.find(
+    (scene) => scene.sceneId === sceneId
+  );
+  if (!newScene) {
+    console.error("Scene not found:", sceneId);
+    return;
+  }
+  currentScene = newScene;
+
+  // Remove existing scene container if it exists
+  const existingContainer = document.getElementById("game-scene");
+  if (existingContainer) {
+    existingContainer.parentNode.removeChild(existingContainer);
+  }
 
   // Create and setup containers
   const sceneContainer = createSceneContainer();
@@ -26,16 +68,8 @@ export function loadScene(sceneId) {
   sceneContainer.appendChild(playerEl);
   sceneContainer.appendChild(lightEl);
 
-  // Load scene data
-  const newScene = globalGameData.scenes.find(
-    (scene) => scene.sceneId === sceneId
-  );
-  if (!newScene) return;
-
   // Set scene properties
-  document
-    .querySelector("a-scene")
-    .setAttribute("background", `color: ${newScene.backgroundColor}`);
+  sceneEl.setAttribute("background", `color: ${newScene.backgroundColor}`);
 
   // Position player
   const spawnPos = newScene.playerSpawnPosition;
@@ -53,7 +87,6 @@ export function loadScene(sceneId) {
     sceneLayer.layerData.forEach((row, rowIndex) => {
       row.forEach((cell, cellIndex) => {
         if (cell !== "0") {
-          // Check for non-void spaces
           const sprite = findSpriteById(cell);
           if (sprite) {
             createCube(
@@ -68,12 +101,34 @@ export function loadScene(sceneId) {
       });
     });
   });
+
+  // Reattach controls to the new player entity
+  const leftHand = document.getElementById("leftHand");
+  const rightHand = document.getElementById("rightHand");
+  if (leftHand && rightHand) {
+    leftHand.setAttribute("grid-move", "");
+    rightHand.setAttribute("rotation-control", "");
+  }
 }
 
-export function reloadGame() {
-  const container = document.getElementById("game-scene");
-  container.parentNode.removeChild(container); // Remove the container
+export function reloadGame(sceneId = currentScene.sceneId) {
+  // If we're in the editor (no a-scene), just update the data
+  const sceneEl = document.querySelector("a-scene");
+  if (!sceneEl) {
+    // We're in editor, just update currentScene
+    const newScene = globalGameData.scenes.find(
+      (scene) => scene.sceneId === sceneId
+    );
+    if (newScene) {
+      currentScene = newScene;
+    }
+    return; // Don't try to reload the scene in editor
+  }
 
-  // Load the scene content
-  loadScene(globalGameData.scenes[0].sceneId);
+  // If we're in the game, proceed with scene reload
+  const container = document.getElementById("game-scene");
+  if (container && container.parentNode) {
+    container.parentNode.removeChild(container);
+  }
+  loadScene(sceneId);
 }
