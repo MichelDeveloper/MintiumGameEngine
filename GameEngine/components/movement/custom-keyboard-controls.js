@@ -1,6 +1,3 @@
-import { getCurrentScene, loadScene } from "../../core/scene-manager.js";
-import { globalGameData } from "../../../GameEditor/gameEditor.js";
-
 AFRAME.registerComponent("custom-keyboard-controls", {
   init: function () {
     this.onKeyDown = this.onKeyDown.bind(this);
