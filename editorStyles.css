@@ -103,3 +103,12 @@ textarea {
   border-color: #0d6efd;
   transform: scale(1.05);
 }
+
+.section-content {
+  display: block;
+  width: 100%;
+  height: auto;
+  overflow: visible;
+  padding-top: 1rem;
+  transition: max-height 0.3s ease-out;
+}
