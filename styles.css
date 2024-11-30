@@ -1,26 +1,91 @@
 /* styles.css */
-#toggleButton {
-  position: absolute;
-  top: 10px;
-  right: 10px;
-  padding: 10px 20px;
-  background-color: #b0bec5; /* Medium grey */
-  color: white;
-  border: none;
+:root {
+  --bs-body-bg: #1a1d21;
+  --bs-body-color: #e9ecef;
+  --editor-bg: #22262a;
+  --section-bg: #2a2e32;
+  --border-color: #373b3e;
+}
+
+body {
+  background-color: var(--bs-body-bg);
+  color: var(--bs-body-color);
+  min-height: 100vh;
+  margin: 0;
+  padding: 20px;
+}
+
+#editorContainer {
+  background-color: var(--editor-bg);
+  padding: 2rem;
+  border-radius: 1rem;
+  box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
+}
+
+.section {
+  background-color: var(--section-bg);
+  border-radius: 0.75rem;
+  border: 1px solid var(--border-color);
+  padding: 1.5rem;
+  margin-bottom: 1.5rem;
+}
+
+.section-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid var(--border-color);
+  margin-bottom: 1.5rem;
   cursor: pointer;
-  z-index: 999; /* Ensure button is always on top */
+}
+
+.btn-editor {
+  background-color: #2b3035;
+  border: 1px solid var(--border-color);
+  color: var(--bs-body-color);
+  padding: 0.5rem 1rem;
+  border-radius: 0.5rem;
+  transition: all 0.2s;
+}
+
+.btn-editor:hover {
+  background-color: #3b4045;
+  color: #fff;
+}
+
+#toggleButton {
+  padding: 0.75rem 1.5rem;
+  border-radius: 0.5rem;
+  background-color: #0d6efd;
+  border: none;
+  color: white;
+  font-weight: 500;
+  min-width: 180px;
 }
 
 #enterVRButton {
-  position: absolute;
-  top: 10px;
-  right: 200px;
-  padding: 10px 20px;
-  background-color: #b0bec5; /* Medium grey */
-  color: white;
+  padding: 0.75rem 1.5rem;
+  border-radius: 0.5rem;
+  background-color: #198754;
   border: none;
-  cursor: pointer;
-  z-index: 999; /* Ensure button is always on top */
+  color: white;
+  font-weight: 500;
+  min-width: 120px;
+}
+
+#toggleButton:hover,
+#enterVRButton:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+#toggleButton:hover {
+  background-color: #0b5ed7;
+}
+
+#enterVRButton:hover {
+  background-color: #157347;
 }
 
 #exportProjectBtn {
@@ -43,4 +108,14 @@
   border: none;
   cursor: pointer;
   z-index: 999; /* Ensure button is always on top */
+}
+
+/* Container for buttons to ensure proper spacing */
+.button-container {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  display: flex;
+  gap: 20px;
+  z-index: 1000;
 }
