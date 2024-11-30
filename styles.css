@@ -12,14 +12,27 @@ body {
   color: var(--bs-body-color);
   min-height: 100vh;
   margin: 0;
-  padding: 20px;
+  padding: 0;
+  overflow-y: auto;
 }
 
 #editorContainer {
   background-color: var(--editor-bg);
+  height: 100%;
+  min-height: 100vh;
   padding: 2rem;
-  border-radius: 1rem;
-  box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
+  margin: 0;
+  width: 100%;
+  box-sizing: border-box;
+  overflow-y: auto;
+}
+
+#editorScrollContainer {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 1rem;
+  height: auto;
+  overflow: visible;
 }
 
 .section {
@@ -28,6 +41,9 @@ body {
   border: 1px solid var(--border-color);
   padding: 1.5rem;
   margin-bottom: 1.5rem;
+  width: 100%;
+  box-sizing: border-box;
+  overflow: visible;
 }
 
 .section-header {
@@ -118,4 +134,24 @@ body {
   display: flex;
   gap: 20px;
   z-index: 1000;
+}
+
+.section-content {
+  display: block;
+  width: 100%;
+  height: auto;
+  overflow: visible;
+  padding-top: 1rem;
+  transition: max-height 0.3s ease-out;
+}
+
+/* Add specific styles for map editor section */
+#mapEditorSection .section-content {
+  min-height: fit-content;
+  overflow: visible;
+}
+
+.mapGrid {
+  overflow: visible;
+  margin: 1rem 0;
 }
