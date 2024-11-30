@@ -1,0 +1,297 @@
+/* styles.css */
+:root {
+  --bs-body-bg: #1a1d21;
+  --bs-body-color: #e9ecef;
+  --editor-bg: #22262a;
+  --section-bg: #2a2e32;
+  --border-color: #373b3e;
+}
+
+body {
+  background-color: var(--bs-body-bg);
+  color: var(--bs-body-color);
+  min-height: 100vh;
+  margin: 0;
+  padding: 0;
+  overflow-y: auto;
+}
+
+#editorContainer {
+  background-color: var(--editor-bg);
+  height: 100%;
+  min-height: 100vh;
+  padding: 2rem;
+  margin: 0;
+  width: 100%;
+  box-sizing: border-box;
+  overflow-y: auto;
+}
+
+#editorScrollContainer {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 1rem;
+  height: auto;
+  overflow: visible;
+}
+
+.section {
+  background-color: var(--section-bg);
+  border-radius: 0.75rem;
+  border: 1px solid var(--border-color);
+  padding: 1.5rem;
+  margin-bottom: 1.5rem;
+  width: 100%;
+  box-sizing: border-box;
+  overflow: visible;
+}
+
+.section-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid var(--border-color);
+  margin-bottom: 1.5rem;
+  cursor: pointer;
+}
+
+.btn-editor {
+  background-color: #2b3035;
+  border: 1px solid var(--border-color);
+  color: var(--bs-body-color);
+  padding: 0.5rem 1rem;
+  border-radius: 0.5rem;
+  transition: all 0.2s;
+}
+
+.btn-editor:hover {
+  background-color: #3b4045;
+  color: #fff;
+}
+
+#toggleButton {
+  padding: 0.75rem 1.5rem;
+  border-radius: 0.5rem;
+  background-color: #0d6efd;
+  border: none;
+  color: white;
+  font-weight: 500;
+  min-width: 180px;
+}
+
+#enterVRButton {
+  padding: 0.75rem 1.5rem;
+  border-radius: 0.5rem;
+  background-color: #198754;
+  border: none;
+  color: white;
+  font-weight: 500;
+  min-width: 120px;
+}
+
+#toggleButton:hover,
+#enterVRButton:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+#toggleButton:hover {
+  background-color: #0b5ed7;
+}
+
+#enterVRButton:hover {
+  background-color: #157347;
+}
+
+#exportProjectBtn {
+  position: relative;
+  padding: 10px 20px;
+  margin-bottom: 16px;
+  background-color: #b0bec5; /* Medium grey */
+  color: white;
+  border: none;
+  cursor: pointer;
+  z-index: 999; /* Ensure button is always on top */
+}
+
+#importProjectBtn {
+  position: relative;
+  padding: 10px 20px;
+  margin-bottom: 16px;
+  background-color: #b0bec5; /* Medium grey */
+  color: white;
+  border: none;
+  cursor: pointer;
+  z-index: 999; /* Ensure button is always on top */
+}
+
+/* Container for buttons to ensure proper spacing */
+.button-container {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  display: flex;
+  gap: 20px;
+  z-index: 1000;
+}
+
+.section-content {
+  display: block;
+  width: 100%;
+  height: auto;
+  overflow: visible;
+  padding-top: 1rem;
+  transition: max-height 0.3s ease-out;
+}
+
+/* Add specific styles for map editor section */
+#mapEditorSection .section-content {
+  min-height: fit-content;
+  overflow: visible;
+}
+
+.mapGrid {
+  overflow: visible;
+  margin: 1rem 0;
+}
+
+.map-controls {
+  display: flex;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+  flex-wrap: wrap;
+}
+
+.control-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.control-group label {
+  font-size: 0.875rem;
+  color: var(--bs-body-color);
+  opacity: 0.8;
+}
+
+.map-actions {
+  display: flex;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.map-footer {
+  margin-top: 1.5rem;
+}
+
+.btn-editor.danger {
+  background-color: #dc3545;
+  border-color: #dc3545;
+}
+
+.btn-editor.danger:hover {
+  background-color: #bb2d3b;
+  border-color: #b02a37;
+}
+
+/* Add a grid overlay to show coordinates */
+.mapGrid {
+  position: relative;
+  background-image: linear-gradient(
+      rgba(255, 255, 255, 0.05) 1px,
+      transparent 1px
+    ),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.05) 1px, transparent 1px);
+  background-size: 40px 40px;
+}
+
+.sprite-editor-controls {
+  display: flex;
+  gap: 2rem;
+  margin-bottom: 2rem;
+  flex-wrap: wrap;
+}
+
+.sprite-editor-workspace {
+  display: flex;
+  gap: 2rem;
+  align-items: flex-start;
+  margin-bottom: 2rem;
+}
+
+.grid-container {
+  display: flex;
+  gap: 2rem;
+  align-items: center;
+}
+
+.grid-preview {
+  width: 80px;
+  height: 80px;
+  border: 1px solid var(--border-color);
+  border-radius: 0.5rem;
+  background-color: var(--editor-bg);
+}
+
+.tool-buttons {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.sprite-properties {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.sprite-options {
+  display: flex;
+  gap: 1rem;
+  align-items: center;
+  margin-top: 0.5rem;
+}
+
+.checkbox-label {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.scene-select {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.sprite-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+input[type="checkbox"] {
+  width: 1rem;
+  height: 1rem;
+  accent-color: #0d6efd;
+}
+
+.brand-header {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 1rem;
+  border-bottom: 1px solid var(--bs-border-color);
+  margin-bottom: 2rem;
+}
+
+.brand-header .logo {
+  height: 40px;
+  width: auto;
+}
+
+.brand-header h1 {
+  margin: 0;
+  color: var(--bs-primary);
+}

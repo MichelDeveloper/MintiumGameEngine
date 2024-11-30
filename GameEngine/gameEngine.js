@@ -5,7 +5,6 @@ import {
   getCurrentScene,
 } from "./core/scene-manager.js";
 import { engineConstants } from "./engineConstants.js";
-import { globalGameData } from "../GameEditor/gameEditor.js";
 
 // Import components
 import "./components/visual/pixelated.js";
@@ -15,18 +14,28 @@ import "./components/movement/grid-move.js";
 import "./components/movement/custom-keyboard-controls.js";
 import "./components/movement/rotation-control.js";
 
-document.addEventListener("DOMContentLoaded", () => {
+let gameData;
+
+async function initGameData() {
+  // Check if we're in editor mode (gameEditor.js exists)
+  try {
+    const { globalGameData } = await import("../GameEditor/gameEditor.js");
+    gameData = globalGameData;
+  } catch {
+    // We're in runtime mode, load from gameData.json
+    const response = await fetch("./gameData.json");
+    gameData = await response.json();
+  }
+  return gameData;
+}
+
+document.addEventListener("DOMContentLoaded", async () => {
   console.log("--- Game Start ---");
 
-  // Load saved game data if it exists
-  const savedData = localStorage.getItem("gameData");
-  if (savedData) {
-    Object.assign(globalGameData, JSON.parse(savedData));
-    initializeGameState(globalGameData);
-  } else {
-    initializeGameState(globalGameData);
-  }
+  await initGameData();
 
+  // Initialize game state
+  initializeGameState(gameData);
   loadScene(getCurrentScene().sceneId);
 
   const leftHand = document.getElementById("leftHand");
@@ -39,3 +48,6 @@ document.addEventListener("DOMContentLoaded", () => {
     console.warn("VR controllers not found");
   }
 });
+
+// Export gameData for other modules
+export { gameData };

@@ -20,6 +20,7 @@
     <script type="module" src="./GameEditor/spriteEditor.js" defer></script>
     <script type="module" src="./GameEditor/mapEditor.js" defer></script>
     <script type="module" src="./GameEditor/gameEditor.js" defer></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
   </head>
   <body>
     <!-- Button Container -->
@@ -32,7 +33,7 @@
     <div id="editorContainer">
       <div id="editorScrollContainer">
         <div class="brand-header">
-          <img src="logo.png" alt="Mintium" class="logo" />
+          <img src="icon.png" alt="Mintium" class="logo" />
           <h1>Mintium Editor</h1>
         </div>
         <button id="exportProjectBtn">Export Project</button>
@@ -43,6 +44,7 @@
           style="display: none"
         />
         <button id="importProjectBtn">Import Project</button>
+        <button id="exportGameBtn">Export Game</button>
 
         <!-- Map Editor Section -->
         <div id="mapEditorSection" class="section">
