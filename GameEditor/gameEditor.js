@@ -179,3 +179,24 @@ export const gameData = ${JSON.stringify(globalGameData, null, 2)};`;
     alert("Error creating game package. Please check the console for details.");
   }
 }
+
+export function clearStorage() {
+  if (
+    confirm(
+      "Are you sure you want to clear all stored data? This cannot be undone."
+    )
+  ) {
+    localStorage.removeItem("gameData");
+    // Reset globalGameData to initial state from gameData.js
+    globalGameData = JSON.parse(JSON.stringify(gameData));
+    window.location.reload();
+  }
+}
+
+// Add event listener
+document.addEventListener("DOMContentLoaded", function () {
+  const clearStorageBtn = document.getElementById("clearStorageBtn");
+  if (clearStorageBtn) {
+    clearStorageBtn.addEventListener("click", clearStorage);
+  }
+});

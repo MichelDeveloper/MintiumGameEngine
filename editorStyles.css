@@ -226,3 +226,16 @@ textarea {
   border-radius: 0.375rem;
   color: var(--bs-body-color);
 }
+
+.danger-button {
+  background-color: #dc3545;
+  color: white;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.danger-button:hover {
+  background-color: #c82333;
+}
