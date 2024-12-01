@@ -221,33 +221,36 @@ document.addEventListener("DOMContentLoaded", function () {
 
   saveSpriteBtn.addEventListener("click", function () {
     const spriteId = spriteIdInput.value;
-    const spriteData = globalGameData.sprites.find(
-      (sprite) => sprite.id === spriteId
-    );
+    if (!spriteId.trim()) {
+      alert("Please enter a sprite ID!");
+      return;
+    }
+
     const pixels = Array.from(grid.children).map(
       (cell) => cell.style.backgroundColor || "rgba(0,0,0,0)"
     );
 
-    // Assuming sprites are 8x8, convert the flat pixel array to a 2D array
+    // Convert flat pixel array to 2D array
     const pixelRows = [];
     for (let i = 0; i < pixels.length; i += 8) {
       pixelRows.push(pixels.slice(i, i + 8));
     }
 
+    // Create new sprite data
     const newSpriteData = {
+      id: spriteId,
       type: spriteTypeSelector.value,
       collision: spriteCollisionCheckbox.checked,
       changeScene: changeSceneSelector.value.trim() || "",
       whenNearShowText: whenNearShowTextArea.value.trim() || "",
-      ...spriteData,
       pixels: pixelRows,
-      id: spriteId,
     };
 
-    // Update or add the sprite in globalGameData
+    // Update or add the sprite
     const existingIndex = globalGameData.sprites.findIndex(
       (sprite) => sprite.id === spriteId
     );
+
     if (existingIndex !== -1) {
       globalGameData.sprites[existingIndex] = newSpriteData;
     } else {
@@ -255,12 +258,11 @@ document.addEventListener("DOMContentLoaded", function () {
       addSpriteToList(spriteId);
     }
 
-    // Save to localStorage
+    // Save and reload
     localStorage.setItem("gameData", JSON.stringify(globalGameData));
+    loadSpriteList();
 
-    loadSpriteList(); //reload map tab sprite list
-
-    // Get current scene ID before reloading
+    // Reload current scene
     const currentScene = getCurrentScene();
     reloadGame(
       currentScene ? currentScene.sceneId : globalGameData.scenes[0].sceneId
