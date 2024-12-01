@@ -1,18 +1,97 @@
-import { gameData } from "../gameData.js";
+// Default structure if no data exists
+const defaultGameData = {
+  scenes: [
+    {
+      sceneId: "default",
+      data: [
+        {
+          layerData: Array(10)
+            .fill()
+            .map(() => Array(10).fill("void")),
+        },
+      ],
+    },
+  ],
+  sprites: [
+    {
+      id: "default",
+      type: "block",
+      collision: false,
+      pixels: Array(8)
+        .fill()
+        .map(() => Array(8).fill("rgba(0,0,0,0)")),
+    },
+  ],
+};
 
-// Deep copy to avoid mutating the original base data
-export let globalGameData =
-  JSON.parse(localStorage.getItem("gameData")) ||
-  JSON.parse(JSON.stringify(gameData));
+export let globalGameData = null;
+export const gameDataLoaded = new Event("gameDataLoaded");
+let initializationPromise = null;
 
-// // Function to update a specific part of globalGameData
-// export function updateGlobalGameData(key, newData) {
-//   if (key in globalGameData) {
-//     globalGameData[key] = newData;
-//   } else {
-//     console.error(`Key '${key}' not found in globalGameData.`);
-//   }
-// }
+export async function getGlobalGameData() {
+  if (!initializationPromise) {
+    initializationPromise = initializeGameData();
+  }
+  await initializationPromise;
+  return globalGameData;
+}
+
+async function initializeGameData() {
+  try {
+    const storedData = localStorage.getItem("gameData");
+    if (storedData) {
+      globalGameData = JSON.parse(storedData);
+    } else {
+      const response = await fetch("./gameData.json");
+      const jsonData = await response.json();
+      globalGameData = jsonData;
+      localStorage.setItem("gameData", JSON.stringify(globalGameData));
+    }
+
+    // Wait for DOM and dispatch event
+    if (document.readyState === "loading") {
+      document.addEventListener("DOMContentLoaded", () => {
+        console.log("--- Dispatching event (after DOM load) ---");
+        setTimeout(() => {
+          document.dispatchEvent(gameDataLoaded);
+          console.log("--- Event dispatched ---");
+        }, 0);
+      });
+    } else {
+      console.log("--- Dispatching event (DOM ready) ---");
+      setTimeout(() => {
+        document.dispatchEvent(gameDataLoaded);
+        console.log("--- Event dispatched ---");
+      }, 0);
+    }
+  } catch (error) {
+    console.warn("Error initializing game data, using default:", error);
+    globalGameData = JSON.parse(JSON.stringify(defaultGameData));
+    localStorage.setItem("gameData", JSON.stringify(globalGameData));
+
+    // Same event dispatch pattern for error case
+    if (document.readyState === "loading") {
+      document.addEventListener("DOMContentLoaded", () => {
+        setTimeout(() => document.dispatchEvent(gameDataLoaded), 0);
+      });
+    } else {
+      setTimeout(() => document.dispatchEvent(gameDataLoaded), 0);
+    }
+  }
+  return globalGameData;
+}
+
+// Initialize immediately
+getGlobalGameData();
+
+// Function to update a specific part of globalGameData
+export function updateGlobalGameData(key, newData) {
+  if (key in globalGameData) {
+    globalGameData[key] = newData;
+  } else {
+    console.error(`Key '${key}' not found in globalGameData.`);
+  }
+}
 
 // Function to export globalGameData as a file
 export function exportGlobalGameData() {
@@ -66,6 +145,11 @@ document.addEventListener("DOMContentLoaded", () => {
           importGameData(e.target.files[0]);
         }
       });
+
+      // Update the file input to only accept our specific file types
+      if (importInput) {
+        importInput.setAttribute("accept", ".js,.json");
+      }
     }
 
     if (exportGameBtn) {
@@ -186,15 +270,13 @@ export function clearStorage() {
       "Are you sure you want to clear all stored data? This cannot be undone."
     )
   ) {
-    localStorage.removeItem("gameData");
-    // Reset globalGameData to initial state from gameData.js
-    globalGameData = JSON.parse(JSON.stringify(gameData));
-    window.location.reload();
+    localStorage.clear(); // Clear all storage instead of just removing gameData
+    window.location.reload(); // Force a page reload to reinitialize everything
   }
 }
 
-// Add event listener
-document.addEventListener("DOMContentLoaded", function () {
+// Add event listener for clear storage
+document.addEventListener("DOMContentLoaded", () => {
   const clearStorageBtn = document.getElementById("clearStorageBtn");
   if (clearStorageBtn) {
     clearStorageBtn.addEventListener("click", clearStorage);

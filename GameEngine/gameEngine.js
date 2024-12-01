@@ -23,9 +23,16 @@ async function initGameData() {
     const { globalGameData } = await import("../GameEditor/gameEditor.js");
     gameData = globalGameData;
   } catch {
-    // We're in runtime mode, load from gameData.json
-    const response = await fetch("./gameData.json");
-    gameData = await response.json();
+    // We're in runtime mode, load from gameData.js
+    try {
+      const { gameData: defaultGameData } = await import("../gameData.js");
+      gameData = defaultGameData;
+    } catch (error) {
+      console.error("Failed to load gameData.js:", error);
+      // Load from gameData.json as fallback
+      const response = await fetch("./gameData.json");
+      gameData = await response.json();
+    }
   }
   return gameData;
 }

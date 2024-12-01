@@ -19,7 +19,7 @@ export function loadSpriteList() {
   });
 }
 
-document.addEventListener("DOMContentLoaded", function () {
+document.addEventListener("gameDataLoaded", function () {
   const mapGrid = document.querySelector(".mapGrid");
   const generateMapCodeBtn = document.getElementById("generateMapCode");
   const resetMapGridBtn = document.getElementById("resetMapGrid");

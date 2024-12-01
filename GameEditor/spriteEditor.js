@@ -5,7 +5,7 @@ import {
   getCurrentScene,
 } from "../GameEngine/core/scene-manager.js";
 
-document.addEventListener("DOMContentLoaded", function () {
+document.addEventListener("gameDataLoaded", function () {
   const grid = document.querySelector(".grid");
   const generateCodeBtn = document.getElementById("generateCode");
   const resetGridBtn = document.getElementById("resetGrid");
@@ -96,8 +96,20 @@ document.addEventListener("DOMContentLoaded", function () {
 
   function populateGrid(pixels) {
     grid.innerHTML = ""; // Clear the grid
-    pixels.forEach((pixelRow) => {
-      pixelRow.forEach((color) => {
+
+    // Ensure pixels is a 2D array
+    const safePixels = Array.isArray(pixels)
+      ? pixels
+      : Array(8)
+          .fill()
+          .map(() => Array(8).fill("rgba(0,0,0,0)"));
+
+    safePixels.forEach((pixelRow) => {
+      // Ensure pixelRow is an array
+      const safeRow = Array.isArray(pixelRow)
+        ? pixelRow
+        : Array(8).fill("rgba(0,0,0,0)");
+      safeRow.forEach((color) => {
         const cell = createGridCell();
         cell.style.backgroundColor = color || "rgba(0,0,0,0)";
         grid.appendChild(cell);
