@@ -1,3 +1,5 @@
+![Mintium Logo](/Mintium_logo.png)
+
 Mintium Game Engine
 
 Mintium is a web-based game engine and editor that allows you to create and play games directly in the browser. It features a Map Editor and a Sprite Editor, and supports VR via A-Frame.
