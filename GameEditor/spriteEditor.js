@@ -39,7 +39,6 @@ document.addEventListener("DOMContentLoaded", function () {
 
   // Populate sprite selector with sprites from globalGameData
   globalGameData.sprites.forEach((sprite) => {
-    console.log(sprite.id);
     addSpriteToList(sprite.id);
   });
 
@@ -265,4 +264,31 @@ document.addEventListener("DOMContentLoaded", function () {
 
     alert("Sprite saved!");
   });
+
+  function initializeSpriteEditor() {
+    const spriteSelector = document.getElementById("spriteEditorSelector");
+    const spriteIdInput = document.getElementById("spriteIdInput");
+
+    spriteSelector.addEventListener("change", (e) => {
+      const selectedSpriteId = e.target.value;
+      spriteIdInput.value = selectedSpriteId;
+
+      // Rest of your existing sprite selection logic
+      const selectedSprite = globalGameData.sprites.find(
+        (sprite) => sprite.id === selectedSpriteId
+      );
+      if (selectedSprite) {
+        document.getElementById("spriteTypeSelector").value =
+          selectedSprite.type;
+        document.getElementById("spriteCollisionCheckbox").checked =
+          selectedSprite.collision;
+        document.getElementById("whenNearShowText").value =
+          selectedSprite.whenNearShowText || "";
+        document.getElementById("changeSceneSelector").value =
+          selectedSprite.changeScene || "";
+      }
+    });
+  }
+
+  initializeSpriteEditor();
 });
