@@ -208,3 +208,21 @@ textarea {
   padding: 0.5rem;
   color: var(--bs-body-color);
 }
+
+.text-display-option {
+  margin-top: 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.text-display-option textarea {
+  width: 100%;
+  resize: vertical;
+  min-height: 50px;
+  padding: 0.5rem;
+  background: var(--editor-bg);
+  border: 1px solid var(--border-color);
+  border-radius: 0.375rem;
+  color: var(--bs-body-color);
+}

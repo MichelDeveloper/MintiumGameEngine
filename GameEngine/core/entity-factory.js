@@ -27,6 +27,12 @@ export function createCube(x, y, z, spriteId, type) {
     `src: url(${texture}) transparent: true; alphaTest: 0.5`
   );
   cubeEl.setAttribute("pixelated", "");
+  if (sprite.whenNearShowText && sprite.collision) {
+    cubeEl.setAttribute("show-text-near", {
+      text: sprite.whenNearShowText,
+      distance: 2,
+    });
+  }
   const container = document.getElementById("dynamic-content");
   container.appendChild(cubeEl); // Add to the container instead of the scene
 }
@@ -37,6 +43,7 @@ export function createPlayer() {
   playerEl.setAttribute("position", "0 1.5 0");
 
   const cameraEl = document.createElement("a-camera");
+  cameraEl.setAttribute("id", "camera");
   playerEl.appendChild(cameraEl);
 
   const leftHandEl = document.createElement("a-entity");

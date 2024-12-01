@@ -1,6 +1,9 @@
 import { globalGameData } from "./gameEditor.js";
 import { loadSpriteList } from "./mapEditor.js";
-import { reloadGame } from "../GameEngine/core/scene-manager.js";
+import {
+  reloadGame,
+  getCurrentScene,
+} from "../GameEngine/core/scene-manager.js";
 
 document.addEventListener("DOMContentLoaded", function () {
   const grid = document.querySelector(".grid");
@@ -19,6 +22,7 @@ document.addEventListener("DOMContentLoaded", function () {
     "spriteCollisionCheckbox"
   );
   const changeSceneSelector = document.getElementById("changeSceneSelector");
+  const whenNearShowTextArea = document.getElementById("whenNearShowText");
 
   // Populate the changeSceneSelector with available scenes
   function populateSceneSelector() {
@@ -51,6 +55,7 @@ document.addEventListener("DOMContentLoaded", function () {
       spriteTypeSelector.value = selectedSprite.type || "block"; // Set to default type if not specified
       spriteCollisionCheckbox.checked = selectedSprite.collision || false; // Set to false if not specified
       changeSceneSelector.value = selectedSprite.changeScene || ""; // Set to empty string if not specified
+      whenNearShowTextArea.value = selectedSprite.whenNearShowText || "";
     }
   });
 
@@ -230,6 +235,7 @@ document.addEventListener("DOMContentLoaded", function () {
       type: spriteTypeSelector.value,
       collision: spriteCollisionCheckbox.checked,
       changeScene: changeSceneSelector.value.trim() || "",
+      whenNearShowText: whenNearShowTextArea.value.trim() || "",
       ...spriteData,
       pixels: pixelRows,
       id: spriteId,
@@ -245,9 +251,18 @@ document.addEventListener("DOMContentLoaded", function () {
       globalGameData.sprites.push(newSpriteData);
       addSpriteToList(spriteId);
     }
-    console.log(newSpriteData);
+
+    // Save to localStorage
+    localStorage.setItem("gameData", JSON.stringify(globalGameData));
+
     loadSpriteList(); //reload map tab sprite list
-    reloadGame();
+
+    // Get current scene ID before reloading
+    const currentScene = getCurrentScene();
+    reloadGame(
+      currentScene ? currentScene.sceneId : globalGameData.scenes[0].sceneId
+    );
+
     alert("Sprite saved!");
   });
 });

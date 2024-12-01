@@ -13,6 +13,7 @@ import "./components/visual/face-camera-3d.js";
 import "./components/movement/grid-move.js";
 import "./components/movement/custom-keyboard-controls.js";
 import "./components/movement/rotation-control.js";
+import "./components/interaction/show-text-near.js";
 
 let gameData;
 
