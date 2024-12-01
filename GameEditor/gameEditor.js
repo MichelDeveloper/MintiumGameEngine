@@ -79,11 +79,10 @@ export async function exportGame() {
   const runtimeFolder = zip.folder("GameRuntime");
 
   try {
-    // Add game data as JSON in root
-    runtimeFolder.file(
-      "gameData.json",
-      JSON.stringify(globalGameData, null, 2)
-    );
+    // Generate gameData.js instead of gameData.json
+    const gameDataContent = `// Generated from gameData.json
+export const gameData = ${JSON.stringify(globalGameData, null, 2)};`;
+    runtimeFolder.file("gameData.js", gameDataContent);
 
     // Copy existing GameRuntime/index.html
     const indexResponse = await fetch("/GameRuntime/index.html");
@@ -137,7 +136,6 @@ export async function exportGame() {
 
       // GameEditor files needed for runtime
       ["/GameEditor/gameEditor.js", "GameEditor/gameEditor.js"],
-      ["/gameData.js", "gameData.js"],
 
       // Utils
       [
@@ -153,10 +151,10 @@ export async function exportGame() {
       const response = await fetch(sourcePath);
       let content = await response.text();
 
-      // Replace gameEditor imports with gameData.json imports
+      // Replace JSON imports with JS imports
       content = content.replace(
-        /import \{ globalGameData \} from ["']\.\.\/GameEditor\/gameEditor\.js["'];?/g,
-        'import gameData from "../../gameData.json" assert { type: "json" };'
+        /import gameData from ["']\.\.\/\.\.\/gameData\.json["'] assert \{ type: ["']json["'] \};/g,
+        'import { gameData } from "../../gameData.js";'
       );
 
       runtimeFolder.file(targetPath, content);
