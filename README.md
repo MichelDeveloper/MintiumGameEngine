@@ -1,4 +1,4 @@
-![Mintium Logo](/Mintium_logo.png)
+![Mintium Logo](/mintium_cover.png)
 
 Mintium Game Engine
 
