@@ -106,78 +106,87 @@
             <span>Hide/Show</span>
           </div>
           <div class="section-content">
-            <div class="sprite-editor-controls">
-              <div class="control-group tools">
-                <label>Tools</label>
-                <div class="tool-buttons">
-                  <button class="btn-editor" id="pen">
-                    <i class="bi bi-pencil-fill"></i> Pen
-                  </button>
-                  <button class="btn-editor" id="eraser">
-                    <i class="bi bi-eraser-fill"></i> Eraser
-                  </button>
-                  <button class="btn-editor" id="fill">
-                    <i class="bi bi-paint-bucket"></i> Fill
-                  </button>
-                  <input type="color" id="colorPicker" value="#000000" />
+            <div class="sprite-editor-layout">
+              <!-- Left side - Grid and Preview -->
+              <div class="sprite-editor-main">
+                <div class="grid-container">
+                  <div class="grid"></div>
+                  <div class="grid-preview"></div>
                 </div>
+                <textarea id="spriteCode" rows="10" readonly></textarea>
               </div>
 
-              <div class="control-group sprite-info">
-                <label>Sprite Properties</label>
-                <div class="sprite-properties">
-                  <input
-                    type="text"
-                    id="spriteIdInput"
-                    placeholder="Sprite ID"
-                  />
-                  <select id="spriteEditorSelector">
-                    <!-- Options added dynamically -->
-                  </select>
-                  <select id="spriteTypeSelector">
-                    <option value="block">Block</option>
-                    <option value="billboard">Billboard</option>
-                  </select>
+              <!-- Right side - Controls -->
+              <div class="sprite-editor-sidebar">
+                <!-- Tools Panel -->
+                <div class="editor-panel">
+                  <h3>Tools</h3>
+                  <div class="tool-buttons">
+                    <button class="btn-editor" id="pen">
+                      <i class="bi bi-pencil-fill"></i> Pen
+                    </button>
+                    <button class="btn-editor" id="eraser">
+                      <i class="bi bi-eraser-fill"></i> Eraser
+                    </button>
+                    <button class="btn-editor" id="fill">
+                      <i class="bi bi-paint-bucket"></i> Fill
+                    </button>
+                    <input type="color" id="colorPicker" value="#000000" />
+                  </div>
                 </div>
-                <div class="sprite-options">
-                  <label class="checkbox-label">
-                    <input type="checkbox" id="spriteCollisionCheckbox" />
-                    Collision
-                  </label>
-                  <div class="scene-select">
-                    <label>Change Scene:</label>
-                    <select id="changeSceneSelector">
-                      <option value="">None</option>
-                      <!-- Scene options added dynamically -->
+
+                <!-- Sprite Properties Panel -->
+                <div class="editor-panel">
+                  <h3>Sprite Properties</h3>
+                  <div class="sprite-properties">
+                    <input
+                      type="text"
+                      id="spriteIdInput"
+                      placeholder="Sprite ID"
+                    />
+                    <select id="spriteEditorSelector">
+                      <!-- Options added dynamically -->
                     </select>
+                    <select id="spriteTypeSelector">
+                      <option value="block">Block</option>
+                      <option value="billboard">Billboard</option>
+                    </select>
+                  </div>
+                  <div class="sprite-options">
+                    <label class="checkbox-label">
+                      <input type="checkbox" id="spriteCollisionCheckbox" />
+                      Collision
+                    </label>
+                    <div class="scene-select">
+                      <label>Change Scene:</label>
+                      <select id="changeSceneSelector">
+                        <option value="">None</option>
+                        <!-- Scene options added dynamically -->
+                      </select>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Actions Panel -->
+                <div class="editor-panel">
+                  <h3>Actions</h3>
+                  <div class="sprite-actions">
+                    <button class="btn-editor" id="loadSprite">
+                      <i class="bi bi-download"></i> Load Sprite
+                    </button>
+                    <button class="btn-editor" id="saveSprite">
+                      <i class="bi bi-save"></i> Save Sprite
+                    </button>
+                    <button class="btn-editor" id="generateCode">
+                      <i class="bi bi-code-square"></i> Generate Code
+                    </button>
+                    <button class="btn-editor danger" id="resetGrid">
+                      <i class="bi bi-trash"></i> Reset
+                    </button>
                   </div>
                 </div>
               </div>
             </div>
-
-            <div class="sprite-editor-workspace">
-              <div class="grid-container">
-                <div class="grid"></div>
-                <div class="grid-preview"></div>
-              </div>
-
-              <div class="sprite-actions">
-                <button class="btn-editor" id="loadSprite">
-                  <i class="bi bi-download"></i> Load Sprite
-                </button>
-                <button class="btn-editor" id="saveSprite">
-                  <i class="bi bi-save"></i> Save Sprite
-                </button>
-                <button class="btn-editor" id="generateCode">
-                  <i class="bi bi-code-square"></i> Generate Code
-                </button>
-                <button class="btn-editor danger" id="resetGrid">
-                  <i class="bi bi-trash"></i> Reset
-                </button>
-              </div>
-            </div>
-
-            <textarea id="spriteCode" rows="10" readonly></textarea>
           </div>
         </div>
       </div>
