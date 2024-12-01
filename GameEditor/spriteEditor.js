@@ -42,21 +42,25 @@ document.addEventListener("DOMContentLoaded", function () {
     addSpriteToList(sprite.id);
   });
 
-  // Load the selected sprite into the grid
-  spriteSelector.addEventListener("change", function () {
-    const selectedSpriteId = this.value;
-    const selectedSprite = globalGameData.sprites.find(
-      (sprite) => sprite.id === selectedSpriteId
-    );
-
-    if (selectedSprite) {
-      populateGrid(selectedSprite.pixels);
-      spriteTypeSelector.value = selectedSprite.type || "block"; // Set to default type if not specified
-      spriteCollisionCheckbox.checked = selectedSprite.collision || false; // Set to false if not specified
-      changeSceneSelector.value = selectedSprite.changeScene || ""; // Set to empty string if not specified
-      whenNearShowTextArea.value = selectedSprite.whenNearShowText || "";
-    }
-  });
+  // Initialize with the first sprite if available
+  if (globalGameData.sprites.length > 0) {
+    const firstSprite = globalGameData.sprites[0];
+    spriteSelector.value = firstSprite.id;
+    spriteIdInput.value = firstSprite.id;
+    spriteTypeSelector.value = firstSprite.type || "block";
+    spriteCollisionCheckbox.checked = firstSprite.collision || false;
+    changeSceneSelector.value = firstSprite.changeScene || "";
+    whenNearShowTextArea.value = firstSprite.whenNearShowText || "";
+    populateGrid(firstSprite.pixels);
+  } else {
+    // Initialize with empty state if no sprites exist
+    spriteIdInput.value = "";
+    spriteTypeSelector.value = "block";
+    spriteCollisionCheckbox.checked = false;
+    changeSceneSelector.value = "";
+    whenNearShowTextArea.value = "";
+    populateGrid(Array(64).fill("rgba(0,0,0,0)"));
+  }
 
   let mode = "draw";
   let selectedColor = colorPicker.value;
@@ -291,4 +295,21 @@ document.addEventListener("DOMContentLoaded", function () {
   }
 
   initializeSpriteEditor();
+
+  // Load the selected sprite into the grid
+  spriteSelector.addEventListener("change", function () {
+    const selectedSpriteId = this.value;
+    const selectedSprite = globalGameData.sprites.find(
+      (sprite) => sprite.id === selectedSpriteId
+    );
+
+    if (selectedSprite) {
+      spriteIdInput.value = selectedSpriteId;
+      spriteTypeSelector.value = selectedSprite.type || "block";
+      spriteCollisionCheckbox.checked = selectedSprite.collision || false;
+      changeSceneSelector.value = selectedSprite.changeScene || "";
+      whenNearShowTextArea.value = selectedSprite.whenNearShowText || "";
+      populateGrid(selectedSprite.pixels);
+    }
+  });
 });
