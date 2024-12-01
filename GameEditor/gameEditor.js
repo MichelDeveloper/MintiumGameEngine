@@ -122,6 +122,10 @@ export const gameData = ${JSON.stringify(globalGameData, null, 2)};`;
 
       // Components - Movement
       [
+        "/GameEngine/components/interaction/show-text-near.js",
+        "GameEngine/components/interaction/show-text-near.js",
+      ],
+      [
         "/GameEngine/components/movement/grid-move.js",
         "GameEngine/components/movement/grid-move.js",
       ],
