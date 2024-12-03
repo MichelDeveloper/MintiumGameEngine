@@ -35,8 +35,13 @@ document.addEventListener("gameDataLoaded", function () {
   let isSettingSpawn = false;
 
   setPlayerSpawnBtn.addEventListener("click", function () {
-    isSettingSpawn = !isSettingSpawn;
-    this.classList.toggle("active");
+    isSettingSpawn = !isSettingSpawn; // Toggle the state
+    if (isSettingSpawn) {
+      this.classList.add("active");
+    } else {
+      this.classList.remove("active");
+      this.blur();
+    }
   });
 
   // Function to load scenes into the scene selector
@@ -110,8 +115,11 @@ document.addEventListener("gameDataLoaded", function () {
               currentScene.playerSpawnPosition = { x, z };
             }
 
+            // Deselect the spawn button
             isSettingSpawn = false;
             setPlayerSpawnBtn.classList.remove("active");
+            setPlayerSpawnBtn.blur();
+            setPlayerSpawnBtn.style.backgroundColor = ""; // Reset button background
           } else {
             const selectedSpriteId = spriteSelector.value;
             cell.dataset.spriteId = selectedSpriteId;
