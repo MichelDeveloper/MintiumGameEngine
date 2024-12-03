@@ -35,11 +35,9 @@ document.addEventListener("gameDataLoaded", function () {
   let isSettingSpawn = false;
 
   setPlayerSpawnBtn.addEventListener("click", function () {
-    isSettingSpawn = !isSettingSpawn; // Toggle the state
-    if (isSettingSpawn) {
-      this.classList.add("active");
-    } else {
-      this.classList.remove("active");
+    isSettingSpawn = !isSettingSpawn;
+    this.classList.toggle("active");
+    if (!isSettingSpawn) {
       this.blur();
     }
   });
@@ -88,7 +86,6 @@ document.addEventListener("gameDataLoaded", function () {
           cell.style.backgroundColor =
             spriteMapping[spriteId] || spriteMapping["0"];
         }
-
         cell.addEventListener("click", function () {
           if (isSettingSpawn) {
             // Remove previous spawn marker
@@ -108,18 +105,18 @@ document.addEventListener("gameDataLoaded", function () {
             const z = Math.floor(index / 10);
 
             // Update scene data
-            const currentScene = globalGameData.scenes.find(
-              (scene) => scene.sceneId === currentSceneId
-            );
-            if (currentScene) {
-              currentScene.playerSpawnPosition = { x, z };
+            const selectedSceneIndex = sceneSelector.value;
+            const selectedScene = globalGameData.scenes[selectedSceneIndex];
+
+            if (selectedScene) {
+              selectedScene.playerSpawnPosition = { x, z };
             }
 
-            // Deselect the spawn button
+            // Deselect the spawn button and reset state
             isSettingSpawn = false;
-            setPlayerSpawnBtn.classList.remove("active");
-            setPlayerSpawnBtn.blur();
-            setPlayerSpawnBtn.style.backgroundColor = ""; // Reset button background
+            const spawnButton = document.getElementById("setPlayerSpawnBtn");
+            spawnButton.classList.remove("active");
+            spawnButton.blur();
           } else {
             const selectedSpriteId = spriteSelector.value;
             cell.dataset.spriteId = selectedSpriteId;
