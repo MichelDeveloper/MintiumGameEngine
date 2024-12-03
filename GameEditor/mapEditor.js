@@ -56,13 +56,12 @@ document.addEventListener("gameDataLoaded", function () {
   });
 
   function loadMapEditorScene() {
-    // Clear existing map grid cells
     mapGrid.innerHTML = "";
 
     const selectedSceneIndex = sceneSelector.value;
     const selectedLayerIndex = layerSelector.selectedIndex;
-    const selectedLayer =
-      globalGameData.scenes[selectedSceneIndex].data[selectedLayerIndex];
+    const selectedScene = globalGameData.scenes[selectedSceneIndex];
+    const selectedLayer = selectedScene.data[selectedLayerIndex];
 
     // Populate the map grid with the selected layer's map data
     selectedLayer.layerData.forEach((row) => {
@@ -70,9 +69,21 @@ document.addEventListener("gameDataLoaded", function () {
         const cell = document.createElement("div");
         cell.classList.add("mapCell");
         cell.dataset.spriteId = spriteId;
-        cell.style.backgroundColor =
-          spriteMapping[spriteId] || spriteMapping["0"];
-        cell.textContent = spriteId;
+
+        // Set sprite preview if it exists
+        if (spriteId !== "0" && spriteId !== "void") {
+          const spritePreview = createSpritePreview(spriteId);
+          if (spritePreview) {
+            cell.style.backgroundImage = `url(${spritePreview})`;
+            cell.style.backgroundSize = "contain";
+            cell.style.backgroundRepeat = "no-repeat";
+            cell.style.backgroundPosition = "center";
+          }
+        } else {
+          cell.style.backgroundColor =
+            spriteMapping[spriteId] || spriteMapping["0"];
+        }
+
         cell.addEventListener("click", function () {
           if (isSettingSpawn) {
             // Remove previous spawn marker
@@ -102,23 +113,30 @@ document.addEventListener("gameDataLoaded", function () {
             isSettingSpawn = false;
             setPlayerSpawnBtn.classList.remove("active");
           } else {
-            // Original sprite placement logic
             const selectedSpriteId = spriteSelector.value;
             cell.dataset.spriteId = selectedSpriteId;
-            cell.style.backgroundColor =
-              spriteMapping[selectedSpriteId] || spriteMapping["0"];
-            cell.textContent = selectedSpriteId;
+            if (selectedSpriteId !== "0" && selectedSpriteId !== "void") {
+              const spritePreview = createSpritePreview(selectedSpriteId);
+              if (spritePreview) {
+                cell.style.backgroundImage = `url(${spritePreview})`;
+                cell.style.backgroundSize = "contain";
+                cell.style.backgroundRepeat = "no-repeat";
+                cell.style.backgroundPosition = "center";
+              }
+            } else {
+              cell.style.backgroundImage = "";
+              cell.style.backgroundColor =
+                spriteMapping[selectedSpriteId] || spriteMapping["0"];
+            }
           }
         });
         mapGrid.appendChild(cell);
       });
     });
 
-    const currentScene = globalGameData.scenes.find(
-      (scene) => scene.sceneId === currentSceneId
-    );
-    if (currentScene && currentScene.playerSpawnPosition) {
-      const { x, z } = currentScene.playerSpawnPosition;
+    // Set spawn position marker if it exists
+    if (selectedScene.playerSpawnPosition) {
+      const { x, z } = selectedScene.playerSpawnPosition;
       const index = z * 10 + x;
       const cell = mapGrid.children[index];
       if (cell) {
@@ -162,6 +180,30 @@ document.addEventListener("gameDataLoaded", function () {
     {}
   );
 
+  function createSpritePreview(spriteId) {
+    const sprite = globalGameData.sprites.find((s) => s.id === spriteId);
+    if (!sprite || !sprite.pixels) return null;
+
+    const canvas = document.createElement("canvas");
+    canvas.width = 40;
+    canvas.height = 40;
+    const ctx = canvas.getContext("2d");
+
+    // Scale the 8x8 sprite to fit the 40x40 cell
+    const scale = 5; // 40/8 = 5
+
+    sprite.pixels.forEach((row, y) => {
+      row.forEach((color, x) => {
+        if (color !== "rgba(0,0,0,0)") {
+          ctx.fillStyle = color;
+          ctx.fillRect(x * scale, y * scale, scale, scale);
+        }
+      });
+    });
+
+    return canvas.toDataURL();
+  }
+
   for (let i = 0; i < 100; i++) {
     // 10x10 grid
     const cell = document.createElement("div");
@@ -171,8 +213,19 @@ document.addEventListener("gameDataLoaded", function () {
     cell.addEventListener("click", function () {
       const selectedSpriteId = spriteSelector.value; // Get the selected sprite ID from the dropdown
       cell.dataset.spriteId = selectedSpriteId;
-      cell.style.backgroundColor =
-        spriteMapping[selectedSpriteId] || spriteMapping["0"];
+      if (selectedSpriteId !== "0" && selectedSpriteId !== "void") {
+        const spritePreview = createSpritePreview(selectedSpriteId);
+        if (spritePreview) {
+          cell.style.backgroundImage = `url(${spritePreview})`;
+          cell.style.backgroundSize = "contain";
+          cell.style.backgroundRepeat = "no-repeat";
+          cell.style.backgroundPosition = "center";
+        }
+      } else {
+        cell.style.backgroundImage = "";
+        cell.style.backgroundColor =
+          spriteMapping[selectedSpriteId] || spriteMapping["0"];
+      }
       cell.textContent = selectedSpriteId; // Display sprite ID for visual feedback
     });
     mapGrid.appendChild(cell);
