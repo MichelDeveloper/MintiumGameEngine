@@ -77,6 +77,10 @@
                   <!-- Added dynamically -->
                 </select>
               </div>
+
+              <button id="setPlayerSpawnBtn" class="editor-button">
+                Set Player Spawn
+              </button>
             </div>
 
             <div class="map-actions">
@@ -216,5 +220,23 @@
         });
       });
     </script>
+
+    <style>
+      .editor-button.active {
+        background-color: #4caf50;
+        color: white;
+      }
+      .mapCell.spawn-position {
+        position: relative;
+      }
+      .mapCell.spawn-position::after {
+        content: "⚑";
+        position: absolute;
+        top: -10px;
+        right: -5px;
+        color: #ff4444;
+        font-size: 20px;
+      }
+    </style>
   </body>
 </html>

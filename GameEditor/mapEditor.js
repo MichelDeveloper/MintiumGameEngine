@@ -30,6 +30,14 @@ document.addEventListener("gameDataLoaded", function () {
   const exportProjectBtn = document.getElementById("exportProjectBtn");
   const loadMapBtn = document.getElementById("loadMap");
   const sceneSelector = document.getElementById("sceneSelector");
+  const setPlayerSpawnBtn = document.getElementById("setPlayerSpawnBtn");
+
+  let isSettingSpawn = false;
+
+  setPlayerSpawnBtn.addEventListener("click", function () {
+    isSettingSpawn = !isSettingSpawn;
+    this.classList.toggle("active");
+  });
 
   // Function to load scenes into the scene selector
   function loadSceneSelector() {
@@ -66,15 +74,57 @@ document.addEventListener("gameDataLoaded", function () {
           spriteMapping[spriteId] || spriteMapping["0"];
         cell.textContent = spriteId;
         cell.addEventListener("click", function () {
-          const selectedSpriteId = spriteSelector.value;
-          cell.dataset.spriteId = selectedSpriteId;
-          cell.style.backgroundColor =
-            spriteMapping[selectedSpriteId] || spriteMapping["0"];
-          cell.textContent = selectedSpriteId;
+          if (isSettingSpawn) {
+            // Remove previous spawn marker
+            const previousSpawn = document.querySelector(
+              ".mapCell.spawn-position"
+            );
+            if (previousSpawn) {
+              previousSpawn.classList.remove("spawn-position");
+            }
+
+            // Set new spawn position
+            cell.classList.add("spawn-position");
+
+            // Calculate grid position
+            const index = Array.from(mapGrid.children).indexOf(cell);
+            const x = index % 10;
+            const z = Math.floor(index / 10);
+
+            // Update scene data
+            const currentScene = globalGameData.scenes.find(
+              (scene) => scene.sceneId === currentSceneId
+            );
+            if (currentScene) {
+              currentScene.playerSpawnPosition = { x, z };
+            }
+
+            isSettingSpawn = false;
+            setPlayerSpawnBtn.classList.remove("active");
+          } else {
+            // Original sprite placement logic
+            const selectedSpriteId = spriteSelector.value;
+            cell.dataset.spriteId = selectedSpriteId;
+            cell.style.backgroundColor =
+              spriteMapping[selectedSpriteId] || spriteMapping["0"];
+            cell.textContent = selectedSpriteId;
+          }
         });
         mapGrid.appendChild(cell);
       });
     });
+
+    const currentScene = globalGameData.scenes.find(
+      (scene) => scene.sceneId === currentSceneId
+    );
+    if (currentScene && currentScene.playerSpawnPosition) {
+      const { x, z } = currentScene.playerSpawnPosition;
+      const index = z * 10 + x;
+      const cell = mapGrid.children[index];
+      if (cell) {
+        cell.classList.add("spawn-position");
+      }
+    }
   }
 
   loadMapBtn.addEventListener("click", function () {
@@ -175,6 +225,18 @@ document.addEventListener("gameDataLoaded", function () {
       parseInt(selectedLayerIndex, 10),
       newLayerData
     );
+
+    // Save spawn position if it exists
+    const spawnCell = document.querySelector(".mapCell.spawn-position");
+    if (spawnCell) {
+      const index = Array.from(mapGrid.children).indexOf(spawnCell);
+      const x = index % 10;
+      const z = Math.floor(index / 10);
+      selectedScene.playerSpawnPosition = { x, z };
+    } else if (!selectedScene.playerSpawnPosition) {
+      // Set default spawn position if none exists
+      selectedScene.playerSpawnPosition = { x: 5, z: 5 };
+    }
 
     // Save to localStorage
     localStorage.setItem("gameData", JSON.stringify(globalGameData));
