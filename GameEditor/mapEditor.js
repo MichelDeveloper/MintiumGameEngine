@@ -341,18 +341,22 @@ document.addEventListener("gameDataLoaded", function () {
       return;
     }
 
-    // Create new scene with 2 standard layers
     const newScene = {
       sceneId: sceneId,
-      backgroundColor: "#aabbcc",
-      playerSpawnPosition: { x: 0, z: 0 },
+      backgroundColor: "#87CEEB", // Default sky blue
+      playerSpawnPosition: {
+        x: 0,
+        z: 0,
+      },
       data: [
         {
+          layer: -1, // Background layer
           layerData: Array(10)
             .fill()
             .map(() => Array(10).fill("0")),
         },
         {
+          layer: 0, // Main layer
           layerData: Array(10)
             .fill()
             .map(() => Array(10).fill("0")),
@@ -360,26 +364,18 @@ document.addEventListener("gameDataLoaded", function () {
       ],
     };
 
-    // Add new scene to globalGameData
     globalGameData.scenes.push(newScene);
 
-    // Add new scene to scene selector
+    // Update scene selector and load new scene
     const option = document.createElement("option");
     option.value = globalGameData.scenes.length - 1;
     option.textContent = sceneId;
     sceneSelector.appendChild(option);
-
-    // Select the new scene
     sceneSelector.value = globalGameData.scenes.length - 1;
     loadMapEditorScene();
 
-    // Clear input
     newSceneIdInput.value = "";
-
-    // Save to localStorage
     localStorage.setItem("gameData", JSON.stringify(globalGameData));
-
-    alert("Scene created successfully!");
   });
 
   // Add after element selections
