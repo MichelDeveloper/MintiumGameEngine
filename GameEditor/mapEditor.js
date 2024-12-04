@@ -31,6 +31,8 @@ document.addEventListener("gameDataLoaded", function () {
   const loadMapBtn = document.getElementById("loadMap");
   const sceneSelector = document.getElementById("sceneSelector");
   const setPlayerSpawnBtn = document.getElementById("setPlayerSpawnBtn");
+  const createSceneBtn = document.getElementById("createSceneBtn");
+  const newSceneIdInput = document.getElementById("newSceneId");
 
   let isSettingSpawn = false;
 
@@ -326,4 +328,59 @@ document.addEventListener("gameDataLoaded", function () {
 
   initializeSkyColorPicker();
   loadMapEditorScene();
+
+  createSceneBtn.addEventListener("click", function () {
+    const sceneId = newSceneIdInput.value.trim();
+
+    if (!sceneId) {
+      alert("Please enter a scene ID!");
+      return;
+    }
+
+    // Check if scene ID already exists
+    if (globalGameData.scenes.some((scene) => scene.sceneId === sceneId)) {
+      alert("A scene with this ID already exists!");
+      return;
+    }
+
+    // Create new scene with 2 standard layers
+    const newScene = {
+      sceneId: sceneId,
+      backgroundColor: "#aabbcc",
+      playerSpawnPosition: { x: 0, z: 0 },
+      data: [
+        {
+          layerData: Array(10)
+            .fill()
+            .map(() => Array(10).fill("0")),
+        },
+        {
+          layerData: Array(10)
+            .fill()
+            .map(() => Array(10).fill("0")),
+        },
+      ],
+    };
+
+    // Add new scene to globalGameData
+    globalGameData.scenes.push(newScene);
+
+    // Add new scene to scene selector
+    const option = document.createElement("option");
+    option.value = globalGameData.scenes.length - 1;
+    option.textContent = sceneId;
+    sceneSelector.appendChild(option);
+
+    // Select the new scene
+    sceneSelector.value = globalGameData.scenes.length - 1;
+    loadMapEditorScene();
+
+    // Clear input
+    newSceneIdInput.value = "";
+
+    // Save to localStorage
+    localStorage.setItem("gameData", JSON.stringify(globalGameData));
+
+    alert("Scene created successfully!");
+  });
 });
