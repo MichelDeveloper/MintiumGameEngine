@@ -1,0 +1,2107 @@
+{
+  "music": {
+    "theme": "E4-200,G4-200,A4-400,R-200,E4-200,G4-200,A4-400",
+    "victory": "C5-300,E5-300,G5-600"
+  },
+  "player": {
+    "position": {
+      "x": 1,
+      "y": 0,
+      "z": 1
+    }
+  },
+  "scenes": [
+    {
+      "sceneId": "Forest",
+      "playerSpawnPosition": {
+        "x": 4,
+        "z": 8
+      },
+      "backgroundColor": "#36c8e2",
+      "data": [
+        {
+          "layer": -1,
+          "layerData": [
+            [
+              "Grass",
+              "Grass",
+              "Grass",
+              "Grass",
+              "Grass",
+              "Grass",
+              "Grass",
+              "Grass",
+              "Grass",
+              "Grass"
+            ],
+            [
+              "Grass",
+              "Grass",
+              "Grass",
+              "Grass",
+              "Grass",
+              "Grass",
+              "Grass",
+              "Grass",
+              "Grass",
+              "Grass"
+            ],
+            [
+              "Grass",
+              "Grass",
+              "Grass",
+              "Grass",
+              "Grass",
+              "Grass",
+              "Grass",
+              "Grass",
+              "Grass",
+              "Grass"
+            ],
+            [
+              "Grass",
+              "Grass",
+              "Grass",
+              "Grass",
+              "Grass",
+              "Grass",
+              "Grass",
+              "Grass",
+              "Grass",
+              "Grass"
+            ],
+            [
+              "Grass",
+              "Grass",
+              "Grass",
+              "Grass",
+              "Grass",
+              "Grass",
+              "Grass",
+              "Grass",
+              "Grass",
+              "Grass"
+            ],
+            [
+              "Grass",
+              "Grass",
+              "Grass",
+              "Grass",
+              "Grass",
+              "Grass",
+              "Grass",
+              "Grass",
+              "Grass",
+              "Grass"
+            ],
+            [
+              "Grass",
+              "Grass",
+              "Grass",
+              "Grass",
+              "Grass",
+              "Grass",
+              "Grass",
+              "Grass",
+              "Grass",
+              "Grass"
+            ],
+            [
+              "Grass",
+              "Grass",
+              "Grass",
+              "Grass",
+              "Grass",
+              "Grass",
+              "Grass",
+              "Grass",
+              "Grass",
+              "Grass"
+            ],
+            [
+              "Grass",
+              "Grass",
+              "Grass",
+              "Grass",
+              "Grass",
+              "Grass",
+              "Grass",
+              "Grass",
+              "Grass",
+              "Grass"
+            ],
+            [
+              "Grass",
+              "Grass",
+              "Grass",
+              "Grass",
+              "Grass",
+              "Grass",
+              "Grass",
+              "Grass",
+              "Grass",
+              "Grass"
+            ]
+          ]
+        },
+        {
+          "layer": 0,
+          "layerData": [
+            [
+              "void",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "void"
+            ],
+            [
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0"
+            ],
+            [
+              "0",
+              "0",
+              "Tree",
+              "0",
+              "0",
+              "0",
+              "0",
+              "Tree",
+              "0",
+              "0"
+            ],
+            [
+              "0",
+              "0",
+              "0",
+              "0",
+              "Cave Entrance",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0"
+            ],
+            [
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0"
+            ],
+            [
+              "Tree",
+              "Tree",
+              "Tree",
+              "0",
+              "0",
+              "0",
+              "0",
+              "Tree",
+              "Tree",
+              "Tree"
+            ],
+            [
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0"
+            ],
+            [
+              "Tree",
+              "0",
+              "0",
+              "0",
+              "void",
+              "0",
+              "0",
+              "0",
+              "0",
+              "Tree"
+            ],
+            [
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0"
+            ],
+            [
+              "Tree",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "Tree"
+            ]
+          ]
+        }
+      ]
+    },
+    {
+      "sceneId": "Cave",
+      "playerSpawnPosition": {
+        "x": 5,
+        "y": 0,
+        "z": 8
+      },
+      "backgroundColor": "rgba(47,79,79,1)",
+      "data": [
+        {
+          "layer": -1,
+          "layerData": [
+            [
+              "Stone Floor",
+              "Stone Floor",
+              "Stone Floor",
+              "Stone Floor",
+              "Stone Floor",
+              "Stone Floor",
+              "Stone Floor",
+              "Stone Floor",
+              "Stone Floor",
+              "Stone Floor"
+            ],
+            [
+              "Stone Floor",
+              "Stone Floor",
+              "Stone Floor",
+              "Stone Floor",
+              "Stone Floor",
+              "Stone Floor",
+              "Stone Floor",
+              "Stone Floor",
+              "Stone Floor",
+              "Stone Floor"
+            ],
+            [
+              "Stone Floor",
+              "Stone Floor",
+              "Stone Floor",
+              "Stone Floor",
+              "Stone Floor",
+              "Stone Floor",
+              "Stone Floor",
+              "Stone Floor",
+              "Stone Floor",
+              "Stone Floor"
+            ],
+            [
+              "Stone Floor",
+              "Stone Floor",
+              "Stone Floor",
+              "Stone Floor",
+              "Stone Floor",
+              "Stone Floor",
+              "Stone Floor",
+              "Stone Floor",
+              "Stone Floor",
+              "Stone Floor"
+            ],
+            [
+              "Stone Floor",
+              "Stone Floor",
+              "Stone Floor",
+              "Stone Floor",
+              "Stone Floor",
+              "Stone Floor",
+              "Stone Floor",
+              "Stone Floor",
+              "Stone Floor",
+              "Stone Floor"
+            ],
+            [
+              "Stone Floor",
+              "Stone Floor",
+              "Stone Floor",
+              "Stone Floor",
+              "Stone Floor",
+              "Stone Floor",
+              "Stone Floor",
+              "Stone Floor",
+              "Stone Floor",
+              "Stone Floor"
+            ],
+            [
+              "Stone Floor",
+              "Stone Floor",
+              "Stone Floor",
+              "Stone Floor",
+              "Stone Floor",
+              "Stone Floor",
+              "Stone Floor",
+              "Stone Floor",
+              "Stone Floor",
+              "Stone Floor"
+            ],
+            [
+              "Stone Floor",
+              "Stone Floor",
+              "Stone Floor",
+              "Stone Floor",
+              "Stone Floor",
+              "Stone Floor",
+              "Stone Floor",
+              "Stone Floor",
+              "Stone Floor",
+              "Stone Floor"
+            ],
+            [
+              "Stone Floor",
+              "Stone Floor",
+              "Stone Floor",
+              "Stone Floor",
+              "Stone Floor",
+              "Stone Floor",
+              "Stone Floor",
+              "Stone Floor",
+              "Stone Floor",
+              "Stone Floor"
+            ],
+            [
+              "Stone Floor",
+              "Stone Floor",
+              "Stone Floor",
+              "Stone Floor",
+              "Stone Floor",
+              "Stone Floor",
+              "Stone Floor",
+              "Stone Floor",
+              "Stone Floor",
+              "Stone Floor"
+            ]
+          ]
+        },
+        {
+          "layer": 0,
+          "layerData": [
+            [
+              "Stone Wall",
+              "Stone Wall",
+              "Stone Wall",
+              "Stone Wall",
+              "Stone Wall",
+              "Stone Wall",
+              "Stone Wall",
+              "Stone Wall",
+              "Stone Wall",
+              "Stone Wall"
+            ],
+            [
+              "Stone Wall",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "Stone Wall"
+            ],
+            [
+              "Stone Wall",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "Stone Wall"
+            ],
+            [
+              "Stone Wall",
+              "0",
+              "0",
+              "0",
+              "Treasure Chest",
+              "0",
+              "0",
+              "0",
+              "0",
+              "Stone Wall"
+            ],
+            [
+              "Stone Wall",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "Stone Wall"
+            ],
+            [
+              "Stone Wall",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "Stone Wall"
+            ],
+            [
+              "Stone Wall",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "Stone Wall"
+            ],
+            [
+              "Stone Wall",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "Stone Wall"
+            ],
+            [
+              "Stone Wall",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "Exit",
+              "Stone Wall"
+            ],
+            [
+              "Stone Wall",
+              "Stone Wall",
+              "Stone Wall",
+              "Stone Wall",
+              "Stone Wall",
+              "Stone Wall",
+              "Stone Wall",
+              "Stone Wall",
+              "Stone Wall",
+              "Stone Wall"
+            ]
+          ]
+        }
+      ]
+    },
+    {
+      "sceneId": "Secret",
+      "backgroundColor": "#2a5783",
+      "playerSpawnPosition": {
+        "x": 4,
+        "z": 7
+      },
+      "data": [
+        {
+          "layerData": [
+            [
+              "Wood",
+              "Wood",
+              "Wood",
+              "Wood",
+              "Wood",
+              "Wood",
+              "Wood",
+              "Wood",
+              "Wood",
+              "Wood"
+            ],
+            [
+              "Wood",
+              "Wood",
+              "Wood",
+              "Wood",
+              "Wood",
+              "Wood",
+              "Wood",
+              "Wood",
+              "Wood",
+              "Wood"
+            ],
+            [
+              "Wood",
+              "Wood",
+              "Wood",
+              "Wood",
+              "Wood",
+              "Wood",
+              "Wood",
+              "Wood",
+              "Wood",
+              "Wood"
+            ],
+            [
+              "Wood",
+              "Wood",
+              "Wood",
+              "Wood",
+              "Wood",
+              "Wood",
+              "Wood",
+              "Wood",
+              "Wood",
+              "Wood"
+            ],
+            [
+              "Wood",
+              "Wood",
+              "Wood",
+              "Wood",
+              "Wood",
+              "Wood",
+              "Wood",
+              "Wood",
+              "Wood",
+              "Wood"
+            ],
+            [
+              "Wood",
+              "Wood",
+              "Wood",
+              "Wood",
+              "Wood",
+              "Wood",
+              "Wood",
+              "Wood",
+              "Wood",
+              "Wood"
+            ],
+            [
+              "Wood",
+              "Wood",
+              "Wood",
+              "Wood",
+              "Wood",
+              "Wood",
+              "Wood",
+              "Wood",
+              "Wood",
+              "Wood"
+            ],
+            [
+              "Wood",
+              "Wood",
+              "Wood",
+              "Wood",
+              "Wood",
+              "Wood",
+              "Wood",
+              "Wood",
+              "Wood",
+              "Wood"
+            ],
+            [
+              "Wood",
+              "Wood",
+              "Wood",
+              "Wood",
+              "Wood",
+              "Wood",
+              "Wood",
+              "Wood",
+              "Wood",
+              "Wood"
+            ],
+            [
+              "Wood",
+              "Wood",
+              "Wood",
+              "Wood",
+              "Wood",
+              "Wood",
+              "Wood",
+              "Wood",
+              "Wood",
+              "Wood"
+            ]
+          ]
+        },
+        {
+          "layerData": [
+            [
+              "Stone Wall",
+              "Stone Wall",
+              "Stone Wall",
+              "Stone Wall",
+              "Stone Wall",
+              "Stone Wall",
+              "Stone Wall",
+              "Stone Wall",
+              "Stone Wall",
+              "Stone Wall"
+            ],
+            [
+              "Stone Wall",
+              "void",
+              "void",
+              "void",
+              "void",
+              "void",
+              "void",
+              "void",
+              "void",
+              "Stone Wall"
+            ],
+            [
+              "Stone Wall",
+              "void",
+              "void",
+              "void",
+              "void",
+              "void",
+              "void",
+              "void",
+              "void",
+              "Stone Wall"
+            ],
+            [
+              "Stone Wall",
+              "void",
+              "void",
+              "void",
+              "void",
+              "void",
+              "void",
+              "void",
+              "void",
+              "Stone Wall"
+            ],
+            [
+              "Stone Wall",
+              "void",
+              "void",
+              "void",
+              "void",
+              "void",
+              "void",
+              "void",
+              "void",
+              "Stone Wall"
+            ],
+            [
+              "Stone Wall",
+              "void",
+              "void",
+              "void",
+              "void",
+              "void",
+              "void",
+              "void",
+              "void",
+              "Stone Wall"
+            ],
+            [
+              "Stone Wall",
+              "void",
+              "void",
+              "void",
+              "void",
+              "void",
+              "void",
+              "void",
+              "void",
+              "Stone Wall"
+            ],
+            [
+              "Stone Wall",
+              "void",
+              "void",
+              "void",
+              "void",
+              "void",
+              "void",
+              "void",
+              "void",
+              "Stone Wall"
+            ],
+            [
+              "Stone Wall",
+              "void",
+              "void",
+              "void",
+              "void",
+              "void",
+              "void",
+              "void",
+              "void",
+              "Stone Wall"
+            ],
+            [
+              "Stone Wall",
+              "Stone Wall",
+              "Stone Wall",
+              "Stone Wall",
+              "Stone Wall",
+              "Stone Wall",
+              "Stone Wall",
+              "Stone Wall",
+              "Stone Wall",
+              "Stone Wall"
+            ]
+          ]
+        }
+      ]
+    },
+    {
+      "sceneId": "Test",
+      "backgroundColor": "#aabbcc",
+      "playerSpawnPosition": {
+        "x": 0,
+        "z": 0
+      },
+      "data": [
+        {
+          "layerData": [
+            [
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0"
+            ],
+            [
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0"
+            ],
+            [
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0"
+            ],
+            [
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0"
+            ],
+            [
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0"
+            ],
+            [
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0"
+            ],
+            [
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0"
+            ],
+            [
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0"
+            ],
+            [
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0"
+            ],
+            [
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0"
+            ]
+          ]
+        },
+        {
+          "layerData": [
+            [
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0"
+            ],
+            [
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0"
+            ],
+            [
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0"
+            ],
+            [
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0"
+            ],
+            [
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0"
+            ],
+            [
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0"
+            ],
+            [
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0"
+            ],
+            [
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0"
+            ],
+            [
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0"
+            ],
+            [
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0"
+            ]
+          ]
+        }
+      ]
+    },
+    {
+      "sceneId": "WoodPlace",
+      "backgroundColor": "#36c8e2",
+      "playerSpawnPosition": {
+        "x": 3,
+        "z": 7
+      },
+      "data": [
+        {
+          "layer": -1,
+          "layerData": [
+            [
+              "Wood",
+              "Wood",
+              "Wood",
+              "Wood",
+              "Wood",
+              "Wood",
+              "Wood",
+              "Wood",
+              "Wood",
+              "Wood"
+            ],
+            [
+              "Wood",
+              "Wood",
+              "Wood",
+              "Wood",
+              "Wood",
+              "Wood",
+              "Wood",
+              "Wood",
+              "Wood",
+              "Wood"
+            ],
+            [
+              "Wood",
+              "Wood",
+              "Wood",
+              "Wood",
+              "Wood",
+              "Wood",
+              "Wood",
+              "Wood",
+              "Wood",
+              "Wood"
+            ],
+            [
+              "Wood",
+              "Wood",
+              "Wood",
+              "Wood",
+              "Wood",
+              "Wood",
+              "Wood",
+              "Wood",
+              "Wood",
+              "Wood"
+            ],
+            [
+              "Wood",
+              "Wood",
+              "Wood",
+              "Wood",
+              "Wood",
+              "Wood",
+              "Wood",
+              "Wood",
+              "Wood",
+              "Wood"
+            ],
+            [
+              "Wood",
+              "Wood",
+              "Wood",
+              "Wood",
+              "Wood",
+              "Wood",
+              "Wood",
+              "Wood",
+              "Wood",
+              "Wood"
+            ],
+            [
+              "Wood",
+              "Wood",
+              "Wood",
+              "Wood",
+              "Wood",
+              "Wood",
+              "Wood",
+              "Wood",
+              "Wood",
+              "Wood"
+            ],
+            [
+              "Wood",
+              "Wood",
+              "Wood",
+              "Wood",
+              "Wood",
+              "Wood",
+              "Wood",
+              "Wood",
+              "Wood",
+              "Wood"
+            ],
+            [
+              "Wood",
+              "Wood",
+              "Wood",
+              "Wood",
+              "Wood",
+              "Wood",
+              "Wood",
+              "Wood",
+              "Wood",
+              "Wood"
+            ],
+            [
+              "Wood",
+              "Wood",
+              "Wood",
+              "Wood",
+              "Wood",
+              "Wood",
+              "Wood",
+              "Wood",
+              "Wood",
+              "Wood"
+            ]
+          ]
+        },
+        {
+          "layer": 0,
+          "layerData": [
+            [
+              "Stone Wall",
+              "Stone Wall",
+              "Stone Wall",
+              "Stone Wall",
+              "Stone Wall",
+              "Stone Wall",
+              "Stone Wall",
+              "Stone Wall",
+              "Stone Wall",
+              "Stone Wall"
+            ],
+            [
+              "Stone Wall",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "Stone Wall"
+            ],
+            [
+              "Stone Wall",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "Stone Wall"
+            ],
+            [
+              "Stone Wall",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "Stone Wall"
+            ],
+            [
+              "Stone Wall",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "Stone Wall"
+            ],
+            [
+              "Stone Wall",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "Stone Wall"
+            ],
+            [
+              "Stone Wall",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "Stone Wall"
+            ],
+            [
+              "Stone Wall",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "Stone Wall"
+            ],
+            [
+              "Stone Wall",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "0",
+              "Stone Wall"
+            ],
+            [
+              "Stone Wall",
+              "Stone Wall",
+              "Stone Wall",
+              "Stone Wall",
+              "Stone Wall",
+              "Stone Wall",
+              "Stone Wall",
+              "Stone Wall",
+              "Stone Wall",
+              "Stone Wall"
+            ]
+          ]
+        }
+      ]
+    }
+  ],
+  "sprites": [
+    {
+      "id": "Grass",
+      "type": "block",
+      "pixels": [
+        [
+          "rgba(124,252,0,1)",
+          "rgba(124,252,0,1)",
+          "rgba(124,252,0,1)",
+          "rgba(124,252,0,1)",
+          "rgba(124,252,0,1)",
+          "rgba(124,252,0,1)",
+          "rgba(124,252,0,1)",
+          "rgba(124,252,0,1)"
+        ],
+        [
+          "rgba(124,252,0,1)",
+          "rgba(34,139,34,1)",
+          "rgba(34,139,34,1)",
+          "rgba(124,252,0,1)",
+          "rgba(34,139,34,1)",
+          "rgba(34,139,34,1)",
+          "rgba(124,252,0,1)",
+          "rgba(124,252,0,1)"
+        ],
+        [
+          "rgba(34,139,34,1)",
+          "rgba(124,252,0,1)",
+          "rgba(34,139,34,1)",
+          "rgba(34,139,34,1)",
+          "rgba(34,139,34,1)",
+          "rgba(34,139,34,1)",
+          "rgba(124,252,0,1)",
+          "rgba(34,139,34,1)"
+        ],
+        [
+          "rgba(124,252,0,1)",
+          "rgba(34,139,34,1)",
+          "rgba(124,252,0,1)",
+          "rgba(124,252,0,1)",
+          "rgba(124,252,0,1)",
+          "rgba(124,252,0,1)",
+          "rgba(34,139,34,1)",
+          "rgba(124,252,0,1)"
+        ],
+        [
+          "rgba(34,139,34,1)",
+          "rgba(124,252,0,1)",
+          "rgba(34,139,34,1)",
+          "rgba(34,139,34,1)",
+          "rgba(34,139,34,1)",
+          "rgba(34,139,34,1)",
+          "rgba(124,252,0,1)",
+          "rgba(34,139,34,1)"
+        ],
+        [
+          "rgba(124,252,0,1)",
+          "rgba(34,139,34,1)",
+          "rgba(124,252,0,1)",
+          "rgba(124,252,0,1)",
+          "rgba(124,252,0,1)",
+          "rgba(124,252,0,1)",
+          "rgba(34,139,34,1)",
+          "rgba(124,252,0,1)"
+        ],
+        [
+          "rgba(124,252,0,1)",
+          "rgba(124,252,0,1)",
+          "rgba(34,139,34,1)",
+          "rgba(34,139,34,1)",
+          "rgba(124,252,0,1)",
+          "rgba(124,252,0,1)",
+          "rgba(124,252,0,1)",
+          "rgba(124,252,0,1)"
+        ],
+        [
+          "rgba(124,252,0,1)",
+          "rgba(124,252,0,1)",
+          "rgba(124,252,0,1)",
+          "rgba(124,252,0,1)",
+          "rgba(124,252,0,1)",
+          "rgba(124,252,0,1)",
+          "rgba(124,252,0,1)",
+          "rgba(124,252,0,1)"
+        ]
+      ],
+      "collision": false
+    },
+    {
+      "id": "Tree",
+      "type": "billboard",
+      "pixels": [
+        [
+          "rgba(0,0,0,0)",
+          "rgba(0,100,0,1)",
+          "rgba(0,100,0,1)",
+          "rgba(34,139,34,1)",
+          "rgba(0,100,0,1)",
+          "rgba(0,100,0,1)",
+          "rgba(0,0,0,0)",
+          "rgba(0,0,0,0)"
+        ],
+        [
+          "rgba(0,100,0,1)",
+          "rgba(34,139,34,1)",
+          "rgba(0,100,0,1)",
+          "rgba(34,139,34,1)",
+          "rgba(0,100,0,1)",
+          "rgba(34,139,34,1)",
+          "rgba(0,100,0,1)",
+          "rgba(0,0,0,0)"
+        ],
+        [
+          "rgba(0,100,0,1)",
+          "rgba(0,100,0,1)",
+          "rgba(34,139,34,1)",
+          "rgba(34,139,34,1)",
+          "rgba(34,139,34,1)",
+          "rgba(0,100,0,1)",
+          "rgba(0,100,0,1)",
+          "rgba(0,0,0,0)"
+        ],
+        [
+          "rgba(0,100,0,1)",
+          "rgba(34,139,34,1)",
+          "rgba(0,100,0,1)",
+          "rgba(34,139,34,1)",
+          "rgba(0,100,0,1)",
+          "rgba(34,139,34,1)",
+          "rgba(0,100,0,1)",
+          "rgba(0,0,0,0)"
+        ],
+        [
+          "rgba(0,0,0,0)",
+          "rgba(0,100,0,1)",
+          "rgba(0,100,0,1)",
+          "rgba(34,139,34,1)",
+          "rgba(0,100,0,1)",
+          "rgba(0,100,0,1)",
+          "rgba(0,0,0,0)",
+          "rgba(0,0,0,0)"
+        ],
+        [
+          "rgba(0,0,0,0)",
+          "rgba(139,69,19,1)",
+          "rgba(139,69,19,1)",
+          "rgba(139,69,19,1)",
+          "rgba(139,69,19,1)",
+          "rgba(139,69,19,1)",
+          "rgba(0,0,0,0)",
+          "rgba(0,0,0,0)"
+        ],
+        [
+          "rgba(0,0,0,0)",
+          "rgba(139,69,19,1)",
+          "rgba(139,69,19,1)",
+          "rgba(139,69,19,1)",
+          "rgba(139,69,19,1)",
+          "rgba(139,69,19,1)",
+          "rgba(0,0,0,0)",
+          "rgba(0,0,0,0)"
+        ],
+        [
+          "rgba(0,0,0,0)",
+          "rgba(139,69,19,1)",
+          "rgba(139,69,19,1)",
+          "rgba(139,69,19,1)",
+          "rgba(139,69,19,1)",
+          "rgba(139,69,19,1)",
+          "rgba(0,0,0,0)",
+          "rgba(0,0,0,0)"
+        ]
+      ],
+      "collision": false
+    },
+    {
+      "id": "Stone Wall",
+      "type": "block",
+      "pixels": [
+        [
+          "rgba(169,169,169,1)",
+          "rgba(169,169,169,1)",
+          "rgba(169,169,169,1)",
+          "rgba(169,169,169,1)",
+          "rgba(169,169,169,1)",
+          "rgba(169,169,169,1)",
+          "rgba(169,169,169,1)",
+          "rgba(169,169,169,1)"
+        ],
+        [
+          "rgba(169,169,169,1)",
+          "rgba(105,105,105,1)",
+          "rgba(105,105,105,1)",
+          "rgba(105,105,105,1)",
+          "rgba(105,105,105,1)",
+          "rgba(105,105,105,1)",
+          "rgba(105,105,105,1)",
+          "rgba(169,169,169,1)"
+        ],
+        [
+          "rgba(169,169,169,1)",
+          "rgba(105,105,105,1)",
+          "rgba(169,169,169,1)",
+          "rgba(169,169,169,1)",
+          "rgba(169,169,169,1)",
+          "rgba(169,169,169,1)",
+          "rgba(105,105,105,1)",
+          "rgba(169,169,169,1)"
+        ],
+        [
+          "rgba(169,169,169,1)",
+          "rgba(105,105,105,1)",
+          "rgba(169,169,169,1)",
+          "rgba(105,105,105,1)",
+          "rgba(105,105,105,1)",
+          "rgba(169,169,169,1)",
+          "rgba(105,105,105,1)",
+          "rgba(169,169,169,1)"
+        ],
+        [
+          "rgba(169,169,169,1)",
+          "rgba(105,105,105,1)",
+          "rgba(169,169,169,1)",
+          "rgba(169,169,169,1)",
+          "rgba(169,169,169,1)",
+          "rgba(169,169,169,1)",
+          "rgba(105,105,105,1)",
+          "rgba(169,169,169,1)"
+        ],
+        [
+          "rgba(169,169,169,1)",
+          "rgba(105,105,105,1)",
+          "rgba(105,105,105,1)",
+          "rgba(105,105,105,1)",
+          "rgba(105,105,105,1)",
+          "rgba(105,105,105,1)",
+          "rgba(105,105,105,1)",
+          "rgba(169,169,169,1)"
+        ],
+        [
+          "rgba(169,169,169,1)",
+          "rgba(169,169,169,1)",
+          "rgba(169,169,169,1)",
+          "rgba(169,169,169,1)",
+          "rgba(169,169,169,1)",
+          "rgba(169,169,169,1)",
+          "rgba(169,169,169,1)",
+          "rgba(169,169,169,1)"
+        ],
+        [
+          "rgba(169,169,169,1)",
+          "rgba(169,169,169,1)",
+          "rgba(169,169,169,1)",
+          "rgba(169,169,169,1)",
+          "rgba(169,169,169,1)",
+          "rgba(169,169,169,1)",
+          "rgba(169,169,169,1)",
+          "rgba(169,169,169,1)"
+        ]
+      ],
+      "collision": true
+    },
+    {
+      "id": "Stone Floor",
+      "type": "block",
+      "pixels": [
+        [
+          "rgba(128,128,128,1)",
+          "rgba(169,169,169,1)",
+          "rgba(128,128,128,1)",
+          "rgba(169,169,169,1)",
+          "rgba(128,128,128,1)",
+          "rgba(169,169,169,1)",
+          "rgba(128,128,128,1)",
+          "rgba(169,169,169,1)"
+        ],
+        [
+          "rgba(169,169,169,1)",
+          "rgba(128,128,128,1)",
+          "rgba(169,169,169,1)",
+          "rgba(128,128,128,1)",
+          "rgba(169,169,169,1)",
+          "rgba(128,128,128,1)",
+          "rgba(169,169,169,1)",
+          "rgba(128,128,128,1)"
+        ],
+        [
+          "rgba(128,128,128,1)",
+          "rgba(169,169,169,1)",
+          "rgba(128,128,128,1)",
+          "rgba(169,169,169,1)",
+          "rgba(128,128,128,1)",
+          "rgba(169,169,169,1)",
+          "rgba(128,128,128,1)",
+          "rgba(169,169,169,1)"
+        ],
+        [
+          "rgba(169,169,169,1)",
+          "rgba(128,128,128,1)",
+          "rgba(169,169,169,1)",
+          "rgba(128,128,128,1)",
+          "rgba(169,169,169,1)",
+          "rgba(128,128,128,1)",
+          "rgba(169,169,169,1)",
+          "rgba(128,128,128,1)"
+        ],
+        [
+          "rgba(128,128,128,1)",
+          "rgba(169,169,169,1)",
+          "rgba(128,128,128,1)",
+          "rgba(169,169,169,1)",
+          "rgba(128,128,128,1)",
+          "rgba(169,169,169,1)",
+          "rgba(128,128,128,1)",
+          "rgba(169,169,169,1)"
+        ],
+        [
+          "rgba(169,169,169,1)",
+          "rgba(128,128,128,1)",
+          "rgba(169,169,169,1)",
+          "rgba(128,128,128,1)",
+          "rgba(169,169,169,1)",
+          "rgba(128,128,128,1)",
+          "rgba(169,169,169,1)",
+          "rgba(128,128,128,1)"
+        ],
+        [
+          "rgba(128,128,128,1)",
+          "rgba(169,169,169,1)",
+          "rgba(128,128,128,1)",
+          "rgba(169,169,169,1)",
+          "rgba(128,128,128,1)",
+          "rgba(169,169,169,1)",
+          "rgba(128,128,128,1)",
+          "rgba(169,169,169,1)"
+        ],
+        [
+          "rgba(169,169,169,1)",
+          "rgba(128,128,128,1)",
+          "rgba(169,169,169,1)",
+          "rgba(128,128,128,1)",
+          "rgba(169,169,169,1)",
+          "rgba(128,128,128,1)",
+          "rgba(169,169,169,1)",
+          "rgba(128,128,128,1)"
+        ]
+      ],
+      "collision": false
+    },
+    {
+      "id": "Cave Entrance",
+      "type": "block",
+      "pixels": [
+        [
+          "rgba(0,0,0,1)",
+          "rgba(0,0,0,1)",
+          "rgba(0,0,0,1)",
+          "rgba(0,0,0,1)",
+          "rgba(0,0,0,1)",
+          "rgba(0,0,0,1)",
+          "rgba(0,0,0,1)",
+          "rgba(0,0,0,1)"
+        ],
+        [
+          "rgba(0,0,0,1)",
+          "rgba(0,0,0,0)",
+          "rgba(0,0,0,0)",
+          "rgba(0,0,0,0)",
+          "rgba(0,0,0,0)",
+          "rgba(0,0,0,0)",
+          "rgba(0,0,0,0)",
+          "rgba(0,0,0,1)"
+        ],
+        [
+          "rgba(0,0,0,1)",
+          "rgba(0,0,0,0)",
+          "rgba(0,0,0,0)",
+          "rgba(0,0,0,0)",
+          "rgba(0,0,0,0)",
+          "rgba(0,0,0,0)",
+          "rgba(0,0,0,0)",
+          "rgba(0,0,0,1)"
+        ],
+        [
+          "rgba(0,0,0,1)",
+          "rgba(0,0,0,0)",
+          "rgba(0,0,0,0)",
+          "rgba(0,0,0,0)",
+          "rgba(0,0,0,0)",
+          "rgba(0,0,0,0)",
+          "rgba(0,0,0,0)",
+          "rgba(0,0,0,1)"
+        ],
+        [
+          "rgba(0,0,0,1)",
+          "rgba(0,0,0,0)",
+          "rgba(0,0,0,0)",
+          "rgba(0,0,0,0)",
+          "rgba(0,0,0,0)",
+          "rgba(0,0,0,0)",
+          "rgba(0,0,0,0)",
+          "rgba(0,0,0,1)"
+        ],
+        [
+          "rgba(0,0,0,1)",
+          "rgba(0,0,0,0)",
+          "rgba(0,0,0,0)",
+          "rgba(0,0,0,0)",
+          "rgba(0,0,0,0)",
+          "rgba(0,0,0,0)",
+          "rgba(0,0,0,0)",
+          "rgba(0,0,0,1)"
+        ],
+        [
+          "rgba(0,0,0,1)",
+          "rgba(0,0,0,0)",
+          "rgba(0,0,0,0)",
+          "rgba(0,0,0,0)",
+          "rgba(0,0,0,0)",
+          "rgba(0,0,0,0)",
+          "rgba(0,0,0,0)",
+          "rgba(0,0,0,1)"
+        ],
+        [
+          "rgba(0,0,0,1)",
+          "rgba(0,0,0,1)",
+          "rgba(0,0,0,1)",
+          "rgba(0,0,0,1)",
+          "rgba(0,0,0,1)",
+          "rgba(0,0,0,1)",
+          "rgba(0,0,0,1)",
+          "rgba(0,0,0,1)"
+        ]
+      ],
+      "collision": true,
+      "whenNearShowText": "A dark cave entrance looms before you. Do you wish to enter?",
+      "changeScene": "Cave"
+    },
+    {
+      "id": "Treasure Chest",
+      "type": "block",
+      "collision": true,
+      "changeScene": "WoodPlace",
+      "whenNearShowText": "You found the treasure! Congratulations!",
+      "pixels": [
+        [
+          "rgb(218, 165, 32)",
+          "rgb(218, 165, 32)",
+          "rgb(218, 165, 32)",
+          "rgb(218, 165, 32)",
+          "rgb(218, 165, 32)",
+          "rgb(218, 165, 32)",
+          "rgb(218, 165, 32)",
+          "rgb(218, 165, 32)"
+        ],
+        [
+          "rgb(218, 165, 32)",
+          "rgb(139, 69, 19)",
+          "rgb(139, 69, 19)",
+          "rgb(139, 69, 19)",
+          "rgb(139, 69, 19)",
+          "rgb(139, 69, 19)",
+          "rgb(139, 69, 19)",
+          "rgb(218, 165, 32)"
+        ],
+        [
+          "rgb(218, 165, 32)",
+          "rgb(139, 69, 19)",
+          "rgb(218, 165, 32)",
+          "rgb(218, 165, 32)",
+          "rgb(218, 165, 32)",
+          "rgb(218, 165, 32)",
+          "rgb(139, 69, 19)",
+          "rgb(218, 165, 32)"
+        ],
+        [
+          "rgb(218, 165, 32)",
+          "rgb(139, 69, 19)",
+          "rgb(218, 165, 32)",
+          "rgb(139, 69, 19)",
+          "rgb(139, 69, 19)",
+          "rgb(218, 165, 32)",
+          "rgb(139, 69, 19)",
+          "rgb(218, 165, 32)"
+        ],
+        [
+          "rgb(218, 165, 32)",
+          "rgb(139, 69, 19)",
+          "rgb(218, 165, 32)",
+          "rgb(218, 165, 32)",
+          "rgb(218, 165, 32)",
+          "rgb(218, 165, 32)",
+          "rgb(139, 69, 19)",
+          "rgb(218, 165, 32)"
+        ],
+        [
+          "rgb(218, 165, 32)",
+          "rgb(139, 69, 19)",
+          "rgb(139, 69, 19)",
+          "rgb(139, 69, 19)",
+          "rgb(139, 69, 19)",
+          "rgb(139, 69, 19)",
+          "rgb(139, 69, 19)",
+          "rgb(218, 165, 32)"
+        ],
+        [
+          "rgb(218, 165, 32)",
+          "rgb(218, 165, 32)",
+          "rgb(218, 165, 32)",
+          "rgb(218, 165, 32)",
+          "rgb(218, 165, 32)",
+          "rgb(218, 165, 32)",
+          "rgb(218, 165, 32)",
+          "rgb(218, 165, 32)"
+        ],
+        [
+          "rgb(218, 165, 32)",
+          "rgb(218, 165, 32)",
+          "rgb(218, 165, 32)",
+          "rgb(218, 165, 32)",
+          "rgb(218, 165, 32)",
+          "rgb(218, 165, 32)",
+          "rgb(218, 165, 32)",
+          "rgb(218, 165, 32)"
+        ]
+      ]
+    },
+    {
+      "id": "Exit",
+      "type": "block",
+      "pixels": [
+        [
+          "rgba(0,0,0,0)",
+          "rgba(255,0,0,1)",
+          "rgba(255,0,0,1)",
+          "rgba(0,0,0,0)",
+          "rgba(0,0,0,0)",
+          "rgba(255,0,0,1)",
+          "rgba(255,0,0,1)",
+          "rgba(0,0,0,0)"
+        ],
+        [
+          "rgba(255,0,0,1)",
+          "rgba(0,0,0,0)",
+          "rgba(0,0,0,0)",
+          "rgba(255,0,0,1)",
+          "rgba(255,0,0,1)",
+          "rgba(0,0,0,0)",
+          "rgba(0,0,0,0)",
+          "rgba(255,0,0,1)"
+        ],
+        [
+          "rgba(255,0,0,1)",
+          "rgba(0,0,0,0)",
+          "rgba(0,0,0,0)",
+          "rgba(255,0,0,1)",
+          "rgba(255,0,0,1)",
+          "rgba(0,0,0,0)",
+          "rgba(0,0,0,0)",
+          "rgba(255,0,0,1)"
+        ],
+        [
+          "rgba(0,0,0,0)",
+          "rgba(255,0,0,1)",
+          "rgba(255,0,0,1)",
+          "rgba(0,0,0,0)",
+          "rgba(0,0,0,0)",
+          "rgba(255,0,0,1)",
+          "rgba(255,0,0,1)",
+          "rgba(0,0,0,0)"
+        ],
+        [
+          "rgba(0,0,0,0)",
+          "rgba(0,0,0,0)",
+          "rgba(255,0,0,1)",
+          "rgba(255,0,0,1)",
+          "rgba(255,0,0,1)",
+          "rgba(255,0,0,1)",
+          "rgba(0,0,0,0)",
+          "rgba(0,0,0,0)"
+        ],
+        [
+          "rgba(0,0,0,0)",
+          "rgba(0,0,0,0)",
+          "rgba(255,0,0,1)",
+          "rgba(255,0,0,1)",
+          "rgba(255,0,0,1)",
+          "rgba(255,0,0,1)",
+          "rgba(0,0,0,0)",
+          "rgba(0,0,0,0)"
+        ],
+        [
+          "rgba(0,0,0,0)",
+          "rgba(255,0,0,1)",
+          "rgba(0,0,0,0)",
+          "rgba(0,0,0,0)",
+          "rgba(0,0,0,0)",
+          "rgba(0,0,0,0)",
+          "rgba(255,0,0,1)",
+          "rgba(0,0,0,0)"
+        ],
+        [
+          "rgba(255,0,0,1)",
+          "rgba(0,0,0,0)",
+          "rgba(255,0,0,1)",
+          "rgba(0,0,0,0)",
+          "rgba(0,0,0,0)",
+          "rgba(255,0,0,1)",
+          "rgba(0,0,0,0)",
+          "rgba(255,0,0,1)"
+        ]
+      ],
+      "collision": true,
+      "whenNearShowText": "You exit the cave and return to the forest.",
+      "changeScene": "Forest"
+    },
+    {
+      "type": "block",
+      "collision": true,
+      "changeScene": "Cave",
+      "whenNearShowText": "",
+      "pixels": [
+        [
+          "rgb(218, 165, 32)",
+          "rgb(218, 165, 32)",
+          "rgb(218, 165, 32)",
+          "rgb(218, 165, 32)",
+          "rgb(218, 165, 32)",
+          "rgb(218, 165, 32)",
+          "rgb(218, 165, 32)",
+          "rgb(218, 165, 32)"
+        ],
+        [
+          "rgb(218, 165, 32)",
+          "rgb(139, 69, 19)",
+          "rgb(139, 69, 19)",
+          "rgb(139, 69, 19)",
+          "rgb(139, 69, 19)",
+          "rgb(139, 69, 19)",
+          "rgb(139, 69, 19)",
+          "rgb(218, 165, 32)"
+        ],
+        [
+          "rgb(218, 165, 32)",
+          "rgb(139, 69, 19)",
+          "rgb(218, 165, 32)",
+          "rgb(218, 165, 32)",
+          "rgb(218, 165, 32)",
+          "rgb(218, 165, 32)",
+          "rgb(139, 69, 19)",
+          "rgb(218, 165, 32)"
+        ],
+        [
+          "rgb(218, 165, 32)",
+          "rgb(139, 69, 19)",
+          "rgb(218, 165, 32)",
+          "rgb(139, 69, 19)",
+          "rgb(139, 69, 19)",
+          "rgb(218, 165, 32)",
+          "rgb(139, 69, 19)",
+          "rgb(218, 165, 32)"
+        ],
+        [
+          "rgb(218, 165, 32)",
+          "rgb(139, 69, 19)",
+          "rgb(218, 165, 32)",
+          "rgb(218, 165, 32)",
+          "rgb(218, 165, 32)",
+          "rgb(218, 165, 32)",
+          "rgb(139, 69, 19)",
+          "rgb(218, 165, 32)"
+        ],
+        [
+          "rgb(218, 165, 32)",
+          "rgb(139, 69, 19)",
+          "rgb(139, 69, 19)",
+          "rgb(139, 69, 19)",
+          "rgb(139, 69, 19)",
+          "rgb(139, 69, 19)",
+          "rgb(139, 69, 19)",
+          "rgb(218, 165, 32)"
+        ],
+        [
+          "rgb(218, 165, 32)",
+          "rgb(218, 165, 32)",
+          "rgb(218, 165, 32)",
+          "rgb(218, 165, 32)",
+          "rgb(218, 165, 32)",
+          "rgb(218, 165, 32)",
+          "rgb(218, 165, 32)",
+          "rgb(218, 165, 32)"
+        ],
+        [
+          "rgb(218, 165, 32)",
+          "rgb(218, 165, 32)",
+          "rgb(218, 165, 32)",
+          "rgb(218, 165, 32)",
+          "rgb(218, 165, 32)",
+          "rgb(218, 165, 32)",
+          "rgb(218, 165, 32)",
+          "rgb(218, 165, 32)"
+        ]
+      ],
+      "id": ""
+    },
+    {
+      "id": "Wood",
+      "type": "block",
+      "collision": true,
+      "changeScene": "",
+      "whenNearShowText": "",
+      "pixels": [
+        [
+          "rgb(94, 68, 23)",
+          "rgb(94, 68, 23)",
+          "rgb(94, 68, 23)",
+          "rgb(94, 68, 23)",
+          "rgb(94, 68, 23)",
+          "rgb(94, 68, 23)",
+          "rgb(72, 51, 15)",
+          "rgb(72, 51, 15)"
+        ],
+        [
+          "rgb(72, 51, 15)",
+          "rgb(72, 51, 15)",
+          "rgb(72, 51, 15)",
+          "rgb(72, 51, 15)",
+          "rgb(72, 51, 15)",
+          "rgb(72, 51, 15)",
+          "rgb(94, 68, 23)",
+          "rgb(72, 51, 15)"
+        ],
+        [
+          "rgb(72, 51, 15)",
+          "rgb(72, 51, 15)",
+          "rgb(94, 68, 23)",
+          "rgb(94, 68, 23)",
+          "rgb(72, 51, 15)",
+          "rgb(94, 68, 23)",
+          "rgb(94, 68, 23)",
+          "rgb(94, 68, 23)"
+        ],
+        [
+          "rgb(72, 51, 15)",
+          "rgb(72, 51, 15)",
+          "rgb(72, 51, 15)",
+          "rgb(72, 51, 15)",
+          "rgb(72, 51, 15)",
+          "rgb(72, 51, 15)",
+          "rgb(72, 51, 15)",
+          "rgb(72, 51, 15)"
+        ],
+        [
+          "rgb(94, 68, 23)",
+          "rgb(94, 68, 23)",
+          "rgb(94, 68, 23)",
+          "rgb(94, 68, 23)",
+          "rgb(94, 68, 23)",
+          "rgb(94, 68, 23)",
+          "rgb(72, 51, 15)",
+          "rgb(72, 51, 15)"
+        ],
+        [
+          "rgb(72, 51, 15)",
+          "rgb(72, 51, 15)",
+          "rgb(72, 51, 15)",
+          "rgb(94, 68, 23)",
+          "rgb(72, 51, 15)",
+          "rgb(72, 51, 15)",
+          "rgb(72, 51, 15)",
+          "rgb(72, 51, 15)"
+        ],
+        [
+          "rgb(94, 68, 23)",
+          "rgb(94, 68, 23)",
+          "rgb(94, 68, 23)",
+          "rgb(72, 51, 15)",
+          "rgb(94, 68, 23)",
+          "rgb(94, 68, 23)",
+          "rgb(94, 68, 23)",
+          "rgb(94, 68, 23)"
+        ],
+        [
+          "rgb(72, 51, 15)",
+          "rgb(72, 51, 15)",
+          "rgb(72, 51, 15)",
+          "rgb(72, 51, 15)",
+          "rgb(72, 51, 15)",
+          "rgb(72, 51, 15)",
+          "rgb(72, 51, 15)",
+          "rgb(72, 51, 15)"
+        ]
+      ]
+    }
+  ]
+}

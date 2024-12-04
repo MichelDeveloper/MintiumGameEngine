@@ -45,7 +45,6 @@ coverage/
 .cache/
 
 # Project specific
-gameData.json
 build-configs/
 
 # Server
