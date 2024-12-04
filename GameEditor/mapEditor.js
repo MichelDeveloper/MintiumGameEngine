@@ -129,19 +129,17 @@ document.addEventListener("gameDataLoaded", function () {
             spawnButton.blur();
           } else {
             const selectedSpriteId = spriteSelector.value;
-            cell.dataset.spriteId = selectedSpriteId;
-            if (selectedSpriteId !== "0" && selectedSpriteId !== "void") {
-              const spritePreview = createSpritePreview(selectedSpriteId);
-              if (spritePreview) {
-                cell.style.backgroundImage = `url(${spritePreview})`;
-                cell.style.backgroundSize = "contain";
-                cell.style.backgroundRepeat = "no-repeat";
-                cell.style.backgroundPosition = "center";
-              }
-            } else {
-              cell.style.backgroundImage = "";
-              cell.style.backgroundColor =
-                spriteMapping[selectedSpriteId] || spriteMapping["0"];
+
+            switch (currentTool) {
+              case "pen":
+                updateCellSprite(cell, selectedSpriteId);
+                break;
+              case "eraser":
+                updateCellSprite(cell, "void");
+                break;
+              case "fill":
+                floodFill(cell, selectedSpriteId);
+                break;
             }
           }
         });
@@ -383,4 +381,94 @@ document.addEventListener("gameDataLoaded", function () {
 
     alert("Scene created successfully!");
   });
+
+  // Add after element selections
+  const penBtn = document.getElementById("penBtn");
+  const eraserBtn = document.getElementById("eraserBtn");
+  const fillBtn = document.getElementById("fillBtn");
+
+  let currentTool = "pen";
+
+  // Add tool click handlers
+  penBtn.addEventListener("click", function () {
+    currentTool = "pen";
+    penBtn.classList.add("tool-active");
+    eraserBtn.classList.remove("tool-active");
+    fillBtn.classList.remove("tool-active");
+  });
+
+  eraserBtn.addEventListener("click", function () {
+    currentTool = "eraser";
+    eraserBtn.classList.add("tool-active");
+    penBtn.classList.remove("tool-active");
+    fillBtn.classList.remove("tool-active");
+  });
+
+  fillBtn.addEventListener("click", function () {
+    currentTool = "fill";
+    fillBtn.classList.add("tool-active");
+    penBtn.classList.remove("tool-active");
+    eraserBtn.classList.remove("tool-active");
+  });
+
+  // Add flood fill function
+  function floodFill(startCell, newSpriteId) {
+    const targetSpriteId = startCell.dataset.spriteId;
+    if (targetSpriteId === newSpriteId) return;
+
+    const cells = Array.from(mapGrid.children);
+    const visited = new Set();
+    const stack = [startCell];
+
+    while (stack.length > 0) {
+      const cell = stack.pop();
+      const index = cells.indexOf(cell);
+      if (visited.has(index)) continue;
+
+      if (cell.dataset.spriteId === targetSpriteId) {
+        // Update cell with new sprite
+        updateCellSprite(cell, newSpriteId);
+        visited.add(index);
+
+        // Add adjacent cells
+        const x = index % 10;
+        const y = Math.floor(index / 10);
+
+        // Check adjacent cells (up, right, down, left)
+        const adjacentIndices = [
+          y > 0 ? index - 10 : -1, // up
+          x < 9 ? index + 1 : -1, // right
+          y < 9 ? index + 10 : -1, // down
+          x > 0 ? index - 1 : -1, // left
+        ];
+
+        adjacentIndices.forEach((adjIndex) => {
+          if (
+            adjIndex !== -1 &&
+            cells[adjIndex]?.dataset.spriteId === targetSpriteId
+          ) {
+            stack.push(cells[adjIndex]);
+          }
+        });
+      }
+    }
+  }
+
+  // Modify the cell click handler in loadMapEditorScene
+  function updateCellSprite(cell, spriteId) {
+    cell.dataset.spriteId = spriteId;
+    if (spriteId !== "0" && spriteId !== "void") {
+      const spritePreview = createSpritePreview(spriteId);
+      if (spritePreview) {
+        cell.style.backgroundImage = `url(${spritePreview})`;
+        cell.style.backgroundSize = "contain";
+        cell.style.backgroundRepeat = "no-repeat";
+        cell.style.backgroundPosition = "center";
+      }
+    } else {
+      cell.style.backgroundImage = "";
+      cell.style.backgroundColor =
+        spriteMapping[spriteId] || spriteMapping["0"];
+    }
+  }
 });
