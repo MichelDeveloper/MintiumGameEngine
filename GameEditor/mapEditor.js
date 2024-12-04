@@ -55,7 +55,15 @@ document.addEventListener("gameDataLoaded", function () {
   loadSceneSelector();
 
   sceneSelector.addEventListener("change", () => {
-    loadMapEditorScene(); // Load map data when a new scene is selected
+    loadMapEditorScene();
+    const selectedSceneIndex = sceneSelector.value;
+    const selectedScene = globalGameData.scenes[selectedSceneIndex];
+    const skyColorPicker = document.getElementById("skyColorPicker");
+    if (selectedScene && selectedScene.backgroundColor) {
+      skyColorPicker.value = selectedScene.backgroundColor;
+    } else {
+      skyColorPicker.value = "#aabbcc"; // Default color
+    }
   });
 
   function loadMapEditorScene() {
@@ -291,10 +299,11 @@ document.addEventListener("gameDataLoaded", function () {
       const x = index % 10;
       const z = Math.floor(index / 10);
       selectedScene.playerSpawnPosition = { x, z };
-    } else if (!selectedScene.playerSpawnPosition) {
-      // Set default spawn position if none exists
-      selectedScene.playerSpawnPosition = { x: 5, z: 5 };
     }
+
+    // Save sky color
+    const skyColorPicker = document.getElementById("skyColorPicker");
+    selectedScene.backgroundColor = skyColorPicker.value;
 
     // Save to localStorage
     localStorage.setItem("gameData", JSON.stringify(globalGameData));
@@ -305,4 +314,15 @@ document.addEventListener("gameDataLoaded", function () {
 
   // Export Project
   exportProjectBtn.addEventListener("click", () => exportGlobalGameData());
+
+  function initializeSkyColorPicker() {
+    const skyColorPicker = document.getElementById("skyColorPicker");
+
+    // Set initial color from current scene
+    const selectedSceneIndex = sceneSelector.value;
+    const selectedScene = globalGameData.scenes[selectedSceneIndex];
+    skyColorPicker.value = selectedScene.backgroundColor || "#aabbcc";
+  }
+
+  initializeSkyColorPicker();
 });
