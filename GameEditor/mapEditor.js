@@ -325,4 +325,5 @@ document.addEventListener("gameDataLoaded", function () {
   }
 
   initializeSkyColorPicker();
+  loadMapEditorScene();
 });
