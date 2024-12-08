@@ -36,6 +36,7 @@ body {
 }
 
 .section {
+  margin-top: 16px;
   background-color: var(--section-bg);
   border-radius: 0.75rem;
   border: 1px solid var(--border-color);
@@ -102,28 +103,6 @@ body {
 
 #enterVRButton:hover {
   background-color: #157347;
-}
-
-#exportProjectBtn {
-  position: relative;
-  padding: 10px 20px;
-  margin-bottom: 16px;
-  background-color: #b0bec5; /* Medium grey */
-  color: white;
-  border: none;
-  cursor: pointer;
-  z-index: 999; /* Ensure button is always on top */
-}
-
-#importProjectBtn {
-  position: relative;
-  padding: 10px 20px;
-  margin-bottom: 16px;
-  background-color: #b0bec5; /* Medium grey */
-  color: white;
-  border: none;
-  cursor: pointer;
-  z-index: 999; /* Ensure button is always on top */
 }
 
 /* Container for buttons to ensure proper spacing */

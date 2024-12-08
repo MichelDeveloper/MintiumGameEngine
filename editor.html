@@ -118,6 +118,11 @@
       .btn-tool.tool-active {
         background: #4caf50;
       }
+      .editor-row {
+        display: flex;
+        flex-direction: row;
+        gap: 20px;
+      }
     </style>
   </head>
   <body>
@@ -130,49 +135,27 @@
 
     <div id="editorContainer">
       <div class="editor-container">
-        <div class="editor-sidebar">
-          <div class="tools-section">
-            <h3>Tools</h3>
-            <div class="tool-buttons">
-              <button class="btn-tool" id="penBtn" title="Pen Tool">
-                <i class="bi bi-pencil-fill"></i>
-              </button>
-              <button class="btn-tool" id="eraserBtn" title="Eraser">
-                <i class="bi bi-eraser-fill"></i>
-              </button>
-              <button class="btn-tool" id="fillBtn" title="Fill Tool">
-                <i class="bi bi-paint-bucket"></i>
-              </button>
-            </div>
-          </div>
-
-          <div class="scene-creation">
-            <h3>Create New Scene</h3>
-            <div class="control-group">
-              <label for="newSceneId">Scene ID:</label>
-              <input type="text" id="newSceneId" placeholder="Enter scene ID" />
-              <button class="btn-editor" id="createSceneBtn">
-                <i class="bi bi-plus-circle"></i> Create Scene
-              </button>
-            </div>
-          </div>
-        </div>
-
         <div class="editor-main">
           <div id="editorScrollContainer">
             <div class="brand-header">
               <img src="mintium_logo_alpha.png" alt="Mintium" class="logo" />
               <h1>Mintium Editor</h1>
             </div>
-            <button id="exportProjectBtn">Export Project</button>
+            <button id="exportProjectBtn" class="btn btn-primary">
+              Export Project
+            </button>
             <input
               type="file"
               id="importGameData"
               accept=".json"
               style="display: none"
             />
-            <button id="importProjectBtn">Import Project</button>
-            <button id="exportGameBtn">Export Game</button>
+            <button id="importProjectBtn" class="btn btn-primary">
+              Import Project
+            </button>
+            <button id="exportGameBtn" class="btn btn-secondary">
+              Export Game
+            </button>
             <button id="clearStorageBtn" class="danger-button">
               Clear Storage
             </button>
@@ -183,57 +166,90 @@
                 <h2>Map Editor</h2>
                 <span>Hide/Show</span>
               </div>
-              <div class="section-content">
-                <div class="map-controls">
-                  <div class="control-group">
-                    <label for="sceneSelector">Scene:</label>
-                    <select id="sceneSelector">
-                      <!-- Scenes will be added dynamically -->
-                    </select>
+              <div class="editor-row">
+                <div class="section-content">
+                  <div class="map-controls">
+                    <div class="control-group">
+                      <label for="sceneSelector">Scene:</label>
+                      <select id="sceneSelector">
+                        <!-- Scenes will be added dynamically -->
+                      </select>
+                    </div>
+
+                    <div class="control-group">
+                      <label for="layerSelector">Layer:</label>
+                      <select id="layerSelector">
+                        <!-- Added dynamically -->
+                      </select>
+                    </div>
+
+                    <div class="control-group">
+                      <label for="spriteSelector">Sprite:</label>
+                      <select id="spriteSelector">
+                        <!-- Added dynamically -->
+                      </select>
+                    </div>
+
+                    <div class="control-group">
+                      <label for="skyColorPicker">Sky Color:</label>
+                      <input type="color" id="skyColorPicker" value="#aabbcc" />
+                    </div>
                   </div>
 
-                  <div class="control-group">
-                    <label for="layerSelector">Layer:</label>
-                    <select id="layerSelector">
-                      <!-- Added dynamically -->
-                    </select>
+                  <div class="map-actions">
+                    <button class="btn-editor" id="setPlayerSpawnBtn">
+                      <i class="bi bi-flag-fill"></i> Set Spawn
+                    </button>
+                    <button class="btn-editor" id="loadMap">
+                      <i class="bi bi-download"></i> Load Map
+                    </button>
+                    <button class="btn-editor" id="saveMap">
+                      <i class="bi bi-save"></i> Save Map
+                    </button>
                   </div>
 
-                  <div class="control-group">
-                    <label for="spriteSelector">Sprite:</label>
-                    <select id="spriteSelector">
-                      <!-- Added dynamically -->
-                    </select>
-                  </div>
+                  <div class="mapGrid"></div>
 
-                  <div class="control-group">
-                    <label for="skyColorPicker">Sky Color:</label>
-                    <input type="color" id="skyColorPicker" value="#aabbcc" />
+                  <div class="map-footer">
+                    <button class="btn-editor" id="generateMapCode">
+                      <i class="bi bi-code-square"></i> Generate Code
+                    </button>
+                    <button class="btn-editor danger" id="resetMapGrid">
+                      <i class="bi bi-trash"></i> Reset
+                    </button>
+                    <textarea id="mapCode" rows="10" readonly></textarea>
                   </div>
                 </div>
+                <div class="editor-sidebar">
+                  <div class="tools-section">
+                    <h3>Tools</h3>
+                    <div class="tool-buttons">
+                      <button class="btn-tool" id="penBtn" title="Pen Tool">
+                        <i class="bi bi-pencil-fill"></i>
+                      </button>
+                      <button class="btn-tool" id="eraserBtn" title="Eraser">
+                        <i class="bi bi-eraser-fill"></i>
+                      </button>
+                      <button class="btn-tool" id="fillBtn" title="Fill Tool">
+                        <i class="bi bi-paint-bucket"></i>
+                      </button>
+                    </div>
+                  </div>
 
-                <div class="map-actions">
-                  <button class="btn-editor" id="setPlayerSpawnBtn">
-                    <i class="bi bi-flag-fill"></i> Set Spawn
-                  </button>
-                  <button class="btn-editor" id="loadMap">
-                    <i class="bi bi-download"></i> Load Map
-                  </button>
-                  <button class="btn-editor" id="saveMap">
-                    <i class="bi bi-save"></i> Save Map
-                  </button>
-                </div>
-
-                <div class="mapGrid"></div>
-
-                <div class="map-footer">
-                  <button class="btn-editor" id="generateMapCode">
-                    <i class="bi bi-code-square"></i> Generate Code
-                  </button>
-                  <button class="btn-editor danger" id="resetMapGrid">
-                    <i class="bi bi-trash"></i> Reset
-                  </button>
-                  <textarea id="mapCode" rows="10" readonly></textarea>
+                  <div class="scene-creation">
+                    <h3>Create New Scene</h3>
+                    <div class="control-group">
+                      <label for="newSceneId">Scene ID:</label>
+                      <input
+                        type="text"
+                        id="newSceneId"
+                        placeholder="Enter scene ID"
+                      />
+                      <button class="btn-editor" id="createSceneBtn">
+                        <i class="bi bi-plus-circle"></i> Create Scene
+                      </button>
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>
