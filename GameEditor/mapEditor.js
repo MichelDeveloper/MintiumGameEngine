@@ -467,4 +467,11 @@ document.addEventListener("gameDataLoaded", function () {
         spriteMapping[spriteId] || spriteMapping["0"];
     }
   }
+
+  document.querySelectorAll(".section-header").forEach((header) => {
+    header.addEventListener("click", () => {
+      const content = header.nextElementSibling;
+      content.classList.toggle("hidden");
+    });
+  });
 });
