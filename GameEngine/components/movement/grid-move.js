@@ -106,7 +106,7 @@ AFRAME.registerComponent("grid-move", {
 
     // Implement a cooldown mechanism
     this.canExecuteEvent = false;
-    setTimeout(() => (this.canExecuteEvent = true), 500);
+    setTimeout(() => (this.canExecuteEvent = true), 250);
   },
 });
 
