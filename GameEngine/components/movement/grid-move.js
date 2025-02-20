@@ -14,7 +14,7 @@ AFRAME.registerComponent("grid-move", {
   onAxisMove: function (evt) {
     if (!this.canExecuteEvent) return;
 
-    var playerAux = document.getElementById("player");
+    const playerAux = document.getElementById("player");
     if (!playerAux) {
       console.error("Player entity not found");
       return;
@@ -26,15 +26,22 @@ AFRAME.registerComponent("grid-move", {
     let shouldUpdatePlayerPosition = true;
 
     // Determine the primary direction of the movement based on thumbstick tilt
-    let directionVector = new THREE.Vector3(0, 0, 0);
+    let inputDirection = new THREE.Vector3(0, 0, 0);
     if (Math.abs(x) > Math.abs(y)) {
-      directionVector.x = Math.sign(x);
+      inputDirection.x = Math.sign(x);
     } else if (Math.abs(y) > 0.5) {
-      directionVector.z = Math.sign(y);
+      inputDirection.z = Math.sign(y);
     } else {
       // Thumbstick is in the dead zone or not tilted enough
       return;
     }
+
+    // Adjust the input direction by the player's current Y rotation
+    const playerRotationY = playerAux.object3D.rotation.y;
+    let directionVector = inputDirection.applyAxisAngle(
+      new THREE.Vector3(0, 1, 0),
+      playerRotationY
+    );
 
     // Quantize the movement to grid blocks
     const gridBlockSize = 10; // Assuming each grid block is 10 units
@@ -72,7 +79,7 @@ AFRAME.registerComponent("grid-move", {
       return;
     }
 
-    const tileType = baseLayer.layerData[gridZ][gridX]; // Directly access the tile type using array indexing
+    const tileType = baseLayer.layerData[gridZ][gridX];
 
     if (!tileType) {
       console.error("Tile type is undefined");
@@ -99,7 +106,7 @@ AFRAME.registerComponent("grid-move", {
 
     // Implement a cooldown mechanism
     this.canExecuteEvent = false;
-    setTimeout(() => (this.canExecuteEvent = true), 500); // Delay for executing the events associated with the joystick movement
+    setTimeout(() => (this.canExecuteEvent = true), 500);
   },
 });
 
