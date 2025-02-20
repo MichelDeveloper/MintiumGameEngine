@@ -23,6 +23,7 @@ document.addEventListener("gameDataLoaded", function () {
   );
   const changeSceneSelector = document.getElementById("changeSceneSelector");
   const whenNearShowTextArea = document.getElementById("whenNearShowText");
+  const hudTextArea = document.getElementById("hudText");
 
   // Populate the changeSceneSelector with available scenes
   function populateSceneSelector() {
@@ -51,6 +52,7 @@ document.addEventListener("gameDataLoaded", function () {
     spriteCollisionCheckbox.checked = firstSprite.collision || false;
     changeSceneSelector.value = firstSprite.changeScene || "";
     whenNearShowTextArea.value = firstSprite.whenNearShowText || "";
+    hudTextArea.value = firstSprite.hudText || "";
     populateGrid(firstSprite.pixels);
   } else {
     // Initialize with empty state if no sprites exist
@@ -59,6 +61,7 @@ document.addEventListener("gameDataLoaded", function () {
     spriteCollisionCheckbox.checked = false;
     changeSceneSelector.value = "";
     whenNearShowTextArea.value = "";
+    hudTextArea.value = "";
     populateGrid(Array(64).fill("rgba(0,0,0,0)"));
   }
 
@@ -255,6 +258,7 @@ document.addEventListener("gameDataLoaded", function () {
       collision: spriteCollisionCheckbox.checked,
       changeScene: changeSceneSelector.value.trim() || "",
       whenNearShowText: whenNearShowTextArea.value.trim() || "",
+      hudText: hudTextArea.value.trim() || "",
       pixels: pixelRows,
     };
 
@@ -304,6 +308,7 @@ document.addEventListener("gameDataLoaded", function () {
           selectedSprite.whenNearShowText || "";
         document.getElementById("changeSceneSelector").value =
           selectedSprite.changeScene || "";
+        document.getElementById("hudText").value = selectedSprite.hudText || "";
       }
     });
   }
@@ -323,6 +328,7 @@ document.addEventListener("gameDataLoaded", function () {
       spriteCollisionCheckbox.checked = selectedSprite.collision || false;
       changeSceneSelector.value = selectedSprite.changeScene || "";
       whenNearShowTextArea.value = selectedSprite.whenNearShowText || "";
+      hudTextArea.value = selectedSprite.hudText || "";
       populateGrid(selectedSprite.pixels);
     }
   });

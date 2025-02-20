@@ -14,6 +14,7 @@ import "./components/movement/grid-move.js";
 import "./components/movement/custom-keyboard-controls.js";
 import "./components/movement/rotation-control.js";
 import "./components/interaction/show-text-near.js";
+import "./components/interaction/show-hud-text.js";
 
 let gameData;
 

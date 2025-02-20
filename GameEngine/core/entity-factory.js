@@ -33,6 +33,12 @@ export function createCube(x, y, z, spriteId, type) {
       distance: 2,
     });
   }
+  if (sprite.hudText && sprite.collision) {
+    cubeEl.setAttribute("show-hud-text", {
+      text: sprite.hudText,
+      distance: 2,
+    });
+  }
   const container = document.getElementById("dynamic-content");
   container.appendChild(cubeEl); // Add to the container instead of the scene
 }
@@ -44,6 +50,24 @@ export function createPlayer() {
 
   const cameraEl = document.createElement("a-camera");
   cameraEl.setAttribute("id", "camera");
+
+  // Create HUD container
+  const hudEl = document.createElement("a-entity");
+  hudEl.setAttribute("id", "hud");
+  hudEl.setAttribute("position", "0 0 -1");
+
+  // Add HUD text
+  const hudText = document.createElement("a-text");
+  hudText.setAttribute("id", "hud-text");
+  hudText.setAttribute("value", "");
+  hudText.setAttribute("color", "#FFFFFF");
+  hudText.setAttribute("align", "center");
+  hudText.setAttribute("width", "1");
+  hudText.setAttribute("position", "0 0 0");
+  hudText.setAttribute("overlay", "true");
+
+  hudEl.appendChild(hudText);
+  cameraEl.appendChild(hudEl);
   playerEl.appendChild(cameraEl);
 
   const leftHandEl = document.createElement("a-entity");
