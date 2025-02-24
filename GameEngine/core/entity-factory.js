@@ -2,13 +2,11 @@ import { findSpriteById, generateTexture } from "./sprite-manager.js";
 import { engineConstants } from "../engineConstants.js";
 
 // Entity Creation
-export function createCube(x, y, z, spriteId, type) {
+export async function createCube(x, y, z, spriteId, type) {
   const sprite = findSpriteById(spriteId);
   if (!sprite) return; // Skip if sprite is not found
 
-  const texture = generateTexture(sprite);
   let cubeEl;
-
   if (type === "block") {
     cubeEl = document.createElement("a-box");
     cubeEl.setAttribute("depth", "10");
@@ -22,10 +20,24 @@ export function createCube(x, y, z, spriteId, type) {
   }
 
   cubeEl.setAttribute("position", `${x * 10} ${y * 10} ${z * 10}`);
-  cubeEl.setAttribute(
-    "material",
-    `src: url(${texture}) transparent: true; alphaTest: 0.5`
-  );
+
+  try {
+    const texture = await generateTexture(sprite);
+    // Set material properties separately
+    cubeEl.setAttribute("material", {
+      src: texture,
+      transparent: true,
+      alphaTest: 0.5,
+      shader: "standard",
+    });
+  } catch (error) {
+    console.error("Failed to generate texture:", error);
+    cubeEl.setAttribute("material", {
+      color: "red",
+      shader: "standard",
+    });
+  }
+
   cubeEl.setAttribute("pixelated", "");
   if (sprite.whenNearShowText && sprite.collision) {
     cubeEl.setAttribute("show-text-near", {
@@ -40,7 +52,7 @@ export function createCube(x, y, z, spriteId, type) {
     });
   }
   const container = document.getElementById("dynamic-content");
-  container.appendChild(cubeEl); // Add to the container instead of the scene
+  container.appendChild(cubeEl);
 }
 
 export function createPlayer() {

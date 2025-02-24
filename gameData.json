@@ -1314,6 +1314,7 @@
     {
       "id": "Grass",
       "type": "block",
+      "textureType": "pixels",
       "pixels": [
         [
           "rgba(124,252,0,1)",
@@ -1401,6 +1402,7 @@
     {
       "id": "Tree",
       "type": "billboard",
+      "textureType": "pixels",
       "pixels": [
         [
           "rgba(0,0,0,0)",
@@ -1488,6 +1490,7 @@
     {
       "id": "Stone Wall",
       "type": "block",
+      "textureType": "pixels",
       "pixels": [
         [
           "rgba(169,169,169,1)",
@@ -1575,6 +1578,7 @@
     {
       "id": "Stone Floor",
       "type": "block",
+      "textureType": "pixels",
       "pixels": [
         [
           "rgba(128,128,128,1)",
@@ -1662,6 +1666,7 @@
     {
       "id": "Cave Entrance",
       "type": "block",
+      "textureType": "pixels",
       "collision": true,
       "changeScene": "Cave",
       "whenNearShowText": "",
@@ -1752,6 +1757,7 @@
     {
       "id": "Treasure Chest",
       "type": "block",
+      "textureType": "pixels",
       "collision": true,
       "changeScene": "Secret",
       "whenNearShowText": "",
@@ -1842,6 +1848,7 @@
     {
       "id": "Exit",
       "type": "block",
+      "textureType": "pixels",
       "collision": true,
       "changeScene": "Forest",
       "whenNearShowText": "",
@@ -1931,6 +1938,7 @@
     },
     {
       "type": "block",
+      "textureType": "pixels",
       "collision": true,
       "changeScene": "Cave",
       "whenNearShowText": "",
@@ -2021,6 +2029,7 @@
     {
       "id": "Wood",
       "type": "block",
+      "textureType": "pixels",
       "collision": true,
       "changeScene": "",
       "whenNearShowText": "",
@@ -2110,6 +2119,7 @@
     {
       "id": "Cave Exit",
       "type": "block",
+      "textureType": "pixels",
       "collision": true,
       "changeScene": "Forest",
       "whenNearShowText": "",
@@ -2200,6 +2210,7 @@
     {
       "id": "Test",
       "type": "block",
+      "textureType": "pixels",
       "collision": true,
       "changeScene": "Cave",
       "whenNearShowText": "",
@@ -2290,6 +2301,7 @@
     {
       "id": "Gold Wall",
       "type": "block",
+      "textureType": "pixels",
       "collision": true,
       "changeScene": "",
       "whenNearShowText": "",
@@ -2380,6 +2392,7 @@
     {
       "id": "Tree Eden",
       "type": "billboard",
+      "textureType": "pixels",
       "collision": true,
       "changeScene": "Forest",
       "whenNearShowText": "",

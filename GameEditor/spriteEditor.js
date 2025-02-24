@@ -23,7 +23,13 @@ document.addEventListener("gameDataLoaded", function () {
   );
   const changeSceneSelector = document.getElementById("changeSceneSelector");
   const whenNearShowTextArea = document.getElementById("whenNearShowText");
+  const textureTypeSelector = document.getElementById("textureTypeSelector");
+  const textureUpload = document.getElementById("textureUpload");
   const hudTextArea = document.getElementById("hudText");
+
+  let mode = "draw";
+  let selectedColor = colorPicker.value;
+  let textureFileName = null;
 
   // Populate the changeSceneSelector with available scenes
   function populateSceneSelector() {
@@ -46,14 +52,33 @@ document.addEventListener("gameDataLoaded", function () {
   // Initialize with the first sprite if available
   if (globalGameData.sprites.length > 0) {
     const firstSprite = globalGameData.sprites[0];
+
+    // First populate the selector
+    globalGameData.sprites.forEach((sprite) => {
+      addSpriteToList(sprite.id);
+    });
+
+    // Then set values
     spriteSelector.value = firstSprite.id;
     spriteIdInput.value = firstSprite.id;
     spriteTypeSelector.value = firstSprite.type || "block";
+    textureTypeSelector.value = firstSprite.textureType || "pixels";
     spriteCollisionCheckbox.checked = firstSprite.collision || false;
     changeSceneSelector.value = firstSprite.changeScene || "";
     whenNearShowTextArea.value = firstSprite.whenNearShowText || "";
     hudTextArea.value = firstSprite.hudText || "";
-    populateGrid(firstSprite.pixels);
+
+    if (firstSprite.textureType === "texture") {
+      textureFileName = firstSprite.texturePath;
+      textureUpload.type = "text";
+      textureUpload.value = firstSprite.texturePath;
+      textureUpload.style.display = "block";
+      grid.style.display = "none";
+    } else {
+      grid.style.display = "grid";
+      textureUpload.style.display = "none";
+      populateGrid(firstSprite.pixels);
+    }
   } else {
     // Initialize with empty state if no sprites exist
     spriteIdInput.value = "";
@@ -61,12 +86,8 @@ document.addEventListener("gameDataLoaded", function () {
     spriteCollisionCheckbox.checked = false;
     changeSceneSelector.value = "";
     whenNearShowTextArea.value = "";
-    hudTextArea.value = "";
     populateGrid(Array(64).fill("rgba(0,0,0,0)"));
   }
-
-  let mode = "draw";
-  let selectedColor = colorPicker.value;
 
   penBtn.classList.add("tool-active");
 
@@ -255,11 +276,14 @@ document.addEventListener("gameDataLoaded", function () {
     const newSpriteData = {
       id: spriteId,
       type: spriteTypeSelector.value,
+      textureType: textureTypeSelector.value,
+      texturePath:
+        textureTypeSelector.value === "texture" ? textureFileName : null,
       collision: spriteCollisionCheckbox.checked,
       changeScene: changeSceneSelector.value.trim() || "",
       whenNearShowText: whenNearShowTextArea.value.trim() || "",
       hudText: hudTextArea.value.trim() || "",
-      pixels: pixelRows,
+      pixels: textureTypeSelector.value === "pixels" ? pixelRows : null,
     };
 
     // Update or add the sprite
@@ -308,7 +332,6 @@ document.addEventListener("gameDataLoaded", function () {
           selectedSprite.whenNearShowText || "";
         document.getElementById("changeSceneSelector").value =
           selectedSprite.changeScene || "";
-        document.getElementById("hudText").value = selectedSprite.hudText || "";
       }
     });
   }
@@ -325,11 +348,52 @@ document.addEventListener("gameDataLoaded", function () {
     if (selectedSprite) {
       spriteIdInput.value = selectedSpriteId;
       spriteTypeSelector.value = selectedSprite.type || "block";
+      textureTypeSelector.value = selectedSprite.textureType || "pixels";
       spriteCollisionCheckbox.checked = selectedSprite.collision || false;
       changeSceneSelector.value = selectedSprite.changeScene || "";
       whenNearShowTextArea.value = selectedSprite.whenNearShowText || "";
       hudTextArea.value = selectedSprite.hudText || "";
-      populateGrid(selectedSprite.pixels);
+
+      if (selectedSprite.textureType === "texture") {
+        textureFileName = selectedSprite.texturePath;
+        textureUpload.type = "text";
+        textureUpload.value = selectedSprite.texturePath;
+        textureUpload.style.display = "block";
+        grid.style.display = "none";
+      } else {
+        grid.style.display = "grid";
+        textureUpload.style.display = "none";
+        textureUpload.value = "";
+        populateGrid(selectedSprite.pixels);
+      }
+    }
+  });
+
+  textureTypeSelector.addEventListener("change", function () {
+    if (this.value === "texture") {
+      // Show a text input instead of file upload
+      textureUpload.type = "text";
+      textureUpload.placeholder = "Enter texture filename (e.g. grass.png)";
+      textureUpload.style.display = "block";
+      grid.style.display = "none";
+    } else {
+      textureUpload.type = "file";
+      textureUpload.style.display = "none";
+      grid.style.display = "grid";
+      textureFileName = null;
+      textureUpload.value = "";
+    }
+  });
+
+  // Change file input handler to text input handler
+  textureUpload.addEventListener("change", function (e) {
+    if (textureTypeSelector.value === "texture") {
+      textureFileName = this.value; // Just store the filename
+    } else {
+      const file = e.target.files[0];
+      if (file) {
+        textureFileName = file.name;
+      }
     }
   });
 });

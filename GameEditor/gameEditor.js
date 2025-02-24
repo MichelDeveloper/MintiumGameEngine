@@ -16,6 +16,7 @@ const defaultGameData = {
     {
       id: "default",
       type: "block",
+      textureType: "pixels",
       collision: false,
       pixels: Array(8)
         .fill()

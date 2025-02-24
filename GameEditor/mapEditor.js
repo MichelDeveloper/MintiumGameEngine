@@ -46,6 +46,7 @@ document.addEventListener("gameDataLoaded", function () {
 
   // Function to load scenes into the scene selector
   function loadSceneSelector() {
+    sceneSelector.innerHTML = ""; // Clear existing options
     globalGameData.scenes.forEach((scene, index) => {
       const option = document.createElement("option");
       option.value = index;
@@ -56,8 +57,8 @@ document.addEventListener("gameDataLoaded", function () {
 
   loadSceneSelector();
 
-  sceneSelector.addEventListener("change", () => {
-    loadMapEditorScene();
+  sceneSelector.addEventListener("change", async () => {
+    await loadMapEditorScene();
     const selectedSceneIndex = sceneSelector.value;
     const selectedScene = globalGameData.scenes[selectedSceneIndex];
     const skyColorPicker = document.getElementById("skyColorPicker");
@@ -68,24 +69,24 @@ document.addEventListener("gameDataLoaded", function () {
     }
   });
 
-  function loadMapEditorScene() {
+  // Updated async function to load the map grid based on the current scene/layer data
+  async function loadMapEditorScene() {
     mapGrid.innerHTML = "";
-
     const selectedSceneIndex = sceneSelector.value;
     const selectedLayerIndex = layerSelector.selectedIndex;
     const selectedScene = globalGameData.scenes[selectedSceneIndex];
     const selectedLayer = selectedScene.data[selectedLayerIndex];
 
-    // Populate the map grid with the selected layer's map data
-    selectedLayer.layerData.forEach((row) => {
-      row.forEach((spriteId) => {
+    // Populate the map grid using async/await for texture loading
+    for (const row of selectedLayer.layerData) {
+      for (const spriteId of row) {
         const cell = document.createElement("div");
         cell.classList.add("mapCell");
         cell.dataset.spriteId = spriteId;
 
-        // Set sprite preview if it exists
+        // If a sprite texture is expected, load and set it asynchronously
         if (spriteId !== "0" && spriteId !== "void") {
-          const spritePreview = createSpritePreview(spriteId);
+          const spritePreview = await createSpritePreview(spriteId);
           if (spritePreview) {
             cell.style.backgroundImage = `url(${spritePreview})`;
             cell.style.backgroundSize = "contain";
@@ -96,7 +97,8 @@ document.addEventListener("gameDataLoaded", function () {
           cell.style.backgroundColor =
             spriteMapping[spriteId] || spriteMapping["0"];
         }
-        cell.addEventListener("click", function () {
+
+        cell.addEventListener("click", async function () {
           if (isSettingSpawn) {
             // Remove previous spawn marker
             const previousSpawn = document.querySelector(
@@ -117,7 +119,6 @@ document.addEventListener("gameDataLoaded", function () {
             // Update scene data
             const selectedSceneIndex = sceneSelector.value;
             const selectedScene = globalGameData.scenes[selectedSceneIndex];
-
             if (selectedScene) {
               selectedScene.playerSpawnPosition = { x, z };
             }
@@ -129,23 +130,27 @@ document.addEventListener("gameDataLoaded", function () {
             spawnButton.blur();
           } else {
             const selectedSpriteId = spriteSelector.value;
-
-            switch (currentTool) {
-              case "pen":
-                updateCellSprite(cell, selectedSpriteId);
-                break;
-              case "eraser":
-                updateCellSprite(cell, "void");
-                break;
-              case "fill":
-                floodFill(cell, selectedSpriteId);
-                break;
+            cell.dataset.spriteId = selectedSpriteId;
+            if (selectedSpriteId !== "0" && selectedSpriteId !== "void") {
+              const spritePreview = await createSpritePreview(selectedSpriteId);
+              if (spritePreview) {
+                cell.style.backgroundImage = `url(${spritePreview})`;
+                cell.style.backgroundSize = "contain";
+                cell.style.backgroundRepeat = "no-repeat";
+                cell.style.backgroundPosition = "center";
+                cell.style.backgroundColor = "transparent";
+              }
+            } else {
+              cell.style.backgroundImage = "";
+              cell.style.backgroundColor =
+                spriteMapping[selectedSpriteId] || spriteMapping["0"];
             }
+            cell.textContent = "";
           }
         });
         mapGrid.appendChild(cell);
-      });
-    });
+      }
+    }
 
     // Set spawn position marker if it exists
     if (selectedScene.playerSpawnPosition) {
@@ -158,8 +163,8 @@ document.addEventListener("gameDataLoaded", function () {
     }
   }
 
-  loadMapBtn.addEventListener("click", function () {
-    loadMapEditorScene();
+  loadMapBtn.addEventListener("click", async function () {
+    await loadMapEditorScene();
   });
 
   // Function to update a map layer in globalGameData
@@ -177,6 +182,7 @@ document.addEventListener("gameDataLoaded", function () {
   loadSpriteList();
 
   // Populate layer selector
+  layerSelector.innerHTML = "";
   globalGameData.scenes[0].data.forEach((layer, index) => {
     const option = document.createElement("option");
     option.value = index;
@@ -185,49 +191,66 @@ document.addEventListener("gameDataLoaded", function () {
   });
 
   // Generate sprite mapping based on game data
-  const spriteMapping = globalGameData.sprites.reduce(
-    (mapping, sprite, index) => {
-      mapping[sprite.id] = `rgba(0, 100, 100, 1)`;
-      return mapping;
-    },
-    {}
-  );
+  const spriteMapping = globalGameData.sprites.reduce((mapping, sprite) => {
+    mapping[sprite.id] = `rgba(0, 100, 100, 1)`;
+    return mapping;
+  }, {});
 
-  function createSpritePreview(spriteId) {
+  async function createSpritePreview(spriteId) {
     const sprite = globalGameData.sprites.find((s) => s.id === spriteId);
-    if (!sprite || !sprite.pixels) return null;
+    if (!sprite) return null;
 
     const canvas = document.createElement("canvas");
     canvas.width = 40;
     canvas.height = 40;
     const ctx = canvas.getContext("2d");
 
-    // Scale the 8x8 sprite to fit the 40x40 cell
-    const scale = 5; // 40/8 = 5
-
-    sprite.pixels.forEach((row, y) => {
-      row.forEach((color, x) => {
-        if (color !== "rgba(0,0,0,0)") {
-          ctx.fillStyle = color;
-          ctx.fillRect(x * scale, y * scale, scale, scale);
-        }
+    if (sprite.textureType === "texture" && sprite.texturePath) {
+      try {
+        const img = new Image();
+        await new Promise((resolve, reject) => {
+          img.onload = resolve;
+          img.onerror = reject;
+          img.src = `/Resources/Textures/${sprite.texturePath}`;
+        });
+        ctx.drawImage(img, 0, 0, 40, 40);
+        return canvas.toDataURL();
+      } catch (error) {
+        console.error("Failed to load texture:", error);
+        ctx.fillStyle = "red";
+        ctx.fillRect(0, 0, 40, 40);
+      }
+    } else if (sprite.pixels) {
+      const scale = 5; // 40/8 = 5
+      sprite.pixels.forEach((row, y) => {
+        row.forEach((color, x) => {
+          if (color !== "rgba(0,0,0,0)") {
+            ctx.fillStyle = color;
+            ctx.fillRect(x * scale, y * scale, scale, scale);
+          }
+        });
       });
-    });
+      return canvas.toDataURL();
+    }
 
+    // Draw placeholder for invalid sprites
+    ctx.fillStyle = "gray";
+    ctx.fillRect(0, 0, 40, 40);
     return canvas.toDataURL();
   }
 
+  // Initialize default 10x10 grid (in case no map is loaded)
+  mapGrid.innerHTML = "";
   for (let i = 0; i < 100; i++) {
-    // 10x10 grid
     const cell = document.createElement("div");
     cell.classList.add("mapCell");
     cell.dataset.spriteId = "0"; // Initialize all cells as void
     cell.style.backgroundColor = spriteMapping["0"];
-    cell.addEventListener("click", function () {
-      const selectedSpriteId = spriteSelector.value; // Get the selected sprite ID from the dropdown
+    cell.addEventListener("click", async function () {
+      const selectedSpriteId = spriteSelector.value;
       cell.dataset.spriteId = selectedSpriteId;
       if (selectedSpriteId !== "0" && selectedSpriteId !== "void") {
-        const spritePreview = createSpritePreview(selectedSpriteId);
+        const spritePreview = await createSpritePreview(selectedSpriteId);
         if (spritePreview) {
           cell.style.backgroundImage = `url(${spritePreview})`;
           cell.style.backgroundSize = "contain";
@@ -246,7 +269,7 @@ document.addEventListener("gameDataLoaded", function () {
 
   generateMapCodeBtn.addEventListener("click", function () {
     let mapCode = "layerData: [\n";
-    const rows = [...mapGrid.children];
+    const rows = Array.from(mapGrid.children);
     for (let i = 0; i < rows.length; i += 10) {
       let rowCode = "  [";
       for (let j = 0; j < 10; j++) {
@@ -268,6 +291,7 @@ document.addEventListener("gameDataLoaded", function () {
       cell.style.backgroundColor = spriteMapping["0"];
       cell.dataset.spriteId = "0"; // Reset cell to void
       cell.textContent = ""; // Clear sprite ID text
+      cell.style.backgroundImage = "";
     }
   });
 
@@ -317,8 +341,6 @@ document.addEventListener("gameDataLoaded", function () {
 
   function initializeSkyColorPicker() {
     const skyColorPicker = document.getElementById("skyColorPicker");
-
-    // Set initial color from current scene
     const selectedSceneIndex = sceneSelector.value;
     const selectedScene = globalGameData.scenes[selectedSceneIndex];
     skyColorPicker.value = selectedScene.backgroundColor || "#aabbcc";
@@ -335,7 +357,6 @@ document.addEventListener("gameDataLoaded", function () {
       return;
     }
 
-    // Check if scene ID already exists
     if (globalGameData.scenes.some((scene) => scene.sceneId === sceneId)) {
       alert("A scene with this ID already exists!");
       return;
@@ -344,10 +365,7 @@ document.addEventListener("gameDataLoaded", function () {
     const newScene = {
       sceneId: sceneId,
       backgroundColor: "#87CEEB", // Default sky blue
-      playerSpawnPosition: {
-        x: 0,
-        z: 0,
-      },
+      playerSpawnPosition: { x: 0, z: 0 },
       data: [
         {
           layer: -1, // Background layer
@@ -366,7 +384,6 @@ document.addEventListener("gameDataLoaded", function () {
 
     globalGameData.scenes.push(newScene);
 
-    // Update scene selector and load new scene
     const option = document.createElement("option");
     option.value = globalGameData.scenes.length - 1;
     option.textContent = sceneId;
@@ -378,14 +395,12 @@ document.addEventListener("gameDataLoaded", function () {
     localStorage.setItem("gameData", JSON.stringify(globalGameData));
   });
 
-  // Add after element selections
   const penBtn = document.getElementById("penBtn");
   const eraserBtn = document.getElementById("eraserBtn");
   const fillBtn = document.getElementById("fillBtn");
 
   let currentTool = "pen";
 
-  // Add tool click handlers
   penBtn.addEventListener("click", function () {
     currentTool = "pen";
     penBtn.classList.add("tool-active");
@@ -407,8 +422,26 @@ document.addEventListener("gameDataLoaded", function () {
     eraserBtn.classList.remove("tool-active");
   });
 
-  // Add flood fill function
-  function floodFill(startCell, newSpriteId) {
+  // Updated cell sprite updater as an async function
+  async function updateCellSprite(cell, spriteId) {
+    cell.dataset.spriteId = spriteId;
+    if (spriteId !== "0" && spriteId !== "void") {
+      const spritePreview = await createSpritePreview(spriteId);
+      if (spritePreview) {
+        cell.style.backgroundImage = `url(${spritePreview})`;
+        cell.style.backgroundSize = "contain";
+        cell.style.backgroundRepeat = "no-repeat";
+        cell.style.backgroundPosition = "center";
+      }
+    } else {
+      cell.style.backgroundImage = "";
+      cell.style.backgroundColor =
+        spriteMapping[spriteId] || spriteMapping["0"];
+    }
+  }
+
+  // Updated flood fill function to work asynchronously
+  async function floodFill(startCell, newSpriteId) {
     const targetSpriteId = startCell.dataset.spriteId;
     if (targetSpriteId === newSpriteId) return;
 
@@ -422,20 +455,16 @@ document.addEventListener("gameDataLoaded", function () {
       if (visited.has(index)) continue;
 
       if (cell.dataset.spriteId === targetSpriteId) {
-        // Update cell with new sprite
-        updateCellSprite(cell, newSpriteId);
+        await updateCellSprite(cell, newSpriteId);
         visited.add(index);
 
-        // Add adjacent cells
         const x = index % 10;
         const y = Math.floor(index / 10);
-
-        // Check adjacent cells (up, right, down, left)
         const adjacentIndices = [
-          y > 0 ? index - 10 : -1, // up
-          x < 9 ? index + 1 : -1, // right
-          y < 9 ? index + 10 : -1, // down
-          x > 0 ? index - 1 : -1, // left
+          y > 0 ? index - 10 : -1,
+          x < 9 ? index + 1 : -1,
+          y < 9 ? index + 10 : -1,
+          x > 0 ? index - 1 : -1,
         ];
 
         adjacentIndices.forEach((adjIndex) => {
@@ -447,24 +476,6 @@ document.addEventListener("gameDataLoaded", function () {
           }
         });
       }
-    }
-  }
-
-  // Modify the cell click handler in loadMapEditorScene
-  function updateCellSprite(cell, spriteId) {
-    cell.dataset.spriteId = spriteId;
-    if (spriteId !== "0" && spriteId !== "void") {
-      const spritePreview = createSpritePreview(spriteId);
-      if (spritePreview) {
-        cell.style.backgroundImage = `url(${spritePreview})`;
-        cell.style.backgroundSize = "contain";
-        cell.style.backgroundRepeat = "no-repeat";
-        cell.style.backgroundPosition = "center";
-      }
-    } else {
-      cell.style.backgroundImage = "";
-      cell.style.backgroundColor =
-        spriteMapping[spriteId] || spriteMapping["0"];
     }
   }
 

@@ -291,6 +291,7 @@ const gameData = {
     {
       id: "Stone Wall",
       type: "block",
+      textureType: "pixels",
       pixels: [
         [
           "rgb(132, 68, 16)",
@@ -378,6 +379,7 @@ const gameData = {
     {
       id: "Grass",
       type: "block",
+      textureType: "pixels",
       pixels: [
         [
           "rgba(0,0,0,0)",
@@ -465,6 +467,7 @@ const gameData = {
     {
       id: "Tree",
       type: "billboard",
+      textureType: "pixels",
       pixels: [
         [
           "rgba(0,0,0,0)",
@@ -552,6 +555,7 @@ const gameData = {
     {
       id: "Portal",
       type: "block",
+      textureType: "pixels",
       pixels: [
         [
           "rgba(0,0,0,1)",
@@ -642,6 +646,7 @@ const gameData = {
     {
       id: "Flower",
       type: "block",
+      textureType: "pixels",
       pixels: [
         [
           "rgba(0,0,0,1)",
@@ -729,6 +734,7 @@ const gameData = {
     {
       id: "Treasure",
       type: "block",
+      textureType: "pixels",
       pixels: [
         [
           "rgba(0,0,0,1)",
@@ -817,6 +823,7 @@ const gameData = {
     {
       id: "Owl",
       type: "block",
+      textureType: "pixels",
       pixels: [
         [
           "rgba(0,0,0,1)",
@@ -907,6 +914,7 @@ const gameData = {
     {
       id: "h",
       type: "block",
+      textureType: "pixels",
       pixels: [
         [
           "rgba(0,0,0,1)",
@@ -996,6 +1004,7 @@ const gameData = {
     {
       id: "i",
       type: "block",
+      textureType: "pixels",
       pixels: [
         [
           "rgba(0,0,0,1)",
@@ -1083,6 +1092,7 @@ const gameData = {
     {
       id: "j",
       type: "block",
+      textureType: "pixels",
       pixels: [
         [
           "rgb(112, 68, 16)",
