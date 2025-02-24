@@ -55,6 +55,7 @@ export async function createCube(x, y, z, spriteId, type) {
     cubeEl.setAttribute("show-hud-text", {
       text: sprite.hudText,
       distance: 2,
+      viewAngle: 150,
     });
   }
   const container = document.getElementById("dynamic-content");

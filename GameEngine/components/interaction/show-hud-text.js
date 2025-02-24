@@ -2,6 +2,7 @@ AFRAME.registerComponent("show-hud-text", {
   schema: {
     text: { type: "string", default: "" },
     distance: { type: "number", default: 2 },
+    viewAngle: { type: "number", default: 45 },
     // Optional offset for positioning relative to the camera.
     offset: { type: "vec3", default: { x: 0, y: -0.5, z: -2 } },
   },
@@ -30,7 +31,7 @@ AFRAME.registerComponent("show-hud-text", {
     );
 
     // Append the HUD text to the camera so that it stays fixed in view.
-    // It’s important that your scene has a camera with id="camera".
+    // It's important that your scene has a camera with id="camera".
     const cameraEl = document.querySelector("#camera");
     if (cameraEl) {
       cameraEl.appendChild(this.hudText);
@@ -48,23 +49,38 @@ AFRAME.registerComponent("show-hud-text", {
   },
 
   initCamera: function () {
-    // Prefer the element with id "camera", or fallback to the scene’s camera.
-    this.camera = document.querySelector("#camera") || this.el.sceneEl.camera;
+    this.camera = document.querySelector("#camera");
+    if (!this.camera) {
+      console.warn("Camera not found in initCamera");
+    }
   },
 
   tick: function () {
     if (!this.camera || !this.data.text || !this.hudText) return;
 
-    // Get the camera’s world position.
     const worldPos = new THREE.Vector3();
     this.camera.object3D.getWorldPosition(worldPos);
-
-    // Compute the distance between the entity (that holds this component)
-    // and the camera. This controls when the HUD text shows.
     const distance = this.el.object3D.position.distanceTo(worldPos);
-    const isNear = distance < this.data.distance * 10; // Adjust multiplier if needed.
 
-    // Smoothly interpolate the opacity.
+    // Get camera direction
+    const cameraForward = new THREE.Vector3(0, 0, -1);
+    this.camera.object3D.getWorldDirection(cameraForward);
+
+    // Get direction to object
+    const directionToObject = this.el.object3D.position
+      .clone()
+      .sub(worldPos)
+      .normalize();
+
+    // Calculate angle between camera direction and direction to object
+    const angle = THREE.MathUtils.radToDeg(
+      cameraForward.angleTo(directionToObject)
+    );
+
+    // Show text when looking at object (small angle means looking directly at it)
+    const isNear =
+      distance / 10 < this.data.distance && angle > this.data.viewAngle;
+
     const targetOpacity = isNear ? 1 : 0;
     this.currentOpacity = THREE.MathUtils.lerp(
       this.currentOpacity,
@@ -73,11 +89,9 @@ AFRAME.registerComponent("show-hud-text", {
     );
     this.hudText.setAttribute("text", "opacity", this.currentOpacity);
 
-    // Update the text content based on proximity.
     if (isNear) {
       this.hudText.setAttribute("text", "value", this.data.text);
     } else if (this.currentOpacity < 0.1) {
-      // Optionally clear the text when nearly invisible.
       this.hudText.setAttribute("text", "value", "");
     }
   },
