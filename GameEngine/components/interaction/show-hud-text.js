@@ -2,7 +2,7 @@ AFRAME.registerComponent("show-hud-text", {
   schema: {
     text: { type: "string", default: "" },
     distance: { type: "number", default: 2 },
-    viewAngle: { type: "number", default: 45 },
+    viewAngle: { type: "boolean", default: true },
     // Optional offset for positioning relative to the camera.
     offset: { type: "vec3", default: { x: 0, y: -0.5, z: -2 } },
   },
@@ -79,7 +79,8 @@ AFRAME.registerComponent("show-hud-text", {
 
     // Show text when looking at object (small angle means looking directly at it)
     const isNear =
-      distance / 10 < this.data.distance && angle > this.data.viewAngle;
+      distance / 10 < this.data.distance &&
+      ((angle > 140 && this.data.viewAngle) || this.data.viewAngle === false);
 
     const targetOpacity = isNear ? 1 : 0;
     this.currentOpacity = THREE.MathUtils.lerp(
