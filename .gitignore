@@ -47,6 +47,18 @@ coverage/
 # Project specific
 build-configs/
 
+# Resources
+Resources/Textures/*
+!Resources/Textures/.gitkeep
+Resources/Audio/*
+!Resources/Audio/.gitkeep
+Resources/Models/*
+!Resources/Models/.gitkeep
+Resources/Data/*
+!Resources/Data/.gitkeep
+Resources/UI/*
+!Resources/UI/.gitkeep
+
 # Server
 cert.pem
 key.pem
