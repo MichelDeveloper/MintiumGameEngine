@@ -26,6 +26,7 @@ document.addEventListener("gameDataLoaded", function () {
   const textureTypeSelector = document.getElementById("textureTypeSelector");
   const textureUpload = document.getElementById("textureUpload");
   const hudTextArea = document.getElementById("hudText");
+  const spriteSizeSelector = document.getElementById("spriteSizeSelector");
 
   let mode = "draw";
   let selectedColor = colorPicker.value;
@@ -67,6 +68,7 @@ document.addEventListener("gameDataLoaded", function () {
     changeSceneSelector.value = firstSprite.changeScene || "";
     whenNearShowTextArea.value = firstSprite.whenNearShowText || "";
     hudTextArea.value = firstSprite.hudText || "";
+    spriteSizeSelector.value = firstSprite.size || "normal";
 
     if (firstSprite.textureType === "texture") {
       textureFileName = firstSprite.texturePath;
@@ -284,6 +286,7 @@ document.addEventListener("gameDataLoaded", function () {
       whenNearShowText: whenNearShowTextArea.value.trim() || "",
       hudText: hudTextArea.value.trim() || "",
       pixels: textureTypeSelector.value === "pixels" ? pixelRows : null,
+      size: document.getElementById("spriteSizeSelector").value || "normal",
     };
 
     // Update or add the sprite
@@ -311,64 +314,6 @@ document.addEventListener("gameDataLoaded", function () {
     alert("Sprite saved!");
   });
 
-  function initializeSpriteEditor() {
-    const spriteSelector = document.getElementById("spriteEditorSelector");
-    const spriteIdInput = document.getElementById("spriteIdInput");
-
-    spriteSelector.addEventListener("change", (e) => {
-      const selectedSpriteId = e.target.value;
-      spriteIdInput.value = selectedSpriteId;
-
-      // Rest of your existing sprite selection logic
-      const selectedSprite = globalGameData.sprites.find(
-        (sprite) => sprite.id === selectedSpriteId
-      );
-      if (selectedSprite) {
-        document.getElementById("spriteTypeSelector").value =
-          selectedSprite.type;
-        document.getElementById("spriteCollisionCheckbox").checked =
-          selectedSprite.collision;
-        document.getElementById("whenNearShowText").value =
-          selectedSprite.whenNearShowText || "";
-        document.getElementById("changeSceneSelector").value =
-          selectedSprite.changeScene || "";
-      }
-    });
-  }
-
-  initializeSpriteEditor();
-
-  // Load the selected sprite into the grid
-  spriteSelector.addEventListener("change", function () {
-    const selectedSpriteId = this.value;
-    const selectedSprite = globalGameData.sprites.find(
-      (sprite) => sprite.id === selectedSpriteId
-    );
-
-    if (selectedSprite) {
-      spriteIdInput.value = selectedSpriteId;
-      spriteTypeSelector.value = selectedSprite.type || "block";
-      textureTypeSelector.value = selectedSprite.textureType || "pixels";
-      spriteCollisionCheckbox.checked = selectedSprite.collision || false;
-      changeSceneSelector.value = selectedSprite.changeScene || "";
-      whenNearShowTextArea.value = selectedSprite.whenNearShowText || "";
-      hudTextArea.value = selectedSprite.hudText || "";
-
-      if (selectedSprite.textureType === "texture") {
-        textureFileName = selectedSprite.texturePath;
-        textureUpload.type = "text";
-        textureUpload.value = selectedSprite.texturePath;
-        textureUpload.style.display = "block";
-        grid.style.display = "none";
-      } else {
-        grid.style.display = "grid";
-        textureUpload.style.display = "none";
-        textureUpload.value = "";
-        populateGrid(selectedSprite.pixels);
-      }
-    }
-  });
-
   textureTypeSelector.addEventListener("change", function () {
     if (this.value === "texture") {
       // Show a text input instead of file upload
@@ -393,6 +338,37 @@ document.addEventListener("gameDataLoaded", function () {
       const file = e.target.files[0];
       if (file) {
         textureFileName = file.name;
+      }
+    }
+  });
+
+  spriteSelector.addEventListener("change", function () {
+    const selectedSpriteId = this.value;
+    const selectedSprite = globalGameData.sprites.find(
+      (sprite) => sprite.id === selectedSpriteId
+    );
+
+    if (selectedSprite) {
+      spriteIdInput.value = selectedSpriteId;
+      spriteTypeSelector.value = selectedSprite.type || "block";
+      textureTypeSelector.value = selectedSprite.textureType || "pixels";
+      spriteCollisionCheckbox.checked = selectedSprite.collision || false;
+      changeSceneSelector.value = selectedSprite.changeScene || "";
+      whenNearShowTextArea.value = selectedSprite.whenNearShowText || "";
+      hudTextArea.value = selectedSprite.hudText || "";
+      spriteSizeSelector.value = selectedSprite.size || "normal";
+
+      if (selectedSprite.textureType === "texture") {
+        textureFileName = selectedSprite.texturePath;
+        textureUpload.type = "text";
+        textureUpload.value = selectedSprite.texturePath;
+        textureUpload.style.display = "block";
+        grid.style.display = "none";
+      } else {
+        grid.style.display = "grid";
+        textureUpload.style.display = "none";
+        textureUpload.value = "";
+        populateGrid(selectedSprite.pixels);
       }
     }
   });

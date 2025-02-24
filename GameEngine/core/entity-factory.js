@@ -6,20 +6,26 @@ export async function createCube(x, y, z, spriteId, type) {
   const sprite = findSpriteById(spriteId);
   if (!sprite) return; // Skip if sprite is not found
 
+  let size = "10";
+  let yOffset = 0;
+  if (sprite.size === "big") {
+    size = "20";
+    yOffset = 5; // Half the size difference to keep object grounded
+  }
   let cubeEl;
   if (type === "block") {
     cubeEl = document.createElement("a-box");
-    cubeEl.setAttribute("depth", "10");
-    cubeEl.setAttribute("height", "10");
-    cubeEl.setAttribute("width", "10");
+    cubeEl.setAttribute("depth", size);
+    cubeEl.setAttribute("height", size);
+    cubeEl.setAttribute("width", size);
   } else if (type === "billboard") {
     cubeEl = document.createElement("a-plane");
-    cubeEl.setAttribute("height", "10");
-    cubeEl.setAttribute("width", "10");
+    cubeEl.setAttribute("height", size);
+    cubeEl.setAttribute("width", size);
     cubeEl.setAttribute("face-camera-2d", "");
   }
 
-  cubeEl.setAttribute("position", `${x * 10} ${y * 10} ${z * 10}`);
+  cubeEl.setAttribute("position", `${x * 10} ${y * 10 + yOffset} ${z * 10}`);
 
   try {
     const texture = await generateTexture(sprite);
