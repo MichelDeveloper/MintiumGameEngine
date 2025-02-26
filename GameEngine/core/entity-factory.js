@@ -10,7 +10,10 @@ export async function createCube(x, y, z, spriteId, type) {
   let yOffset = 0;
   if (sprite.size === "big") {
     size = "20";
-    yOffset = 5; // Half the size difference to keep object grounded
+    yOffset = 5;
+  } else if (sprite.size === "small") {
+    size = "5";
+    yOffset = -2.5;
   }
   let cubeEl;
   if (type === "block") {
