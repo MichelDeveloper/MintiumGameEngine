@@ -47,6 +47,19 @@ export async function createCube(x, y, z, spriteId, type) {
     });
   }
 
+  if (sprite.lifePoints > 0) {
+    console.log(
+      "Adding life system to sprite:",
+      sprite.id,
+      "with life:",
+      sprite.lifePoints
+    );
+    cubeEl.setAttribute("life-system", {
+      maxLife: sprite.lifePoints,
+      currentLife: sprite.lifePoints,
+    });
+  }
+
   cubeEl.setAttribute("pixelated", "");
   if (sprite.whenNearShowText && sprite.collision) {
     cubeEl.setAttribute("show-text-near", {

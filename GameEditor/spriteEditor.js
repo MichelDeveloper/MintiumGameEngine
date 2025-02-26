@@ -69,6 +69,8 @@ document.addEventListener("gameDataLoaded", function () {
     whenNearShowTextArea.value = firstSprite.whenNearShowText || "";
     hudTextArea.value = firstSprite.hudText || "";
     spriteSizeSelector.value = firstSprite.size || "normal";
+    document.getElementById("spriteLifePoints").value =
+      firstSprite.lifePoints || 0;
 
     if (firstSprite.textureType === "texture") {
       textureFileName = firstSprite.texturePath;
@@ -287,6 +289,8 @@ document.addEventListener("gameDataLoaded", function () {
       hudText: hudTextArea.value.trim() || "",
       pixels: textureTypeSelector.value === "pixels" ? pixelRows : null,
       size: document.getElementById("spriteSizeSelector").value || "normal",
+      lifePoints:
+        parseInt(document.getElementById("spriteLifePoints").value) || 0,
     };
 
     // Update or add the sprite
@@ -357,7 +361,9 @@ document.addEventListener("gameDataLoaded", function () {
       whenNearShowTextArea.value = selectedSprite.whenNearShowText || "";
       hudTextArea.value = selectedSprite.hudText || "";
       spriteSizeSelector.value = selectedSprite.size || "normal";
-
+      document.getElementById("spriteLifePoints").value =
+        selectedSprite.lifePoints || 0;
+      textureUpload.placeholder = "Enter texture filename (e.g. grass.png)";
       if (selectedSprite.textureType === "texture") {
         textureFileName = selectedSprite.texturePath;
         textureUpload.type = "text";
