@@ -5,11 +5,10 @@ AFRAME.registerComponent("life-system", {
   },
 
   init: function () {
-    console.log("Life system init called with data:", this.data);
     if (this.data.maxLife <= 0) return;
 
-    console.log("Initializing life system with:", this.data.maxLife);
     this.currentLife = this.data.maxLife;
+    this.lastDamageTime = 0;
     this.createLifeBar();
 
     // Wait for scene to be ready
@@ -22,28 +21,6 @@ AFRAME.registerComponent("life-system", {
 
   initCamera: function () {
     this.camera = document.querySelector("#camera");
-    this.lastDamageTime = 0;
-  },
-
-  tick: function () {
-    if (!this.camera || !this.lifeBarContainer) return;
-
-    // Make life bar face camera
-    const worldPos = new THREE.Vector3();
-    this.camera.object3D.getWorldPosition(worldPos);
-    this.lifeBarContainer.object3D.lookAt(worldPos);
-
-    // Calculate distance and check for damage
-    const distance = Math.round(
-      this.el.object3D.position.distanceTo(worldPos) / 10
-    );
-
-    const now = Date.now();
-    if (distance < 2 && now - this.lastDamageTime > 1000) {
-      // 1 second cooldown
-      this.takeDamage(10);
-      this.lastDamageTime = now;
-    }
   },
 
   takeDamage: function (amount) {
@@ -57,28 +34,54 @@ AFRAME.registerComponent("life-system", {
   },
 
   createLifeBar: function () {
-    // Create container for life bar
     this.lifeBarContainer = document.createElement("a-entity");
-    this.lifeBarContainer.setAttribute("position", "0 3 0"); // Higher position
+    this.lifeBarContainer.setAttribute("position", "0 3 0");
 
     // Background bar
     this.backgroundBar = document.createElement("a-plane");
     this.backgroundBar.setAttribute("color", "#333");
-    this.backgroundBar.setAttribute("height", "0.3"); // Bigger
-    this.backgroundBar.setAttribute("width", "2"); // Wider
+    this.backgroundBar.setAttribute("height", "0.3");
+    this.backgroundBar.setAttribute("width", "2");
+    // Add depth and transparency settings
+    this.backgroundBar.setAttribute("material", {
+      shader: "standard",
+      transparent: true,
+      opacity: 0.8,
+      depthTest: true,
+    });
 
     // Health bar
     this.healthBar = document.createElement("a-plane");
     this.healthBar.setAttribute("color", "#ff0000");
-    this.healthBar.setAttribute("height", "0.25"); // Bigger
-    this.healthBar.setAttribute("width", "1.9"); // Wider
-    this.healthBar.setAttribute("position", "0 0 0.001");
+    this.healthBar.setAttribute("height", "0.25");
+    this.healthBar.setAttribute("width", "1.9");
+    this.healthBar.setAttribute("position", "0 0 0.01"); // Slight offset
+    // Add depth and transparency settings
+    this.healthBar.setAttribute("material", {
+      shader: "standard",
+      transparent: true,
+      opacity: 0.9,
+      depthTest: true,
+    });
 
     this.lifeBarContainer.appendChild(this.backgroundBar);
     this.lifeBarContainer.appendChild(this.healthBar);
     this.el.appendChild(this.lifeBarContainer);
+  },
+
+  tick: function () {
+    if (!this.camera || !this.lifeBarContainer) return;
 
     // Make life bar face camera
-    this.lifeBarContainer.setAttribute("look-at", "#camera");
+    const worldPos = new THREE.Vector3();
+    this.camera.object3D.getWorldPosition(worldPos);
+    this.lifeBarContainer.object3D.lookAt(worldPos);
+
+    // Adjust opacity based on distance
+    const distance = this.el.object3D.position.distanceTo(worldPos) / 10;
+    const opacity = Math.min(1, Math.max(0.4, 1 - distance / 5));
+
+    this.backgroundBar.setAttribute("material", "opacity", opacity * 0.8);
+    this.healthBar.setAttribute("material", "opacity", opacity * 0.9);
   },
 });

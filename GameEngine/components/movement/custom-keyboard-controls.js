@@ -58,20 +58,24 @@ AFRAME.registerComponent("custom-keyboard-controls", {
 
     // Handle movement if direction is set
     if (directionVector.length() > 0) {
-      // Copy grid movement logic from grid-move component
       const gridBlockSize = 10;
       directionVector.multiplyScalar(gridBlockSize);
 
       const currentPosition = new THREE.Vector3().copy(
         player.object3D.position
       );
-      const potentialPosition = currentPosition.add(directionVector);
+      const potentialPosition = currentPosition.clone().add(directionVector);
 
-      // Use the same collision detection logic as in grid-move
-      // Reference the grid-move component's collision detection:
-      startLine: 68;
-      endLine: 117;
-
+      // Get grid-move component and use its collision check
+      const gridMove = player.components["grid-move"];
+      if (gridMove) {
+        // Check wall collisions first
+        const shouldMove = !gridMove.checkWallCollision(potentialPosition);
+        if (shouldMove) {
+          gridMove.checkDamageCollision(currentPosition, potentialPosition);
+          player.object3D.position.copy(potentialPosition);
+        }
+      }
       this.addCooldown();
     }
   },
