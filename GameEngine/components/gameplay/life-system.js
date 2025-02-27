@@ -38,48 +38,88 @@ AFRAME.registerComponent("life-system", {
     const newCenter = baseLeft + newWidth / 2;
     this.healthBar.setAttribute("position", `${newCenter} 0 0.01`);
 
-    // Counter-attack the player
-    this.counterAttack();
+    // Show damage number effect immediately
+    this.showDamageNumberEffect(amount);
 
-    if (this.currentLife <= 0) {
-      // Existing logic to remove the sprite from the scene
-      const baseLayer = getCurrentScene().data.find(
-        (sceneLayer) => sceneLayer.layer === 0
-      );
+    // Lock player movement during combat sequence
+    this.lockPlayerMovement();
 
-      if (baseLayer) {
-        const gridBlockSize = 10;
-        const gridX = Math.round(
-          this.el.object3D.position.x / gridBlockSize +
-            baseLayer.layerData[0].length / 2
-        );
-        const gridZ = Math.round(
-          this.el.object3D.position.z / gridBlockSize +
-            baseLayer.layerData.length / 2
-        );
+    // Delay counter-attack to allow player to see damage numbers
+    setTimeout(() => {
+      // Counter-attack the player with a delay
+      this.counterAttack();
 
-        if (
-          gridZ >= 0 &&
-          gridZ < baseLayer.layerData.length &&
-          gridX >= 0 &&
-          gridX < baseLayer.layerData[0].length
-        ) {
-          baseLayer.layerData[gridZ][gridX] = "0";
-        }
+      // Check if enemy is still alive
+      if (this.currentLife <= 0) {
+        this.removeFromScene();
       }
+    }, 800); // 800ms delay before counter-attack
+  },
 
-      this.el.parentNode.removeChild(this.el);
+  lockPlayerMovement: function () {
+    // Find all player movement components
+    const player = document.querySelector("#player");
+    if (!player) return;
+
+    // Store original values to restore later
+    this.originalMovementState = {
+      gridMove: player.components["grid-move"]?.canExecuteEvent,
+      keyboardControls:
+        player.components["custom-keyboard-controls"]?.canExecuteEvent,
+      rotationControl: player.components["rotation-control"]?.canExecuteEvent,
+    };
+
+    // Disable all movement
+    if (player.components["grid-move"]) {
+      player.components["grid-move"].canExecuteEvent = false;
+    }
+    if (player.components["custom-keyboard-controls"]) {
+      player.components["custom-keyboard-controls"].canExecuteEvent = false;
+    }
+    if (player.components["rotation-control"]) {
+      player.components["rotation-control"].canExecuteEvent = false;
+    }
+  },
+
+  unlockPlayerMovement: function () {
+    const player = document.querySelector("#player");
+    if (!player || !this.originalMovementState) return;
+
+    // Restore original movement state
+    if (player.components["grid-move"]) {
+      player.components["grid-move"].canExecuteEvent =
+        this.originalMovementState.gridMove !== undefined
+          ? this.originalMovementState.gridMove
+          : true;
+    }
+    if (player.components["custom-keyboard-controls"]) {
+      player.components["custom-keyboard-controls"].canExecuteEvent =
+        this.originalMovementState.keyboardControls !== undefined
+          ? this.originalMovementState.keyboardControls
+          : true;
+    }
+    if (player.components["rotation-control"]) {
+      player.components["rotation-control"].canExecuteEvent =
+        this.originalMovementState.rotationControl !== undefined
+          ? this.originalMovementState.rotationControl
+          : true;
     }
   },
 
   counterAttack: function () {
     // Find the player
     const player = document.querySelector("#player");
-    if (!player) return;
+    if (!player) {
+      this.unlockPlayerMovement();
+      return;
+    }
 
     // Check if player has health component
     const playerHealth = player.components["player-health"];
-    if (!playerHealth) return;
+    if (!playerHealth) {
+      this.unlockPlayerMovement();
+      return;
+    }
 
     // Calculate distance to player
     const distance = Math.round(
@@ -95,12 +135,20 @@ AFRAME.registerComponent("life-system", {
       // Apply damage to player
       playerHealth.takeDamage(damage);
 
-      // Optional: Add visual feedback
-      this.showCounterAttackEffect(player);
+      // Show visual feedback with damage amount
+      this.showCounterAttackEffect(player, damage);
+
+      // Unlock player movement after a delay
+      setTimeout(() => {
+        this.unlockPlayerMovement();
+      }, 1000); // 1 second after counter-attack
+    } else {
+      // If not close enough, unlock immediately
+      this.unlockPlayerMovement();
     }
   },
 
-  showCounterAttackEffect: function (player) {
+  showCounterAttackEffect: function (player, damage) {
     // Get the camera for better positioning
     const camera = document.querySelector("#camera");
     if (!camera) return;
@@ -111,9 +159,9 @@ AFRAME.registerComponent("life-system", {
     // Position it in the center of the view
     attackEffect.setAttribute("position", "0 0 -2");
 
-    // Make text larger and more visible
+    // Make text larger and more visible with damage amount
     attackEffect.setAttribute("text", {
-      value: "Enemy Attack!",
+      value: `-${damage} HP!`,
       align: "center",
       color: "#FF0000",
       wrapCount: 20,
@@ -127,7 +175,7 @@ AFRAME.registerComponent("life-system", {
       property: "scale",
       from: "0.5 0.5 0.5",
       to: "1.5 1.5 1.5",
-      dur: 200,
+      dur: 300,
       easing: "easeOutBack",
     });
 
@@ -135,13 +183,30 @@ AFRAME.registerComponent("life-system", {
       property: "text.color",
       from: "#FFFFFF",
       to: "#FF0000",
-      dur: 200,
+      dur: 300,
       easing: "easeInOutSine",
       loop: 3,
     });
 
+    // Add screen flash effect
+    const flashEffect = document.createElement("a-plane");
+    flashEffect.setAttribute("color", "#FF0000");
+    flashEffect.setAttribute("opacity", "0.3");
+    flashEffect.setAttribute("position", "0 0 -1.5");
+    flashEffect.setAttribute("width", "4");
+    flashEffect.setAttribute("height", "2");
+    flashEffect.setAttribute("material", "transparent: true; shader: flat");
+    flashEffect.setAttribute("animation", {
+      property: "opacity",
+      from: "0.3",
+      to: "0",
+      dur: 500,
+      easing: "easeOutQuad",
+    });
+
     // Attach to camera for visibility
     camera.appendChild(attackEffect);
+    camera.appendChild(flashEffect);
 
     // Apply a shake effect to the camera
     camera.setAttribute("animation", {
@@ -170,13 +235,65 @@ AFRAME.registerComponent("life-system", {
 
     // Remove effects after animation completes
     setTimeout(() => {
-      if (attackEffect.parentNode) {
+      if (attackEffect && attackEffect.parentNode) {
         attackEffect.parentNode.removeChild(attackEffect);
       }
-      if (flashEffect.parentNode) {
+      if (flashEffect && flashEffect.parentNode) {
         flashEffect.parentNode.removeChild(flashEffect);
       }
     }, 1500);
+  },
+
+  showDamageNumberEffect: function (amount) {
+    // Create a damage number that floats up from the enemy
+    const damageText = document.createElement("a-entity");
+    damageText.setAttribute("position", "0 2 0");
+
+    // Set text properties
+    damageText.setAttribute("text", {
+      value: `-${amount}`,
+      align: "center",
+      color: "#FFFF00", // Yellow for player damage
+      width: 5,
+      wrapCount: 10,
+      baseline: "center",
+      font: "mozillavr",
+    });
+
+    // Make sure text faces the camera
+    damageText.setAttribute("face-camera-2d", "");
+
+    // Add floating animation
+    damageText.setAttribute("animation__position", {
+      property: "position.y",
+      from: 2,
+      to: 4,
+      dur: 1000,
+      easing: "easeOutQuad",
+    });
+
+    // Add fade-out animation
+    damageText.setAttribute("animation__opacity", {
+      property: "text.opacity",
+      from: 1.0,
+      to: 0,
+      dur: 1000,
+      easing: "easeInQuad",
+    });
+
+    // Add a small random offset so multiple hits don't overlap exactly
+    const randomX = (Math.random() - 0.5) * 1.5;
+    damageText.setAttribute("position", `${randomX} 2 0`);
+
+    // Add to the enemy entity
+    this.el.appendChild(damageText);
+
+    // Remove after animation completes
+    setTimeout(() => {
+      if (damageText.parentNode) {
+        damageText.parentNode.removeChild(damageText);
+      }
+    }, 1000);
   },
 
   createLifeBar: function () {
@@ -229,5 +346,40 @@ AFRAME.registerComponent("life-system", {
 
     this.backgroundBar.setAttribute("material", "opacity", opacity * 0.8);
     this.healthBar.setAttribute("material", "opacity", opacity * 0.9);
+  },
+
+  removeFromScene: function () {
+    // Logic to remove the sprite from the scene
+    const baseLayer = getCurrentScene().data.find(
+      (sceneLayer) => sceneLayer.layer === 0
+    );
+
+    if (baseLayer) {
+      const gridBlockSize = 10;
+      const gridX = Math.round(
+        this.el.object3D.position.x / gridBlockSize +
+          baseLayer.layerData[0].length / 2
+      );
+      const gridZ = Math.round(
+        this.el.object3D.position.z / gridBlockSize +
+          baseLayer.layerData.length / 2
+      );
+
+      if (
+        gridZ >= 0 &&
+        gridZ < baseLayer.layerData.length &&
+        gridX >= 0 &&
+        gridX < baseLayer.layerData[0].length
+      ) {
+        baseLayer.layerData[gridZ][gridX] = "0";
+      }
+    }
+
+    // Unlock player movement before removing
+    this.unlockPlayerMovement();
+
+    if (this.el.parentNode) {
+      this.el.parentNode.removeChild(this.el);
+    }
   },
 });
