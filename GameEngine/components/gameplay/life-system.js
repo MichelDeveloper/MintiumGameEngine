@@ -28,16 +28,23 @@ AFRAME.registerComponent("life-system", {
   takeDamage: function (amount) {
     this.currentLife = Math.max(0, this.currentLife - amount);
     const healthPercent = this.currentLife / this.data.maxLife;
-    this.healthBar.setAttribute("width", 1.9 * healthPercent);
+    const newWidth = 1.9 * healthPercent;
+
+    // Update the width of the health bar
+    this.healthBar.setAttribute("width", newWidth);
+
+    // Calculate the new center position so the left edge stays fixed
+    const baseLeft = -1.9 / 2; // For full health, left edge is at -0.95
+    const newCenter = baseLeft + newWidth / 2;
+    this.healthBar.setAttribute("position", `${newCenter} 0 0.01`);
 
     if (this.currentLife <= 0) {
-      // Get the sprite data to update collision state
+      // Existing logic to remove the sprite from the scene
       const baseLayer = getCurrentScene().data.find(
         (sceneLayer) => sceneLayer.layer === 0
       );
 
       if (baseLayer) {
-        // Convert world position to grid position
         const gridBlockSize = 10;
         const gridX = Math.round(
           this.el.object3D.position.x / gridBlockSize +
@@ -48,7 +55,6 @@ AFRAME.registerComponent("life-system", {
             baseLayer.layerData.length / 2
         );
 
-        // Update the grid data to remove the sprite
         if (
           gridZ >= 0 &&
           gridZ < baseLayer.layerData.length &&
@@ -59,7 +65,6 @@ AFRAME.registerComponent("life-system", {
         }
       }
 
-      // Remove the entity from the scene
       this.el.parentNode.removeChild(this.el);
     }
   },
