@@ -95,6 +95,10 @@ AFRAME.registerComponent("grid-move", {
   },
 
   onAxisMove: function (evt) {
+    // First check the global lock
+    if (window.playerMovementLocked) return;
+
+    // Then check the component lock
     if (!this.canExecuteEvent) return;
 
     const playerAux = document.getElementById("player");

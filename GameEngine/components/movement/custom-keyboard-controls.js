@@ -23,6 +23,10 @@ AFRAME.registerComponent("custom-keyboard-controls", {
   },
 
   tick: function () {
+    // First check the global lock
+    if (window.playerMovementLocked) return;
+
+    // Then check the component lock
     if (!this.canExecuteEvent) return;
 
     const player = document.getElementById("player");

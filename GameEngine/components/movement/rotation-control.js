@@ -9,6 +9,10 @@ AFRAME.registerComponent("rotation-control", {
   },
 
   onAxisMove: function (evt) {
+    // First check the global lock
+    if (window.playerMovementLocked) return;
+
+    // Then check the component lock
     if (!this.canExecuteEvent) return;
 
     var playerAux = document.getElementById("player");

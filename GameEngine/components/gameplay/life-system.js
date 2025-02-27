@@ -53,13 +53,16 @@ AFRAME.registerComponent("life-system", {
       if (this.currentLife <= 0) {
         this.removeFromScene();
       }
-    }, 800); // 800ms delay before counter-attack
+    }, 1000); // 1000ms delay before counter-attack
   },
 
   lockPlayerMovement: function () {
-    // Find all player movement components
+    // Find the player
     const player = document.querySelector("#player");
     if (!player) return;
+
+    // Create a global lock flag
+    window.playerMovementLocked = true;
 
     // Store original values to restore later
     this.originalMovementState = {
@@ -69,19 +72,27 @@ AFRAME.registerComponent("life-system", {
       rotationControl: player.components["rotation-control"]?.canExecuteEvent,
     };
 
-    // Disable all movement
+    // Disable all movement components
     if (player.components["grid-move"]) {
       player.components["grid-move"].canExecuteEvent = false;
     }
+
     if (player.components["custom-keyboard-controls"]) {
       player.components["custom-keyboard-controls"].canExecuteEvent = false;
     }
+
     if (player.components["rotation-control"]) {
       player.components["rotation-control"].canExecuteEvent = false;
     }
+
+    // Add a visual indicator that movement is locked
+    this.addMovementLockedIndicator(player);
   },
 
   unlockPlayerMovement: function () {
+    // Clear global lock flag
+    window.playerMovementLocked = false;
+
     const player = document.querySelector("#player");
     if (!player || !this.originalMovementState) return;
 
@@ -92,17 +103,48 @@ AFRAME.registerComponent("life-system", {
           ? this.originalMovementState.gridMove
           : true;
     }
+
     if (player.components["custom-keyboard-controls"]) {
       player.components["custom-keyboard-controls"].canExecuteEvent =
         this.originalMovementState.keyboardControls !== undefined
           ? this.originalMovementState.keyboardControls
           : true;
     }
+
     if (player.components["rotation-control"]) {
       player.components["rotation-control"].canExecuteEvent =
         this.originalMovementState.rotationControl !== undefined
           ? this.originalMovementState.rotationControl
           : true;
+    }
+
+    // Remove the movement locked indicator
+    this.removeMovementLockedIndicator(player);
+  },
+
+  addMovementLockedIndicator: function (player) {
+    const camera = document.querySelector("#camera");
+    if (!camera) return;
+
+    // Create a small indicator in the corner of the screen
+    const lockIndicator = document.createElement("a-entity");
+    lockIndicator.setAttribute("id", "movement-lock-indicator");
+    lockIndicator.setAttribute("position", "0 -0.3 -1");
+    lockIndicator.setAttribute("text", {
+      value: "", //combat in progress message
+      color: "#FF4444",
+      align: "center",
+      width: 1,
+      wrapCount: 20,
+    });
+
+    camera.appendChild(lockIndicator);
+  },
+
+  removeMovementLockedIndicator: function (player) {
+    const indicator = document.querySelector("#movement-lock-indicator");
+    if (indicator && indicator.parentNode) {
+      indicator.parentNode.removeChild(indicator);
     }
   },
 
@@ -188,25 +230,8 @@ AFRAME.registerComponent("life-system", {
       loop: 3,
     });
 
-    // Add screen flash effect
-    const flashEffect = document.createElement("a-plane");
-    flashEffect.setAttribute("color", "#FF0000");
-    flashEffect.setAttribute("opacity", "0.3");
-    flashEffect.setAttribute("position", "0 0 -1.5");
-    flashEffect.setAttribute("width", "4");
-    flashEffect.setAttribute("height", "2");
-    flashEffect.setAttribute("material", "transparent: true; shader: flat");
-    flashEffect.setAttribute("animation", {
-      property: "opacity",
-      from: "0.3",
-      to: "0",
-      dur: 500,
-      easing: "easeOutQuad",
-    });
-
     // Attach to camera for visibility
     camera.appendChild(attackEffect);
-    camera.appendChild(flashEffect);
 
     // Apply a shake effect to the camera
     camera.setAttribute("animation", {
@@ -247,13 +272,13 @@ AFRAME.registerComponent("life-system", {
   showDamageNumberEffect: function (amount) {
     // Create a damage number that floats up from the enemy
     const damageText = document.createElement("a-entity");
-    damageText.setAttribute("position", "0 2 0");
+    damageText.setAttribute("position", "0 4 0");
 
     // Set text properties
     damageText.setAttribute("text", {
       value: `-${amount}`,
       align: "center",
-      color: "#FFFF00", // Yellow for player damage
+      color: "#ff0000", // Red for player damage
       width: 5,
       wrapCount: 10,
       baseline: "center",
@@ -266,8 +291,8 @@ AFRAME.registerComponent("life-system", {
     // Add floating animation
     damageText.setAttribute("animation__position", {
       property: "position.y",
-      from: 2,
-      to: 4,
+      from: 4,
+      to: 5,
       dur: 1000,
       easing: "easeOutQuad",
     });
