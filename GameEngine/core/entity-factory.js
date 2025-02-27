@@ -82,6 +82,8 @@ export function createPlayer() {
   const playerEl = document.createElement("a-entity");
   playerEl.setAttribute("id", "player");
   playerEl.setAttribute("position", "0 1.5 0");
+  // Add player health system with 100 health
+  playerEl.setAttribute("player-health", "maxHealth: 100; currentHealth: 100");
 
   const cameraEl = document.createElement("a-camera");
   cameraEl.setAttribute("id", "camera");

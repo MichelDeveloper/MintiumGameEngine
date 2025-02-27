@@ -38,6 +38,9 @@ AFRAME.registerComponent("life-system", {
     const newCenter = baseLeft + newWidth / 2;
     this.healthBar.setAttribute("position", `${newCenter} 0 0.01`);
 
+    // Counter-attack the player
+    this.counterAttack();
+
     if (this.currentLife <= 0) {
       // Existing logic to remove the sprite from the scene
       const baseLayer = getCurrentScene().data.find(
@@ -67,6 +70,64 @@ AFRAME.registerComponent("life-system", {
 
       this.el.parentNode.removeChild(this.el);
     }
+  },
+
+  counterAttack: function () {
+    // Find the player
+    const player = document.querySelector("#player");
+    if (!player) return;
+
+    // Check if player has health component
+    const playerHealth = player.components["player-health"];
+    if (!playerHealth) return;
+
+    // Calculate distance to player
+    const distance = Math.round(
+      this.el.object3D.position.distanceTo(player.object3D.position) / 10
+    );
+
+    // Only counter-attack if close enough
+    if (distance < 3) {
+      // Counter-attack damage can be based on enemy type or stats
+      // For now we'll use a random damage between 5-15
+      const damage = 5 + Math.floor(Math.random() * 11);
+
+      // Apply damage to player
+      playerHealth.takeDamage(damage);
+
+      // Optional: Add visual feedback
+      this.showCounterAttackEffect(player);
+    }
+  },
+
+  showCounterAttackEffect: function (player) {
+    // Create a temporary visual effect
+    const attackEffect = document.createElement("a-entity");
+    attackEffect.setAttribute("position", "0 1 0");
+    attackEffect.setAttribute("text", {
+      value: "Counter Attack!",
+      align: "center",
+      color: "#FF0000",
+      wrapCount: 20,
+    });
+
+    // Make the text face the camera
+    const camera = document.querySelector("#camera");
+    if (camera) {
+      const cameraPos = new THREE.Vector3();
+      camera.object3D.getWorldPosition(cameraPos);
+      attackEffect.object3D.lookAt(cameraPos);
+    }
+
+    // Animate and remove the effect
+    player.appendChild(attackEffect);
+
+    // Remove after animation
+    setTimeout(() => {
+      if (attackEffect.parentNode) {
+        attackEffect.parentNode.removeChild(attackEffect);
+      }
+    }, 1000);
   },
 
   createLifeBar: function () {
