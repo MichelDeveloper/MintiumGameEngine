@@ -101,33 +101,82 @@ AFRAME.registerComponent("life-system", {
   },
 
   showCounterAttackEffect: function (player) {
-    // Create a temporary visual effect
+    // Get the camera for better positioning
+    const camera = document.querySelector("#camera");
+    if (!camera) return;
+
+    // Create a visible attack effect that appears in front of the player
     const attackEffect = document.createElement("a-entity");
-    attackEffect.setAttribute("position", "0 1 0");
+
+    // Position it in the center of the view
+    attackEffect.setAttribute("position", "0 0 -2");
+
+    // Make text larger and more visible
     attackEffect.setAttribute("text", {
-      value: "Counter Attack!",
+      value: "Enemy Attack!",
       align: "center",
       color: "#FF0000",
       wrapCount: 20,
+      width: 3,
+      baseline: "center",
+      font: "mozillavr",
     });
 
-    // Make the text face the camera
-    const camera = document.querySelector("#camera");
-    if (camera) {
-      const cameraPos = new THREE.Vector3();
-      camera.object3D.getWorldPosition(cameraPos);
-      attackEffect.object3D.lookAt(cameraPos);
+    // Add animation for emphasis
+    attackEffect.setAttribute("animation__scale", {
+      property: "scale",
+      from: "0.5 0.5 0.5",
+      to: "1.5 1.5 1.5",
+      dur: 200,
+      easing: "easeOutBack",
+    });
+
+    attackEffect.setAttribute("animation__color", {
+      property: "text.color",
+      from: "#FFFFFF",
+      to: "#FF0000",
+      dur: 200,
+      easing: "easeInOutSine",
+      loop: 3,
+    });
+
+    // Attach to camera for visibility
+    camera.appendChild(attackEffect);
+
+    // Apply a shake effect to the camera
+    camera.setAttribute("animation", {
+      property: "position",
+      from: "0 1.6 0",
+      to: "0 1.6 0",
+      dur: 200,
+      easing: "easeInOutSine",
+      dir: "alternate",
+      loop: 3,
+      startEvents: "shake",
+    });
+    camera.emit("shake");
+
+    // Player health bar flash
+    const playerHealth = player.components["player-health"];
+    if (playerHealth && playerHealth.healthBar) {
+      playerHealth.healthBar.setAttribute("animation", {
+        property: "material.color",
+        from: "#FF0000",
+        to: playerHealth.healthBar.getAttribute("color"),
+        dur: 500,
+        easing: "easeOutQuad",
+      });
     }
 
-    // Animate and remove the effect
-    player.appendChild(attackEffect);
-
-    // Remove after animation
+    // Remove effects after animation completes
     setTimeout(() => {
       if (attackEffect.parentNode) {
         attackEffect.parentNode.removeChild(attackEffect);
       }
-    }, 1000);
+      if (flashEffect.parentNode) {
+        flashEffect.parentNode.removeChild(flashEffect);
+      }
+    }, 1500);
   },
 
   createLifeBar: function () {
