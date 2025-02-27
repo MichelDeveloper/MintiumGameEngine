@@ -1,3 +1,5 @@
+import { getCurrentScene } from "../../core/scene-manager.js";
+
 AFRAME.registerComponent("life-system", {
   schema: {
     maxLife: { type: "number", default: 0 },
@@ -29,6 +31,35 @@ AFRAME.registerComponent("life-system", {
     this.healthBar.setAttribute("width", 1.9 * healthPercent);
 
     if (this.currentLife <= 0) {
+      // Get the sprite data to update collision state
+      const baseLayer = getCurrentScene().data.find(
+        (sceneLayer) => sceneLayer.layer === 0
+      );
+
+      if (baseLayer) {
+        // Convert world position to grid position
+        const gridBlockSize = 10;
+        const gridX = Math.round(
+          this.el.object3D.position.x / gridBlockSize +
+            baseLayer.layerData[0].length / 2
+        );
+        const gridZ = Math.round(
+          this.el.object3D.position.z / gridBlockSize +
+            baseLayer.layerData.length / 2
+        );
+
+        // Update the grid data to remove the sprite
+        if (
+          gridZ >= 0 &&
+          gridZ < baseLayer.layerData.length &&
+          gridX >= 0 &&
+          gridX < baseLayer.layerData[0].length
+        ) {
+          baseLayer.layerData[gridZ][gridX] = "0";
+        }
+      }
+
+      // Remove the entity from the scene
       this.el.parentNode.removeChild(this.el);
     }
   },

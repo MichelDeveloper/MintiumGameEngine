@@ -85,6 +85,12 @@ AFRAME.registerComponent("grid-move", {
       (sprite) => sprite.id === tileType
     );
 
+    // Check if this is a scene change tile
+    if (tileData && tileData.changeScene) {
+      loadScene(tileData.changeScene);
+      return true;
+    }
+
     return tileData && tileData.collision;
   },
 

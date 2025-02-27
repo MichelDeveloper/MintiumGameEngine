@@ -176,7 +176,7 @@
               "0",
               "Tree",
               "0",
-              "void",
+              "slime",
               "0",
               "0",
               "Tree",
@@ -1327,7 +1327,7 @@
       "id": "Tree",
       "type": "billboard",
       "textureType": "texture",
-      "texturePath": "tree_01.png",
+      "texturePath": "tree_pixel_01.png",
       "collision": false,
       "changeScene": "",
       "whenNearShowText": "",
@@ -2275,6 +2275,19 @@
       "hudText": "",
       "pixels": null,
       "size": "normal"
+    },
+    {
+      "id": "slime",
+      "type": "billboard",
+      "textureType": "texture",
+      "texturePath": "slime_01.png",
+      "collision": true,
+      "changeScene": "",
+      "whenNearShowText": "",
+      "hudText": "fight me!",
+      "pixels": null,
+      "size": "small",
+      "lifePoints": 50
     }
   ]
 }
