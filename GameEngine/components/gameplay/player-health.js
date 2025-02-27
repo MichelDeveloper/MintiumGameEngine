@@ -7,6 +7,10 @@ AFRAME.registerComponent("player-health", {
   init: function () {
     this.currentHealth = this.data.maxHealth;
     this.createHealthUI();
+    this.gameActive = true;
+
+    // Listen for player-death event to handle game over
+    this.el.addEventListener("player-death", this.handleGameOver.bind(this));
   },
 
   createHealthUI: function () {
@@ -55,6 +59,8 @@ AFRAME.registerComponent("player-health", {
   },
 
   takeDamage: function (amount) {
+    if (!this.gameActive) return;
+
     // Decrease health
     this.currentHealth = Math.max(0, this.currentHealth - amount);
 
@@ -85,7 +91,112 @@ AFRAME.registerComponent("player-health", {
     }
   },
 
+  handleGameOver: function () {
+    this.gameActive = false;
+
+    // Lock player movement immediately
+    window.playerMovementLocked = true;
+
+    // Hide the health UI immediately
+    const healthHUD = document.querySelector("#health-hud");
+    if (healthHUD) {
+      healthHUD.setAttribute("visible", false);
+    }
+
+    // Add a visual death indicator before the game over screen
+    this.showDeathIndicator();
+
+    // Delay the game over screen by 2 seconds
+    setTimeout(() => {
+      this.showGameOverScreen();
+    }, 2000); // 2 seconds delay
+  },
+
+  showDeathIndicator: function () {
+    const camera = document.querySelector("#camera");
+    if (!camera) return;
+
+    // Create a red flash effect
+    const flashEffect = document.createElement("a-plane");
+    flashEffect.setAttribute("id", "death-flash");
+    flashEffect.setAttribute("color", "#FF0000");
+    flashEffect.setAttribute("opacity", "0.6");
+    flashEffect.setAttribute("height", "2");
+    flashEffect.setAttribute("width", "2");
+    flashEffect.setAttribute("position", "0 0 -0.1");
+    flashEffect.setAttribute("material", "shader: flat; transparent: true");
+
+    // Add fade-out animation
+    flashEffect.setAttribute("animation", {
+      property: "opacity",
+      from: "0.6",
+      to: "0",
+      dur: 2000,
+      easing: "easeOutQuad",
+    });
+
+    camera.appendChild(flashEffect);
+
+    // Remove the flash effect after animation
+    setTimeout(() => {
+      if (flashEffect.parentNode) {
+        flashEffect.parentNode.removeChild(flashEffect);
+      }
+    }, 2000);
+  },
+
+  showGameOverScreen: function () {
+    const camera = document.querySelector("#camera");
+    if (!camera) return;
+
+    // Create container for game over UI
+    const gameOverContainer = document.createElement("a-entity");
+    gameOverContainer.setAttribute("id", "game-over-screen");
+    gameOverContainer.setAttribute("position", "0 0 -2");
+
+    // Game over text
+    const gameOverText = document.createElement("a-entity");
+    gameOverText.setAttribute("text", {
+      value: "GAME OVER",
+      color: "#FF0000",
+      align: "center",
+      width: 2,
+      wrapCount: 20,
+      font: "mozillavr",
+    });
+    gameOverText.setAttribute("position", "0 0 0");
+    gameOverText.setAttribute("scale", "1.5 1.5 1.5");
+
+    // Add animation for emphasis
+    gameOverText.setAttribute("animation__scale", {
+      property: "scale",
+      from: "0.5 0.5 0.5",
+      to: "1.5 1.5 1.5",
+      dur: 1000,
+      easing: "easeOutElastic",
+    });
+
+    // Add pulsing animation
+    gameOverText.setAttribute("animation__color", {
+      property: "text.color",
+      from: "#FF0000",
+      to: "#880000",
+      dur: 1500,
+      dir: "alternate",
+      loop: true,
+      easing: "easeInOutSine",
+    });
+
+    // Add elements to container
+    gameOverContainer.appendChild(gameOverText);
+
+    // Add container to camera
+    camera.appendChild(gameOverContainer);
+  },
+
   heal: function (amount) {
+    if (!this.gameActive) return;
+
     this.currentHealth = Math.min(
       this.data.maxHealth,
       this.currentHealth + amount

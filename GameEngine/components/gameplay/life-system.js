@@ -44,16 +44,19 @@ AFRAME.registerComponent("life-system", {
     // Lock player movement during combat sequence
     this.lockPlayerMovement();
 
-    // Delay counter-attack to allow player to see damage numbers
-    setTimeout(() => {
-      // Counter-attack the player with a delay
-      this.counterAttack();
-
-      // Check if enemy is still alive
-      if (this.currentLife <= 0) {
+    // Check if enemy is still alive immediately
+    if (this.currentLife <= 0) {
+      // If enemy is dead, show death animation with delay then remove
+      setTimeout(() => {
         this.removeFromScene();
-      }
-    }, 1000); // 1000ms delay before counter-attack
+        this.unlockPlayerMovement();
+      }, 1000);
+    } else {
+      // Only counter-attack if the enemy is still alive
+      setTimeout(() => {
+        this.counterAttack();
+      }, 1000); // 1000ms delay before counter-attack
+    }
   },
 
   lockPlayerMovement: function () {
@@ -246,7 +249,7 @@ AFRAME.registerComponent("life-system", {
     });
     camera.emit("shake");
 
-    // Player health bar flash
+    // Player health bar
     const playerHealth = player.components["player-health"];
     if (playerHealth && playerHealth.healthBar) {
       playerHealth.healthBar.setAttribute("animation", {
@@ -262,9 +265,6 @@ AFRAME.registerComponent("life-system", {
     setTimeout(() => {
       if (attackEffect && attackEffect.parentNode) {
         attackEffect.parentNode.removeChild(attackEffect);
-      }
-      if (flashEffect && flashEffect.parentNode) {
-        flashEffect.parentNode.removeChild(flashEffect);
       }
     }, 1500);
   },
