@@ -42,6 +42,9 @@ AFRAME.registerComponent("life-system", {
     const newCenter = baseLeft + newWidth / 2;
     this.healthBar.setAttribute("position", `${newCenter} 0 0.01`);
 
+    // Apply damage flash effect
+    this.applyDamageFlash();
+
     // Show damage number effect immediately
     this.showDamageNumberEffect(amount);
 
@@ -425,5 +428,45 @@ AFRAME.registerComponent("life-system", {
     if (this.el.parentNode) {
       this.el.parentNode.removeChild(this.el);
     }
+  },
+
+  // Add this new method to create damage flash effect
+  applyDamageFlash: function () {
+    // Get current material
+    const currentMaterial = this.el.getAttribute("material");
+    if (!currentMaterial) return;
+
+    // Store original emissive color if not already stored
+    if (!this.originalEmissive) {
+      this.originalEmissive = currentMaterial.emissive || "#000000";
+    }
+
+    // Apply red emissive glow
+    this.el.setAttribute("material", "emissive", "#ff0000");
+    this.el.setAttribute("material", "emissiveIntensity", 0.25);
+
+    // Flash 3 times
+    let flashCount = 0;
+    const flashInterval = setInterval(() => {
+      // Toggle emissive between red and off
+      if (flashCount % 2 === 0) {
+        // Turn off red
+        this.el.setAttribute("material", "emissive", this.originalEmissive);
+        this.el.setAttribute("material", "emissiveIntensity", 0);
+      } else {
+        // Turn on red
+        this.el.setAttribute("material", "emissive", "#ff0000");
+        this.el.setAttribute("material", "emissiveIntensity", 0.25);
+      }
+
+      flashCount++;
+      if (flashCount >= 6) {
+        // 3 complete flashes (on-off cycles)
+        clearInterval(flashInterval);
+        // Ensure we end with the original state
+        this.el.setAttribute("material", "emissive", this.originalEmissive);
+        this.el.setAttribute("material", "emissiveIntensity", 0);
+      }
+    }, 100); // 100ms per state change
   },
 });

@@ -2281,6 +2281,7 @@
       "type": "billboard",
       "textureType": "texture",
       "texturePath": "slime_01.png",
+      "attackImage": "slime_01_attack.png",
       "collision": true,
       "changeScene": "",
       "whenNearShowText": "",
