@@ -30,6 +30,9 @@ export async function createCube(x, y, z, spriteId, type) {
 
   cubeEl.setAttribute("position", `${x * 10} ${y * 10 + yOffset} ${z * 10}`);
 
+  // Store the sprite ID on the entity for reference
+  cubeEl.setAttribute("data-entity-id", spriteId);
+
   try {
     const texture = await generateTexture(sprite);
     // Set material properties separately

@@ -1,4 +1,8 @@
 import { getCurrentScene } from "../../core/scene-manager.js";
+import {
+  findSpriteById,
+  updateEntityTexture,
+} from "../../core/sprite-manager.js";
 
 AFRAME.registerComponent("life-system", {
   schema: {
@@ -173,6 +177,21 @@ AFRAME.registerComponent("life-system", {
 
     // Only counter-attack if close enough
     if (distance < 3) {
+      // Get entity's sprite data
+      const entityId = this.el.getAttribute("data-entity-id");
+      const sprite = entityId ? findSpriteById(entityId) : null;
+
+      // Show attack animation if sprite has an attack image
+      if (sprite && sprite.attackImage) {
+        // Change to attack image
+        updateEntityTexture(this.el, sprite, true);
+
+        // Schedule change back to normal image
+        setTimeout(() => {
+          updateEntityTexture(this.el, sprite, false);
+        }, 800); // Show attack image for 800ms
+      }
+
       // Counter-attack damage can be based on enemy type or stats
       // For now we'll use a random damage between 5-15
       const damage = 5 + Math.floor(Math.random() * 11);

@@ -1,5 +1,9 @@
 import { getCurrentScene, loadScene } from "../../core/scene-manager.js";
 import { globalGameData } from "../../../GameEditor/gameEditor.js";
+import {
+  findSpriteById,
+  updateEntityTexture,
+} from "../../core/sprite-manager.js";
 
 AFRAME.registerComponent("grid-move", {
   schema: {
@@ -46,6 +50,7 @@ AFRAME.registerComponent("grid-move", {
             sprite.components["life-system"].lastDamageTime || 0;
 
           if (now - lastDamageTime > 1000) {
+            // Apply damage
             sprite.components["life-system"].takeDamage(10);
             sprite.components["life-system"].lastDamageTime = now;
           }

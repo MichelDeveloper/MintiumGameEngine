@@ -25,12 +25,17 @@ document.addEventListener("gameDataLoaded", function () {
   const whenNearShowTextArea = document.getElementById("whenNearShowText");
   const textureTypeSelector = document.getElementById("textureTypeSelector");
   const textureUpload = document.getElementById("textureUpload");
+  const attackTextureUpload = document.getElementById("attackTextureUpload");
+  const attackTextureContainer = document.getElementById(
+    "attackTextureContainer"
+  );
   const hudTextArea = document.getElementById("hudText");
   const spriteSizeSelector = document.getElementById("spriteSizeSelector");
 
   let mode = "draw";
   let selectedColor = colorPicker.value;
   let textureFileName = null;
+  let attackTextureFileName = null;
 
   // Populate the changeSceneSelector with available scenes
   function populateSceneSelector() {
@@ -74,13 +79,19 @@ document.addEventListener("gameDataLoaded", function () {
 
     if (firstSprite.textureType === "texture") {
       textureFileName = firstSprite.texturePath;
+      attackTextureFileName = firstSprite.attackImage || "";
       textureUpload.type = "text";
-      textureUpload.value = firstSprite.texturePath;
+      textureUpload.value = firstSprite.texturePath || "";
       textureUpload.style.display = "block";
+      attackTextureContainer.style.display = "block";
+      attackTextureUpload.value = firstSprite.attackImage || "";
       grid.style.display = "none";
     } else {
       grid.style.display = "grid";
       textureUpload.style.display = "none";
+      attackTextureContainer.style.display = "none";
+      textureUpload.value = "";
+      attackTextureUpload.value = "";
       populateGrid(firstSprite.pixels);
     }
   } else {
@@ -283,6 +294,8 @@ document.addEventListener("gameDataLoaded", function () {
       textureType: textureTypeSelector.value,
       texturePath:
         textureTypeSelector.value === "texture" ? textureFileName : null,
+      attackImage:
+        textureTypeSelector.value === "texture" ? attackTextureFileName : null,
       collision: spriteCollisionCheckbox.checked,
       changeScene: changeSceneSelector.value.trim() || "",
       whenNearShowText: whenNearShowTextArea.value.trim() || "",
@@ -324,26 +337,23 @@ document.addEventListener("gameDataLoaded", function () {
       textureUpload.type = "text";
       textureUpload.placeholder = "Enter texture filename (e.g. grass.png)";
       textureUpload.style.display = "block";
+      attackTextureContainer.style.display = "block"; // Show attack texture field
       grid.style.display = "none";
     } else {
       textureUpload.type = "file";
       textureUpload.style.display = "none";
+      attackTextureContainer.style.display = "none"; // Hide attack texture field
       grid.style.display = "grid";
       textureFileName = null;
+      attackTextureFileName = null;
       textureUpload.value = "";
+      attackTextureUpload.value = "";
     }
   });
 
-  // Change file input handler to text input handler
-  textureUpload.addEventListener("change", function (e) {
-    if (textureTypeSelector.value === "texture") {
-      textureFileName = this.value; // Just store the filename
-    } else {
-      const file = e.target.files[0];
-      if (file) {
-        textureFileName = file.name;
-      }
-    }
+  // Add event listener for attack texture upload
+  attackTextureUpload.addEventListener("change", function () {
+    attackTextureFileName = this.value;
   });
 
   spriteSelector.addEventListener("change", function () {
@@ -363,17 +373,25 @@ document.addEventListener("gameDataLoaded", function () {
       spriteSizeSelector.value = selectedSprite.size || "normal";
       document.getElementById("spriteLifePoints").value =
         selectedSprite.lifePoints || 0;
-      textureUpload.placeholder = "Enter texture filename (e.g. grass.png)";
+
       if (selectedSprite.textureType === "texture") {
         textureFileName = selectedSprite.texturePath;
+        attackTextureFileName = selectedSprite.attackImage || "";
+
         textureUpload.type = "text";
-        textureUpload.value = selectedSprite.texturePath;
+        textureUpload.value = selectedSprite.texturePath || "";
         textureUpload.style.display = "block";
+
+        attackTextureContainer.style.display = "block";
+        attackTextureUpload.value = selectedSprite.attackImage || "";
+
         grid.style.display = "none";
       } else {
         grid.style.display = "grid";
         textureUpload.style.display = "none";
+        attackTextureContainer.style.display = "none";
         textureUpload.value = "";
+        attackTextureUpload.value = "";
         populateGrid(selectedSprite.pixels);
       }
     }

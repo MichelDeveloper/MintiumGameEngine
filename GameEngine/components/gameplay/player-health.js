@@ -17,7 +17,7 @@ AFRAME.registerComponent("player-health", {
     // Create health bar container for the HUD
     const hudEl = document.createElement("a-entity");
     hudEl.setAttribute("id", "health-hud");
-    hudEl.setAttribute("position", "0 -0.4 -1");
+    hudEl.setAttribute("position", "0 -0.75 -1");
     hudEl.setAttribute("rotation", "0 0 0");
     hudEl.setAttribute("scale", "0.5 0.5 0.5");
 
