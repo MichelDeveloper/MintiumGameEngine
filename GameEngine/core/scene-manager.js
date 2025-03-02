@@ -80,7 +80,7 @@ function initScene(sceneId) {
       type: "exponential2",
       color: newScene.backgroundColor,
       near: 0,
-      far: newScene.fogDistance * 0.6,
+      far: newScene.fogDistance * 1.5,
     });
   } else {
     // Remove fog if disabled
