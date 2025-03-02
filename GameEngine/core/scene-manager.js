@@ -77,10 +77,10 @@ function initScene(sceneId) {
   // Apply fog settings
   if (newScene.fogEnabled) {
     sceneEl.setAttribute("fog", {
-      type: "linear",
+      type: "exponential2",
       color: newScene.backgroundColor,
       near: 0,
-      far: newScene.fogDistance,
+      far: newScene.fogDistance * 0.6,
     });
   } else {
     // Remove fog if disabled
