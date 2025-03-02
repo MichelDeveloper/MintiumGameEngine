@@ -33,6 +33,8 @@ document.addEventListener("gameDataLoaded", function () {
   const setPlayerSpawnBtn = document.getElementById("setPlayerSpawnBtn");
   const createSceneBtn = document.getElementById("createSceneBtn");
   const newSceneIdInput = document.getElementById("newSceneId");
+  const mapSizeSelector = document.getElementById("mapSizeSelector");
+  const applyMapSizeBtn = document.getElementById("applyMapSizeBtn");
 
   let isSettingSpawn = false;
 
@@ -59,6 +61,8 @@ document.addEventListener("gameDataLoaded", function () {
 
   sceneSelector.addEventListener("change", async () => {
     await loadMapEditorScene();
+    initMapSizeSelector();
+
     const selectedSceneIndex = sceneSelector.value;
     const selectedScene = globalGameData.scenes[selectedSceneIndex];
     const skyColorPicker = document.getElementById("skyColorPicker");
@@ -69,22 +73,182 @@ document.addEventListener("gameDataLoaded", function () {
     }
   });
 
+  // Get the current scene
+  function getCurrentEditingScene() {
+    const selectedSceneIndex = sceneSelector.value;
+    return globalGameData.scenes[selectedSceneIndex];
+  }
+
+  // Initialize the size selector with current scene size
+  function initMapSizeSelector() {
+    const currentScene = getCurrentEditingScene();
+    if (currentScene && currentScene.size) {
+      mapSizeSelector.value = currentScene.size;
+    } else {
+      // Default to 10x10 if no size is set
+      mapSizeSelector.value = "10";
+      // Also set the scene size property
+      if (currentScene) {
+        currentScene.size = 10;
+      }
+    }
+  }
+
+  // Apply size button handler
+  applyMapSizeBtn.addEventListener("click", function () {
+    const newSize = parseInt(mapSizeSelector.value);
+    const currentScene = getCurrentEditingScene();
+
+    // Confirm before changing size if map already has data
+    if (
+      currentScene &&
+      hasMapData(currentScene) &&
+      currentScene.size !== newSize
+    ) {
+      if (
+        !confirm(
+          "Changing the map size will reset your current map data. Continue?"
+        )
+      ) {
+        return;
+      }
+    }
+
+    // Set the new size and reset the map
+    if (currentScene) {
+      currentScene.size = newSize;
+      resetMapWithSize(currentScene, newSize);
+
+      // Force a complete reload of the map editor display
+      loadMapEditorScene();
+
+      // Save changes to localStorage
+      localStorage.setItem("gameData", JSON.stringify(globalGameData));
+    }
+  });
+
+  function hasMapData(scene) {
+    if (!scene.data || scene.data.length === 0) return false;
+
+    for (const layer of scene.data) {
+      for (const row of layer.layerData) {
+        for (const cell of row) {
+          if (cell !== "0") return true;
+        }
+      }
+    }
+
+    return false;
+  }
+
+  function resetMapWithSize(scene, size) {
+    // Create new empty scene data with the specified size
+    const newSceneData = [];
+
+    // Set up layers (keep existing layer numbers but resize them)
+    if (scene.data && scene.data.length > 0) {
+      scene.data.forEach((existingLayer) => {
+        const newLayer = {
+          layer: existingLayer.layer,
+          layerData: [],
+        };
+
+        // Create empty layer data of requested size
+        for (let row = 0; row < size; row++) {
+          const rowData = [];
+          for (let col = 0; col < size; col++) {
+            rowData.push("0");
+          }
+          newLayer.layerData.push(rowData);
+        }
+
+        newSceneData.push(newLayer);
+      });
+    } else {
+      // If no existing layers, create default ones
+      for (let layerIndex = 0; layerIndex < 3; layerIndex++) {
+        const newLayer = {
+          layer: layerIndex - 1, // Layer -1, 0, 1
+          layerData: [],
+        };
+
+        // Create empty layer data of requested size
+        for (let row = 0; row < size; row++) {
+          const rowData = [];
+          for (let col = 0; col < size; col++) {
+            rowData.push("0");
+          }
+          newLayer.layerData.push(rowData);
+        }
+
+        newSceneData.push(newLayer);
+      }
+    }
+
+    // Set the new scene data
+    scene.data = newSceneData;
+
+    // Reset player spawn to center of map
+    scene.playerSpawnPosition = {
+      x: Math.floor(size / 2),
+      z: Math.floor(size / 2),
+    };
+  }
+
   // Updated async function to load the map grid based on the current scene/layer data
   async function loadMapEditorScene() {
-    mapGrid.innerHTML = "";
-    const selectedSceneIndex = sceneSelector.value;
-    const selectedLayerIndex = layerSelector.selectedIndex;
-    const selectedScene = globalGameData.scenes[selectedSceneIndex];
-    const selectedLayer = selectedScene.data[selectedLayerIndex];
+    const currentScene = getCurrentEditingScene();
 
-    // Populate the map grid using async/await for texture loading
-    for (const row of selectedLayer.layerData) {
-      for (const spriteId of row) {
+    // Update the size selector to match current scene's size
+    if (currentScene && currentScene.size) {
+      mapSizeSelector.value = currentScene.size;
+    } else if (currentScene) {
+      // Default to 10x10 if not set, and save it
+      currentScene.size = 10;
+      mapSizeSelector.value = "10";
+    }
+
+    const selectedLayerIndex = layerSelector.selectedIndex;
+
+    // Get scene size (default to 10 if not set)
+    const sceneSize =
+      currentScene && currentScene.size ? parseInt(currentScene.size) : 10;
+
+    // Clear the map grid
+    mapGrid.innerHTML = "";
+
+    // Set the grid template based on scene size
+    mapGrid.style.gridTemplateColumns = `repeat(${sceneSize}, 40px)`;
+    mapGrid.style.gridTemplateRows = `repeat(${sceneSize}, 40px)`;
+
+    // If no scene selected, don't proceed
+    if (!currentScene || !currentScene.data || currentScene.data.length === 0)
+      return;
+
+    const selectedLayer = currentScene.data[selectedLayerIndex];
+    if (!selectedLayer) return;
+
+    // Populate the map grid
+    for (let z = 0; z < sceneSize; z++) {
+      for (let x = 0; x < sceneSize; x++) {
         const cell = document.createElement("div");
-        cell.classList.add("mapCell");
+        cell.className = "mapCell";
+        cell.dataset.row = z;
+        cell.dataset.col = x;
+
+        // Get sprite ID from layer data (if exists)
+        let spriteId = "0";
+        if (
+          selectedLayer.layerData &&
+          z < selectedLayer.layerData.length &&
+          x < selectedLayer.layerData[z].length
+        ) {
+          spriteId = selectedLayer.layerData[z][x];
+        }
+
         cell.dataset.spriteId = spriteId;
 
-        // If a sprite texture is expected, load and set it asynchronously
+        // Set cell appearance based on sprite
         if (spriteId !== "0" && spriteId !== "void") {
           const spritePreview = await createSpritePreview(spriteId);
           if (spritePreview) {
@@ -92,8 +256,10 @@ document.addEventListener("gameDataLoaded", function () {
             cell.style.backgroundSize = "contain";
             cell.style.backgroundRepeat = "no-repeat";
             cell.style.backgroundPosition = "center";
+            cell.style.backgroundColor = "transparent";
           }
         } else {
+          cell.style.backgroundImage = "";
           cell.style.backgroundColor =
             spriteMapping[spriteId] || spriteMapping["0"];
         }
@@ -111,16 +277,13 @@ document.addEventListener("gameDataLoaded", function () {
             // Set new spawn position
             cell.classList.add("spawn-position");
 
-            // Calculate grid position
-            const index = Array.from(mapGrid.children).indexOf(cell);
-            const x = index % 10;
-            const z = Math.floor(index / 10);
-
             // Update scene data
-            const selectedSceneIndex = sceneSelector.value;
-            const selectedScene = globalGameData.scenes[selectedSceneIndex];
-            if (selectedScene) {
-              selectedScene.playerSpawnPosition = { x, z };
+            const currentScene = getCurrentEditingScene();
+            if (currentScene) {
+              currentScene.playerSpawnPosition = {
+                x: parseInt(cell.dataset.col),
+                z: parseInt(cell.dataset.row),
+              };
             }
 
             // Deselect the spawn button and reset state
@@ -129,36 +292,23 @@ document.addEventListener("gameDataLoaded", function () {
             spawnButton.classList.remove("active");
             spawnButton.blur();
           } else {
-            const selectedSpriteId = spriteSelector.value;
-            cell.dataset.spriteId = selectedSpriteId;
-            if (selectedSpriteId !== "0" && selectedSpriteId !== "void") {
-              const spritePreview = await createSpritePreview(selectedSpriteId);
-              if (spritePreview) {
-                cell.style.backgroundImage = `url(${spritePreview})`;
-                cell.style.backgroundSize = "contain";
-                cell.style.backgroundRepeat = "no-repeat";
-                cell.style.backgroundPosition = "center";
-                cell.style.backgroundColor = "transparent";
-              }
-            } else {
-              cell.style.backgroundImage = "";
-              cell.style.backgroundColor =
-                spriteMapping[selectedSpriteId] || spriteMapping["0"];
-            }
-            cell.textContent = "";
+            await updateCellWithTool(this);
           }
         });
+
         mapGrid.appendChild(cell);
       }
     }
 
     // Set spawn position marker if it exists
-    if (selectedScene.playerSpawnPosition) {
-      const { x, z } = selectedScene.playerSpawnPosition;
-      const index = z * 10 + x;
-      const cell = mapGrid.children[index];
-      if (cell) {
-        cell.classList.add("spawn-position");
+    if (currentScene.playerSpawnPosition) {
+      const { x, z } = currentScene.playerSpawnPosition;
+      // Find the cell by data attributes instead of index
+      const spawnCell = document.querySelector(
+        `.mapCell[data-row="${z}"][data-col="${x}"]`
+      );
+      if (spawnCell) {
+        spawnCell.classList.add("spawn-position");
       }
     }
   }
@@ -295,44 +445,49 @@ document.addEventListener("gameDataLoaded", function () {
     }
   });
 
-  // Save Map
+  // Save Map - Update to handle variable-sized maps
   saveMapBtn.addEventListener("click", () => {
     const selectedLayerIndex = layerSelector.value;
-    const selectedSceneIndex = sceneSelector.value;
-    const selectedScene = globalGameData.scenes[selectedSceneIndex];
-    const cells = Array.from(mapGrid.children);
-    const newLayerData = [];
+    const currentScene = getCurrentEditingScene();
+    const sceneSize =
+      currentScene && currentScene.size ? parseInt(currentScene.size) : 10;
 
-    // Collect data row by row
-    for (let i = 0; i < cells.length; i += 10) {
-      const row = cells.slice(i, i + 10).map((cell) => cell.dataset.spriteId);
+    // Create a new empty layer data structure
+    const newLayerData = [];
+    for (let z = 0; z < sceneSize; z++) {
+      const row = [];
+      for (let x = 0; x < sceneSize; x++) {
+        // Find cell by data attributes
+        const cell = document.querySelector(
+          `.mapCell[data-row="${z}"][data-col="${x}"]`
+        );
+        row.push(cell ? cell.dataset.spriteId : "0");
+      }
       newLayerData.push(row);
     }
 
     // Update the selected layer in the global game data
-    updateMapLayer(
-      selectedScene.sceneId,
-      parseInt(selectedLayerIndex, 10),
-      newLayerData
-    );
+    if (currentScene.data[parseInt(selectedLayerIndex)]) {
+      currentScene.data[parseInt(selectedLayerIndex)].layerData = newLayerData;
+    }
 
     // Save spawn position if it exists
     const spawnCell = document.querySelector(".mapCell.spawn-position");
     if (spawnCell) {
-      const index = Array.from(mapGrid.children).indexOf(spawnCell);
-      const x = index % 10;
-      const z = Math.floor(index / 10);
-      selectedScene.playerSpawnPosition = { x, z };
+      currentScene.playerSpawnPosition = {
+        x: parseInt(spawnCell.dataset.col),
+        z: parseInt(spawnCell.dataset.row),
+      };
     }
 
     // Save sky color
     const skyColorPicker = document.getElementById("skyColorPicker");
-    selectedScene.backgroundColor = skyColorPicker.value;
+    currentScene.backgroundColor = skyColorPicker.value;
 
     // Save to localStorage
     localStorage.setItem("gameData", JSON.stringify(globalGameData));
 
-    reloadGame(selectedScene.sceneId);
+    reloadGame(currentScene.sceneId);
     alert("Map saved successfully!");
   });
 
@@ -362,22 +517,29 @@ document.addEventListener("gameDataLoaded", function () {
       return;
     }
 
+    // Get current selected size
+    const selectedSize = parseInt(mapSizeSelector.value) || 10;
+
     const newScene = {
       sceneId: sceneId,
       backgroundColor: "#87CEEB", // Default sky blue
-      playerSpawnPosition: { x: 0, z: 0 },
+      playerSpawnPosition: {
+        x: Math.floor(selectedSize / 2),
+        z: Math.floor(selectedSize / 2),
+      },
+      size: selectedSize, // Add size property
       data: [
         {
           layer: -1, // Background layer
-          layerData: Array(10)
+          layerData: Array(selectedSize)
             .fill()
-            .map(() => Array(10).fill("0")),
+            .map(() => Array(selectedSize).fill("0")),
         },
         {
           layer: 0, // Main layer
-          layerData: Array(10)
+          layerData: Array(selectedSize)
             .fill()
-            .map(() => Array(10).fill("0")),
+            .map(() => Array(selectedSize).fill("0")),
         },
       ],
     };
@@ -440,42 +602,77 @@ document.addEventListener("gameDataLoaded", function () {
     }
   }
 
-  // Updated flood fill function to work asynchronously
+  // Updated flood fill function to work with variable-sized maps
   async function floodFill(startCell, newSpriteId) {
     const targetSpriteId = startCell.dataset.spriteId;
     if (targetSpriteId === newSpriteId) return;
 
-    const cells = Array.from(mapGrid.children);
+    const currentScene = getCurrentEditingScene();
+    const sceneSize =
+      currentScene && currentScene.size ? parseInt(currentScene.size) : 10;
+
+    // Using a queue-based approach for better memory usage
+    const queue = [startCell];
+    // Track visited cells by their coordinates
     const visited = new Set();
-    const stack = [startCell];
+    const startCoord = `${startCell.dataset.row},${startCell.dataset.col}`;
+    visited.add(startCoord);
 
-    while (stack.length > 0) {
-      const cell = stack.pop();
-      const index = cells.indexOf(cell);
-      if (visited.has(index)) continue;
+    while (queue.length > 0) {
+      const cell = queue.shift();
 
-      if (cell.dataset.spriteId === targetSpriteId) {
-        await updateCellSprite(cell, newSpriteId);
-        visited.add(index);
+      // Apply the new sprite to this cell
+      await updateCellSprite(cell, newSpriteId);
 
-        const x = index % 10;
-        const y = Math.floor(index / 10);
-        const adjacentIndices = [
-          y > 0 ? index - 10 : -1,
-          x < 9 ? index + 1 : -1,
-          y < 9 ? index + 10 : -1,
-          x > 0 ? index - 1 : -1,
-        ];
+      // Get cell coordinates
+      const row = parseInt(cell.dataset.row);
+      const col = parseInt(cell.dataset.col);
 
-        adjacentIndices.forEach((adjIndex) => {
-          if (
-            adjIndex !== -1 &&
-            cells[adjIndex]?.dataset.spriteId === targetSpriteId
-          ) {
-            stack.push(cells[adjIndex]);
-          }
-        });
+      // Check each of the 4 adjacent cells (up, right, down, left)
+      const adjacentPositions = [
+        [row - 1, col], // up
+        [row, col + 1], // right
+        [row + 1, col], // down
+        [row, col - 1], // left
+      ];
+
+      for (const [adjRow, adjCol] of adjacentPositions) {
+        // Skip if out of bounds
+        if (
+          adjRow < 0 ||
+          adjRow >= sceneSize ||
+          adjCol < 0 ||
+          adjCol >= sceneSize
+        ) {
+          continue;
+        }
+
+        // Create key for visited set
+        const adjCoord = `${adjRow},${adjCol}`;
+        if (visited.has(adjCoord)) continue;
+
+        // Find the adjacent cell in the DOM
+        const adjCell = document.querySelector(
+          `.mapCell[data-row="${adjRow}"][data-col="${adjCol}"]`
+        );
+        if (adjCell && adjCell.dataset.spriteId === targetSpriteId) {
+          visited.add(adjCoord);
+          queue.push(adjCell);
+        }
       }
+    }
+  }
+
+  // Make sure the flood fill tool is correctly attached to cell clicks
+  async function updateCellWithTool(cell) {
+    const selectedSpriteId = spriteSelector.value;
+
+    if (currentTool === "pen") {
+      await updateCellSprite(cell, selectedSpriteId);
+    } else if (currentTool === "eraser") {
+      await updateCellSprite(cell, "0");
+    } else if (currentTool === "fill") {
+      await floodFill(cell, selectedSpriteId);
     }
   }
 

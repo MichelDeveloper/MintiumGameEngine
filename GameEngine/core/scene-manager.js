@@ -49,6 +49,9 @@ function initScene(sceneId) {
   }
   currentScene = newScene;
 
+  // Get scene size (default to 10 if not set)
+  const sceneSize = parseInt(newScene.size || 10);
+
   // Remove existing scene container if it exists
   const existingContainer = document.getElementById("game-scene");
   if (existingContainer) {
@@ -73,12 +76,12 @@ function initScene(sceneId) {
 
   // Position player
   const spawnPos = newScene.playerSpawnPosition;
-  const gridOffset =
-    engineConstants.TILE_SIZE * Math.round(engineConstants.TILE_SIZE / 2);
+  const halfSize = Math.floor(sceneSize / 2);
+
   playerEl.setAttribute(
     "position",
-    `${spawnPos.x * engineConstants.TILE_SIZE - gridOffset} 0 ${
-      spawnPos.z * engineConstants.TILE_SIZE - gridOffset
+    `${(spawnPos.x - halfSize) * engineConstants.TILE_SIZE} 0 ${
+      (spawnPos.z - halfSize) * engineConstants.TILE_SIZE
     }`
   );
 
@@ -90,9 +93,9 @@ function initScene(sceneId) {
           const sprite = findSpriteById(cell);
           if (sprite) {
             createCube(
-              cellIndex - Math.floor(sceneLayer.layerData[0].length / 2),
+              cellIndex - halfSize,
               sceneLayer.layer,
-              rowIndex - Math.floor(sceneLayer.layerData.length / 2),
+              rowIndex - halfSize,
               sprite.id,
               sprite.type
             );
