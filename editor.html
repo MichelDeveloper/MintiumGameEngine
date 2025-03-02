@@ -250,6 +250,26 @@
                           value="#aabbcc"
                         />
                       </div>
+
+                      <div class="editor-section">
+                        <label for="fogToggle">Enable Fog:</label>
+                        <input type="checkbox" id="fogToggle" />
+
+                        <div
+                          id="fogSettings"
+                          style="display: none; margin-top: 10px"
+                        >
+                          <label for="fogDistance">Fog Distance:</label>
+                          <input
+                            type="range"
+                            id="fogDistance"
+                            min="10"
+                            max="100"
+                            value="50"
+                          />
+                          <span id="fogDistanceValue">50</span>
+                        </div>
+                      </div>
                     </div>
 
                     <div class="map-actions">

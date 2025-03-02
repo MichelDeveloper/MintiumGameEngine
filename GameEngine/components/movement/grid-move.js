@@ -66,37 +66,59 @@ AFRAME.registerComponent("grid-move", {
 
     if (!baseLayer) return true;
 
+    const currentScene = getCurrentScene();
+    const sceneSize =
+      currentScene && currentScene.size ? parseInt(currentScene.size) : 10;
     const gridBlockSize = 10;
-    const gridX = Math.round(
-      potentialPosition.x / gridBlockSize + baseLayer.layerData[0].length / 2
+
+    // Calculate grid coordinates from world position using floor instead of round
+    // This fixes the off-by-one issue at the upper-left map edges
+    const gridX = Math.floor(
+      potentialPosition.x / gridBlockSize + sceneSize / 2
     );
-    const gridZ = Math.round(
-      potentialPosition.z / gridBlockSize + baseLayer.layerData.length / 2
+    const gridZ = Math.floor(
+      potentialPosition.z / gridBlockSize + sceneSize / 2
     );
 
+    // Add a small offset check for the edge cases
     if (
-      gridZ < 0 ||
-      gridZ >= baseLayer.layerData.length ||
       gridX < 0 ||
-      gridX >= baseLayer.layerData[gridZ].length
+      gridX >= sceneSize ||
+      gridZ < 0 ||
+      gridZ >= sceneSize ||
+      potentialPosition.x < -((sceneSize / 2) * gridBlockSize) ||
+      potentialPosition.z < -((sceneSize / 2) * gridBlockSize)
     ) {
-      return true;
+      return true; // Collision with world boundary
     }
 
-    const tileType = baseLayer.layerData[gridZ][gridX];
-    if (!tileType) return true;
+    // Check if there's a wall at this position
+    try {
+      const cellSpriteId = baseLayer.layerData[gridZ][gridX];
+      if (cellSpriteId === "0" || cellSpriteId === "void") {
+        return false; // No wall here
+      }
 
-    const tileData = globalGameData.sprites.find(
-      (sprite) => sprite.id === tileType
-    );
+      // Find the sprite for this cell
+      const sprite = findSpriteById(cellSpriteId);
 
-    // Check if this is a scene change tile
-    if (tileData && tileData.changeScene) {
-      loadScene(tileData.changeScene);
-      return true;
+      // Check for scene change trigger
+      if (sprite && sprite.changeScene) {
+        // Trigger scene change
+        loadScene(sprite.changeScene);
+        return true; // Prevent further movement
+      }
+
+      // Check for collision
+      if (sprite && sprite.collision) {
+        return true; // Collision with a wall
+      }
+
+      return false; // Default to no collision
+    } catch (e) {
+      console.error("Error checking collision:", e);
+      return true; // Default to collision on error
     }
-
-    return tileData && tileData.collision;
   },
 
   onAxisMove: function (evt) {

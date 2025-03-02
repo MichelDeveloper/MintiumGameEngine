@@ -74,6 +74,19 @@ function initScene(sceneId) {
   // Set scene properties
   sceneEl.setAttribute("background", `color: ${newScene.backgroundColor}`);
 
+  // Apply fog settings
+  if (newScene.fogEnabled) {
+    sceneEl.setAttribute("fog", {
+      type: "linear",
+      color: newScene.backgroundColor,
+      near: 0,
+      far: newScene.fogDistance,
+    });
+  } else {
+    // Remove fog if disabled
+    sceneEl.removeAttribute("fog");
+  }
+
   // Position player
   const spawnPos = newScene.playerSpawnPosition;
   const halfSize = Math.floor(sceneSize / 2);

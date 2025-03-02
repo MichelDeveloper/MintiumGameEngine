@@ -35,6 +35,10 @@ document.addEventListener("gameDataLoaded", function () {
   const newSceneIdInput = document.getElementById("newSceneId");
   const mapSizeSelector = document.getElementById("mapSizeSelector");
   const applyMapSizeBtn = document.getElementById("applyMapSizeBtn");
+  const fogToggle = document.getElementById("fogToggle");
+  const fogSettings = document.getElementById("fogSettings");
+  const fogDistance = document.getElementById("fogDistance");
+  const fogDistanceValue = document.getElementById("fogDistanceValue");
 
   let isSettingSpawn = false;
 
@@ -71,6 +75,9 @@ document.addEventListener("gameDataLoaded", function () {
     } else {
       skyColorPicker.value = "#aabbcc"; // Default color
     }
+
+    // Add this line to update fog settings when changing scenes
+    initializeSkyColorPicker();
   });
 
   // Get the current scene
@@ -484,6 +491,10 @@ document.addEventListener("gameDataLoaded", function () {
     const skyColorPicker = document.getElementById("skyColorPicker");
     currentScene.backgroundColor = skyColorPicker.value;
 
+    // Save fog settings
+    currentScene.fogEnabled = fogToggle.checked;
+    currentScene.fogDistance = parseInt(fogDistance.value);
+
     // Save to localStorage
     localStorage.setItem("gameData", JSON.stringify(globalGameData));
 
@@ -498,7 +509,21 @@ document.addEventListener("gameDataLoaded", function () {
     const skyColorPicker = document.getElementById("skyColorPicker");
     const selectedSceneIndex = sceneSelector.value;
     const selectedScene = globalGameData.scenes[selectedSceneIndex];
+
+    // Set sky color
     skyColorPicker.value = selectedScene.backgroundColor || "#aabbcc";
+
+    // Set fog settings
+    fogToggle.checked = selectedScene.fogEnabled || false;
+    fogSettings.style.display = fogToggle.checked ? "block" : "none";
+
+    if (selectedScene.fogDistance) {
+      fogDistance.value = selectedScene.fogDistance;
+      fogDistanceValue.textContent = selectedScene.fogDistance;
+    } else {
+      fogDistance.value = 50;
+      fogDistanceValue.textContent = "50";
+    }
   }
 
   initializeSkyColorPicker();
@@ -527,7 +552,9 @@ document.addEventListener("gameDataLoaded", function () {
         x: Math.floor(selectedSize / 2),
         z: Math.floor(selectedSize / 2),
       },
-      size: selectedSize, // Add size property
+      size: selectedSize,
+      fogEnabled: false,
+      fogDistance: 50,
       data: [
         {
           layer: -1, // Background layer
@@ -675,6 +702,16 @@ document.addEventListener("gameDataLoaded", function () {
       await floodFill(cell, selectedSpriteId);
     }
   }
+
+  // Add event listener for fog toggle
+  fogToggle.addEventListener("change", function () {
+    fogSettings.style.display = this.checked ? "block" : "none";
+  });
+
+  // Add event listener for fog distance slider
+  fogDistance.addEventListener("input", function () {
+    fogDistanceValue.textContent = this.value;
+  });
 
   document.querySelectorAll(".section-header").forEach((header) => {
     header.addEventListener("click", () => {
