@@ -30,6 +30,15 @@ export function loadScene(sceneId) {
   } else {
     initScene(sceneId);
   }
+
+  // Trigger a scene-changed event after everything is loaded
+  setTimeout(() => {
+    const sceneEl = document.querySelector("a-scene");
+    if (sceneEl) {
+      console.log("Dispatching scene-changed event");
+      sceneEl.dispatchEvent(new CustomEvent("scene-changed"));
+    }
+  }, 300);
 }
 
 function initScene(sceneId) {

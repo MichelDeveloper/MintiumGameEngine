@@ -375,7 +375,14 @@
                         <select id="spriteTypeSelector">
                           <option value="block">Block</option>
                           <option value="billboard">Billboard</option>
+                          <option value="gaussian">Gaussian Splatting</option>
                         </select>
+                        <input
+                          type="text"
+                          id="gaussianPath"
+                          placeholder="Enter gaussian splat filename (e.g. splat.ply)"
+                          style="display: none"
+                        />
                       </div>
                       <div class="sprite-options">
                         <!-- Add this inside the sprite-options div, after the collision checkbox -->

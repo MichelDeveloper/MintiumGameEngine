@@ -31,6 +31,7 @@ document.addEventListener("gameDataLoaded", function () {
   );
   const hudTextArea = document.getElementById("hudText");
   const spriteSizeSelector = document.getElementById("spriteSizeSelector");
+  const gaussianPathInput = document.getElementById("gaussianPath");
 
   let mode = "draw";
   let selectedColor = colorPicker.value;
@@ -270,41 +271,63 @@ document.addEventListener("gameDataLoaded", function () {
     selectedColor = this.value;
   });
 
-  saveSpriteBtn.addEventListener("click", function () {
-    const spriteId = spriteIdInput.value;
-    if (!spriteId.trim()) {
-      alert("Please enter a sprite ID!");
-      return;
+  // Function to collect pixel data from the grid
+  function collectPixelData() {
+    const cells = document.querySelectorAll(".grid div");
+    const pixelData = [];
+    const gridSize = 8; // 8x8 grid
+
+    // Create 2D array
+    for (let y = 0; y < gridSize; y++) {
+      const row = [];
+      for (let x = 0; x < gridSize; x++) {
+        const index = y * gridSize + x;
+        const cell = cells[index];
+        row.push(
+          cell ? cell.style.backgroundColor || "rgba(0,0,0,0)" : "rgba(0,0,0,0)"
+        );
+      }
+      pixelData.push(row);
     }
 
-    const pixels = Array.from(grid.children).map(
-      (cell) => cell.style.backgroundColor || "rgba(0,0,0,0)"
-    );
+    return pixelData;
+  }
 
-    // Convert flat pixel array to 2D array
-    const pixelRows = [];
-    for (let i = 0; i < pixels.length; i += 8) {
-      pixelRows.push(pixels.slice(i, i + 8));
+  saveSpriteBtn.addEventListener("click", function () {
+    const spriteId = spriteIdInput.value.trim();
+
+    if (!spriteId) {
+      alert("Please enter a valid Sprite ID!");
+      return;
     }
 
     // Create new sprite data
     const newSpriteData = {
       id: spriteId,
       type: spriteTypeSelector.value,
-      textureType: textureTypeSelector.value,
-      texturePath:
-        textureTypeSelector.value === "texture" ? textureFileName : null,
-      attackImage:
-        textureTypeSelector.value === "texture" ? attackTextureFileName : null,
       collision: spriteCollisionCheckbox.checked,
       changeScene: changeSceneSelector.value.trim() || "",
       whenNearShowText: whenNearShowTextArea.value.trim() || "",
       hudText: hudTextArea.value.trim() || "",
-      pixels: textureTypeSelector.value === "pixels" ? pixelRows : null,
       size: document.getElementById("spriteSizeSelector").value || "normal",
       lifePoints:
         parseInt(document.getElementById("spriteLifePoints").value) || 0,
     };
+
+    // Handle gaussian splatting specific data
+    if (spriteTypeSelector.value === "gaussian") {
+      newSpriteData.gaussianPath = gaussianPathInput.value.trim();
+    } else {
+      // Handle texture type specific data
+      newSpriteData.textureType = textureTypeSelector.value;
+
+      if (textureTypeSelector.value === "texture") {
+        newSpriteData.texturePath = textureFileName;
+        newSpriteData.attackImage = attackTextureFileName;
+      } else {
+        newSpriteData.pixels = collectPixelData();
+      }
+    }
 
     // Update or add the sprite
     const existingIndex = globalGameData.sprites.findIndex(
@@ -332,22 +355,17 @@ document.addEventListener("gameDataLoaded", function () {
   });
 
   textureTypeSelector.addEventListener("change", function () {
-    if (this.value === "texture") {
-      // Show a text input instead of file upload
-      textureUpload.type = "text";
-      textureUpload.placeholder = "Enter texture filename (e.g. grass.png)";
+    const selectedType = this.value;
+
+    // Only handle texture vs pixels toggle
+    if (selectedType === "texture") {
       textureUpload.style.display = "block";
-      attackTextureContainer.style.display = "block"; // Show attack texture field
+      attackTextureContainer.style.display = "block";
       grid.style.display = "none";
     } else {
-      textureUpload.type = "file";
       textureUpload.style.display = "none";
-      attackTextureContainer.style.display = "none"; // Hide attack texture field
+      attackTextureContainer.style.display = "none";
       grid.style.display = "grid";
-      textureFileName = null;
-      attackTextureFileName = null;
-      textureUpload.value = "";
-      attackTextureUpload.value = "";
     }
   });
 
@@ -356,44 +374,81 @@ document.addEventListener("gameDataLoaded", function () {
     attackTextureFileName = this.value;
   });
 
-  spriteSelector.addEventListener("change", function () {
-    const selectedSpriteId = this.value;
-    const selectedSprite = globalGameData.sprites.find(
-      (sprite) => sprite.id === selectedSpriteId
-    );
+  // Modify the sprite selector event listener to handle gaussian splatting type
+  const originalSpriteSelector = spriteSelector.onchange;
+  spriteSelector.onchange = function (event) {
+    const handler = function () {
+      const selectedSpriteId = this.value;
+      const selectedSprite = globalGameData.sprites.find(
+        (sprite) => sprite.id === selectedSpriteId
+      );
 
-    if (selectedSprite) {
-      spriteIdInput.value = selectedSpriteId;
-      spriteTypeSelector.value = selectedSprite.type || "block";
-      textureTypeSelector.value = selectedSprite.textureType || "pixels";
-      spriteCollisionCheckbox.checked = selectedSprite.collision || false;
-      changeSceneSelector.value = selectedSprite.changeScene || "";
-      whenNearShowTextArea.value = selectedSprite.whenNearShowText || "";
-      hudTextArea.value = selectedSprite.hudText || "";
-      spriteSizeSelector.value = selectedSprite.size || "normal";
-      document.getElementById("spriteLifePoints").value =
-        selectedSprite.lifePoints || 0;
+      if (selectedSprite) {
+        // Set basic sprite properties
+        spriteIdInput.value = selectedSpriteId;
+        spriteTypeSelector.value = selectedSprite.type || "block";
+        spriteCollisionCheckbox.checked = selectedSprite.collision || false;
+        changeSceneSelector.value = selectedSprite.changeScene || "";
+        whenNearShowTextArea.value = selectedSprite.whenNearShowText || "";
+        hudTextArea.value = selectedSprite.hudText || "";
+        spriteSizeSelector.value = selectedSprite.size || "normal";
+        document.getElementById("spriteLifePoints").value =
+          selectedSprite.lifePoints || 0;
 
-      if (selectedSprite.textureType === "texture") {
-        textureFileName = selectedSprite.texturePath;
-        attackTextureFileName = selectedSprite.attackImage || "";
+        // Handle type-specific properties
+        if (selectedSprite.type === "gaussian") {
+          // For gaussian splatting
+          textureTypeSelector.style.display = "none";
+          textureUpload.style.display = "none";
+          attackTextureContainer.style.display = "none";
+          grid.style.display = "none";
+          gaussianPathInput.style.display = "block";
+          gaussianPathInput.value = selectedSprite.gaussianPath || "";
+        } else {
+          // For non-gaussian types
+          textureTypeSelector.style.display = "block";
+          gaussianPathInput.style.display = "none";
+          textureTypeSelector.value = selectedSprite.textureType || "pixels";
 
-        textureUpload.type = "text";
-        textureUpload.value = selectedSprite.texturePath || "";
-        textureUpload.style.display = "block";
-
-        attackTextureContainer.style.display = "block";
-        attackTextureUpload.value = selectedSprite.attackImage || "";
-
-        grid.style.display = "none";
-      } else {
-        grid.style.display = "grid";
-        textureUpload.style.display = "none";
-        attackTextureContainer.style.display = "none";
-        textureUpload.value = "";
-        attackTextureUpload.value = "";
-        populateGrid(selectedSprite.pixels);
+          if (selectedSprite.textureType === "texture") {
+            textureFileName = selectedSprite.texturePath;
+            attackTextureFileName = selectedSprite.attackImage || "";
+            textureUpload.type = "text";
+            textureUpload.value = selectedSprite.texturePath || "";
+            textureUpload.style.display = "block";
+            attackTextureContainer.style.display = "block";
+            attackTextureUpload.value = selectedSprite.attackImage || "";
+            grid.style.display = "none";
+          } else {
+            grid.style.display = "grid";
+            textureUpload.style.display = "none";
+            attackTextureContainer.style.display = "none";
+            textureUpload.value = "";
+            attackTextureUpload.value = "";
+            populateGrid(selectedSprite.pixels);
+          }
+        }
       }
+    };
+
+    // Call the original event handler if it exists
+    if (typeof originalSpriteSelector === "function") {
+      originalSpriteSelector.call(this, event);
+    }
+
+    handler.call(this);
+  };
+
+  // Add this event listener for sprite type selector
+  spriteTypeSelector.addEventListener("change", function () {
+    const selectedType = this.value;
+
+    if (selectedType === "gaussian") {
+      // If gaussian is selected, show gaussian path and hide texture options
+      gaussianPathInput.style.display = "block";
+    } else {
+      // For other types, hide gaussian path and show texture selector
+      gaussianPathInput.style.display = "none";
     }
   });
 });

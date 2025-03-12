@@ -26,6 +26,19 @@ export async function createCube(x, y, z, spriteId, type) {
     cubeEl.setAttribute("height", size);
     cubeEl.setAttribute("width", size);
     cubeEl.setAttribute("face-camera-2d", "");
+  } else if (type === "gaussian") {
+    console.log("Creating gaussian splat entity for sprite:", spriteId);
+    console.log("Sprite data:", sprite);
+
+    cubeEl = document.createElement("a-entity");
+    cubeEl.setAttribute("gaussian-splatting", {
+      src: sprite.gaussianPath
+        ? `Resources/GaussianSplatting/${sprite.gaussianPath}`
+        : "train.splat",
+    });
+
+    // Make sure to also set the scale for the gaussian entity
+    cubeEl.setAttribute("scale", `${size} ${size} ${size}`);
   }
 
   cubeEl.setAttribute("position", `${x * 10} ${y * 10 + yOffset} ${z * 10}`);
@@ -33,21 +46,24 @@ export async function createCube(x, y, z, spriteId, type) {
   // Store the sprite ID on the entity for reference
   cubeEl.setAttribute("data-entity-id", spriteId);
 
-  try {
-    const texture = await generateTexture(sprite);
-    // Set material properties separately
-    cubeEl.setAttribute("material", {
-      src: texture,
-      transparent: true,
-      alphaTest: 0.5,
-      shader: "standard",
-    });
-  } catch (error) {
-    console.error("Failed to generate texture:", error);
-    cubeEl.setAttribute("material", {
-      color: "red",
-      shader: "standard",
-    });
+  // Only apply texture for non-gaussian types
+  if (type !== "gaussian") {
+    try {
+      const texture = await generateTexture(sprite);
+      // Set material properties separately
+      cubeEl.setAttribute("material", {
+        src: texture,
+        transparent: true,
+        alphaTest: 0.5,
+        shader: "standard",
+      });
+    } catch (error) {
+      console.error("Failed to generate texture:", error);
+      cubeEl.setAttribute("material", {
+        color: "red",
+        shader: "standard",
+      });
+    }
   }
 
   if (sprite.lifePoints > 0) {
@@ -63,13 +79,18 @@ export async function createCube(x, y, z, spriteId, type) {
     });
   }
 
-  cubeEl.setAttribute("pixelated", "");
+  // Only add pixelated component to non-gaussian types
+  if (type !== "gaussian") {
+    cubeEl.setAttribute("pixelated", "");
+  }
+
   if (sprite.whenNearShowText && sprite.collision) {
     cubeEl.setAttribute("show-text-near", {
       text: sprite.whenNearShowText,
       distance: 2,
     });
   }
+
   if (sprite.hudText && sprite.collision) {
     cubeEl.setAttribute("show-hud-text", {
       text: sprite.hudText,
@@ -77,8 +98,11 @@ export async function createCube(x, y, z, spriteId, type) {
       viewAngle: true,
     });
   }
+
   const container = document.getElementById("dynamic-content");
   container.appendChild(cubeEl);
+
+  return cubeEl;
 }
 
 export function createPlayer() {
