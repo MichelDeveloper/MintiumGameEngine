@@ -35,6 +35,8 @@ export async function createCube(x, y, z, spriteId, type) {
       src: sprite.gaussianPath
         ? `Resources/GaussianSplatting/${sprite.gaussianPath}`
         : "train.splat",
+      pixelRatio: 0.5,
+      xrPixelRatio: 0.5,
     });
 
     // Make sure to also set the scale for the gaussian entity
