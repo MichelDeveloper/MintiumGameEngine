@@ -124,7 +124,6 @@ AFRAME.registerComponent("grid-move", {
   onAxisMove: function (evt) {
     // First check the global lock
     if (window.playerMovementLocked) return;
-
     // Then check the component lock
     if (!this.canExecuteEvent) return;
 
@@ -137,36 +136,49 @@ AFRAME.registerComponent("grid-move", {
     const axis = evt.detail.axis;
     const x = axis[2];
     const y = axis[3];
-    let shouldUpdatePlayerPosition = true;
 
-    // Determine the primary direction of the movement based on thumbstick tilt
-    let inputDirection = new THREE.Vector3(0, 0, 0);
-    if (Math.abs(x) > Math.abs(y)) {
-      inputDirection.x = Math.sign(x);
-    } else if (Math.abs(y) > 0.5) {
-      inputDirection.z = Math.sign(y);
-    } else {
-      // Thumbstick is in the dead zone or not tilted enough
-      return;
-    }
+    // Only act if the thumbstick is tilted enough.
+    if (Math.abs(x) < 0.5 && Math.abs(y) < 0.5) return;
 
-    // Adjust the input direction by the player's current Y rotation
-    const playerRotationY = playerAux.object3D.rotation.y;
-    let directionVector = inputDirection.applyAxisAngle(
-      new THREE.Vector3(0, 1, 0),
-      playerRotationY
-    );
-
-    // Quantize the movement to grid blocks
-    const gridBlockSize = 10; // Assuming each grid block is 10 units
-    directionVector.multiplyScalar(gridBlockSize);
-
-    // Calculate potential new position
+    const gridBlockSize = 10; // Your grid cell size
     const currentPosition = new THREE.Vector3().copy(
       playerAux.object3D.position
     );
-    const potentialPosition = currentPosition.clone().add(directionVector);
 
+    // Determine the player's current grid cell based on world position.
+    // Assuming the grid is aligned with world axes.
+    const currentGridX = Math.round(currentPosition.x / gridBlockSize);
+    const currentGridZ = Math.round(currentPosition.z / gridBlockSize);
+
+    // Determine input offset from thumbstick.
+    // We use a discrete value based on which axis is stronger.
+    let inputDir = new THREE.Vector3(0, 0, 0);
+    if (Math.abs(x) > Math.abs(y)) {
+      inputDir.x = Math.sign(x);
+    } else {
+      inputDir.z = Math.sign(y);
+    }
+
+    // Rotate the input direction by the player's current Y rotation.
+    const playerRotationY = playerAux.object3D.rotation.y;
+    inputDir.applyAxisAngle(new THREE.Vector3(0, 1, 0), playerRotationY);
+
+    // Round the rotated direction to get a cardinal offset.
+    let offsetX = Math.abs(inputDir.x) >= 0.5 ? Math.sign(inputDir.x) : 0;
+    let offsetZ = Math.abs(inputDir.z) >= 0.5 ? Math.sign(inputDir.z) : 0;
+
+    // Calculate the new grid cell.
+    const newGridX = currentGridX + offsetX;
+    const newGridZ = currentGridZ + offsetZ;
+
+    // Convert back to world coordinates (using the grid cell centers).
+    const potentialPosition = new THREE.Vector3(
+      newGridX * gridBlockSize,
+      currentPosition.y,
+      newGridZ * gridBlockSize
+    );
+
+    let shouldUpdatePlayerPosition = true;
     if (this.checkWallCollision(potentialPosition)) {
       shouldUpdatePlayerPosition = false;
     }
@@ -177,7 +189,7 @@ AFRAME.registerComponent("grid-move", {
       playerAux.object3D.position.copy(potentialPosition);
     }
 
-    // Implement a cooldown mechanism
+    // Implement a cooldown mechanism.
     this.canExecuteEvent = false;
     setTimeout(() => (this.canExecuteEvent = true), 250);
   },
