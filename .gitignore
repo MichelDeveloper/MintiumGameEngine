@@ -58,6 +58,8 @@ Resources/Data/*
 !Resources/Data/.gitkeep
 Resources/UI/*
 !Resources/UI/.gitkeep
+Resources/GaussianSplatting/*
+!Resources/GaussianSplatting/.gitkeep
 
 # Server
 cert.pem

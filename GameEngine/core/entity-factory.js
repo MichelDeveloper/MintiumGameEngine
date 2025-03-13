@@ -27,9 +27,6 @@ export async function createCube(x, y, z, spriteId, type) {
     cubeEl.setAttribute("width", size);
     cubeEl.setAttribute("face-camera-2d", "");
   } else if (type === "gaussian") {
-    console.log("Creating gaussian splat entity for sprite:", spriteId);
-    console.log("Sprite data:", sprite);
-
     cubeEl = document.createElement("a-entity");
     cubeEl.setAttribute("gaussian-splatting", {
       src: sprite.gaussianPath
@@ -38,8 +35,15 @@ export async function createCube(x, y, z, spriteId, type) {
       pixelRatio: 0.5,
       xrPixelRatio: 0.5,
     });
-
-    // Make sure to also set the scale for the gaussian entity
+    cubeEl.setAttribute("scale", `${size} ${size} ${size}`);
+  } else if (type === "mesh") {
+    cubeEl = document.createElement("a-entity");
+    cubeEl.setAttribute("mesh-rendering", {
+      src: sprite.meshPath
+        ? `Resources/Models/${sprite.meshPath}`
+        : "Resources/Models/default.glb",
+      yOffset: sprite.meshYOffset || 0,
+    });
     cubeEl.setAttribute("scale", `${size} ${size} ${size}`);
   }
 
@@ -49,7 +53,7 @@ export async function createCube(x, y, z, spriteId, type) {
   cubeEl.setAttribute("data-entity-id", spriteId);
 
   // Only apply texture for non-gaussian types
-  if (type !== "gaussian") {
+  if (type !== "gaussian" && type !== "mesh") {
     try {
       const texture = await generateTexture(sprite);
       // Set material properties separately
@@ -82,7 +86,7 @@ export async function createCube(x, y, z, spriteId, type) {
   }
 
   // Only add pixelated component to non-gaussian types
-  if (type !== "gaussian") {
+  if (type !== "gaussian" && type !== "mesh") {
     cubeEl.setAttribute("pixelated", "");
   }
 

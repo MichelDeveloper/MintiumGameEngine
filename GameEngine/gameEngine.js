@@ -18,6 +18,8 @@ import "./components/interaction/show-hud-text.js";
 import "./components/gameplay/life-system.js";
 import "./components/gameplay/player-health.js";
 import "./components/rendering/gaussian-splatting.js";
+import "./components/rendering/mesh-rendering.js";
+
 let gameData;
 
 async function initGameData() {

@@ -2,7 +2,7 @@ AFRAME.registerComponent("gaussian-splatting", {
   schema: {
     src: { type: "string", default: "train.splat" },
     cutoutEntity: { type: "selector" },
-    pixelRatio: { type: "number", default: 1 },
+    pixelRatio: { type: "number", default: 0.5 },
     xrPixelRatio: { type: "number", default: 0.5 },
   },
   init: function () {
@@ -735,6 +735,14 @@ AFRAME.registerComponent("gaussian-splatting", {
           // 	cutoutArea = false;
         }
 
+        // // --- NEW MODIFICATION: Distance-based culling ---
+        // // Only process splats whose translation is within 50 units.
+        // let x = matrices[i * 16 + 12];
+        // let y = matrices[i * 16 + 13];
+        // let z = matrices[i * 16 + 14];
+        // let dist = Math.sqrt(x * x + y * y + z * z);
+        // if (dist > 50) continue;
+
         // Skip behind of camera and small, transparent splat
         if (
           depth < 0 &&
@@ -764,6 +772,30 @@ AFRAME.registerComponent("gaussian-splatting", {
         depthIndex[starts0[sizeList[i]]++] = validIndexList[i];
 
       return depthIndex;
+
+      // // --- NEW MODIFICATION: Density Reduction ---
+      // // Use a simple grid approach to only keep one splat per cell.
+      // let cellSize = 0.01; // Adjust cell size as needed.
+      // let grid = {};
+      // let finalIndices = [];
+      // for (let i = 0; i < depthIndex.length; i++) {
+      //   let idx = depthIndex[i];
+      //   let x = matrices[idx * 16 + 12];
+      //   let y = matrices[idx * 16 + 13];
+      //   let z = matrices[idx * 16 + 14];
+      //   let key =
+      //     Math.floor(x / cellSize) +
+      //     "_" +
+      //     Math.floor(y / cellSize) +
+      //     "_" +
+      //     Math.floor(z / cellSize);
+      //   if (!grid[key]) {
+      //     grid[key] = true;
+      //     finalIndices.push(idx);
+      //   }
+      // }
+      // // Return the filtered indices.
+      // return finalIndices;
     };
 
     self.onmessage = (e) => {

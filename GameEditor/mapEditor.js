@@ -364,16 +364,24 @@ document.addEventListener("gameDataLoaded", function () {
 
     // Add special handling for gaussian splatting
     if (sprite.type === "gaussian") {
-      // Use a special icon or color for gaussian splatting
-      ctx.fillStyle = "#4287f5"; // Nice blue color
+      ctx.fillStyle = "#4287f5";
       ctx.fillRect(0, 0, 40, 40);
-
-      // Draw a "G" in the center
       ctx.fillStyle = "white";
       ctx.font = "bold 24px Arial";
       ctx.textAlign = "center";
       ctx.textBaseline = "middle";
       ctx.fillText("G", 20, 20);
+
+      return canvas.toDataURL();
+    } else if (sprite.type === "mesh") {
+      ctx.fillStyle = "#00ff55";
+      ctx.fillRect(0, 0, 40, 40);
+
+      ctx.fillStyle = "white";
+      ctx.font = "bold 24px Arial";
+      ctx.textAlign = "center";
+      ctx.textBaseline = "middle";
+      ctx.fillText("M", 20, 20);
 
       return canvas.toDataURL();
     } else if (sprite.textureType === "texture" && sprite.texturePath) {

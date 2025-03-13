@@ -174,12 +174,12 @@
             [
               "Stone Wall",
               "0",
-              "Tree",
+              "TreeMesh",
               "0",
               "slime",
               "0",
               "0",
-              "Tree",
+              "TreeMesh",
               "0",
               "Stone Wall"
             ],
@@ -209,20 +209,20 @@
             ],
             [
               "Stone Wall",
-              "Tree",
-              "Tree",
+              "TreeMesh",
+              "TreeMesh",
               "0",
-              "void",
+              "TreeMesh",
               "0",
               "slime",
-              "Tree",
-              "Tree",
+              "TreeMesh",
+              "TreeMesh",
               "Stone Wall"
             ],
             [
               "Stone Wall",
               "0",
-              "Bush",
+              "TreeMesh",
               "0",
               "0",
               "0",
@@ -3078,7 +3078,7 @@
       "id": "Cave Entrance",
       "type": "block",
       "collision": true,
-      "changeScene": "testGaussian",
+      "changeScene": "BigForest",
       "whenNearShowText": "",
       "hudText": "A dark cave entrance looms before you. Do you wish to enter?",
       "size": "normal",
@@ -3941,6 +3941,18 @@
       "size": "big",
       "lifePoints": 0,
       "gaussianPath": "train.splat"
+    },
+    {
+      "id": "TreeMesh",
+      "type": "mesh",
+      "collision": false,
+      "changeScene": "",
+      "whenNearShowText": "",
+      "hudText": "",
+      "size": "small",
+      "lifePoints": 0,
+      "meshPath": "tree.glb",
+      "meshYOffset": -1
     }
   ]
 }
