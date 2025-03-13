@@ -35,6 +35,8 @@ document.addEventListener("gameDataLoaded", function () {
   const meshPathInput = document.getElementById("meshPath");
   const meshYOffsetInput = document.getElementById("meshYOffset");
   const meshSettings = document.getElementById("meshSettings");
+  const customSizeContainer = document.getElementById("customSizeContainer");
+  const customSizeInput = document.getElementById("customSizeInput");
 
   let mode = "draw";
   let selectedColor = colorPicker.value;
@@ -296,6 +298,15 @@ document.addEventListener("gameDataLoaded", function () {
     return pixelData;
   }
 
+  // Add event listener for size selector
+  spriteSizeSelector.addEventListener("change", function () {
+    if (this.value === "custom") {
+      customSizeContainer.style.display = "block";
+    } else {
+      customSizeContainer.style.display = "none";
+    }
+  });
+
   saveSpriteBtn.addEventListener("click", function () {
     const spriteId = spriteIdInput.value.trim();
 
@@ -312,10 +323,18 @@ document.addEventListener("gameDataLoaded", function () {
       changeScene: changeSceneSelector.value.trim() || "",
       whenNearShowText: whenNearShowTextArea.value.trim() || "",
       hudText: hudTextArea.value.trim() || "",
-      size: document.getElementById("spriteSizeSelector").value || "normal",
+      size:
+        spriteSizeSelector.value === "custom"
+          ? undefined
+          : spriteSizeSelector.value,
       lifePoints:
         parseInt(document.getElementById("spriteLifePoints").value) || 0,
     };
+
+    // Add custom size if selected
+    if (spriteSizeSelector.value === "custom") {
+      newSpriteData.customSize = parseFloat(customSizeInput.value) || 10;
+    }
 
     // Handle gaussian splatting specific data
     if (spriteTypeSelector.value === "gaussian") {
@@ -438,6 +457,16 @@ document.addEventListener("gameDataLoaded", function () {
       } else {
         populateGrid(selectedSprite.pixels);
       }
+    }
+
+    // Set size properties
+    if (selectedSprite.customSize) {
+      spriteSizeSelector.value = "custom";
+      customSizeContainer.style.display = "block";
+      customSizeInput.value = selectedSprite.customSize;
+    } else {
+      spriteSizeSelector.value = selectedSprite.size || "normal";
+      customSizeContainer.style.display = "none";
     }
 
     // Update the UI based on sprite type

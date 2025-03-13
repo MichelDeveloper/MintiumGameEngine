@@ -8,13 +8,21 @@ export async function createCube(x, y, z, spriteId, type) {
 
   let size = "10";
   let yOffset = 0;
-  if (sprite.size === "big") {
+
+  // Check for custom size first
+  if (sprite.customSize && !isNaN(parseFloat(sprite.customSize))) {
+    // Use the custom size if it exists and is a valid number
+    size = sprite.customSize.toString();
+    // Calculate proportional yOffset for custom sizes
+    yOffset = (parseFloat(size) - 10) / 2;
+  } else if (sprite.size === "big") {
     size = "20";
     yOffset = 5;
   } else if (sprite.size === "small") {
     size = "5";
     yOffset = -2.5;
   }
+
   let cubeEl;
   if (type === "block") {
     cubeEl = document.createElement("a-box");
