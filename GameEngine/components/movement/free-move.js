@@ -125,7 +125,6 @@ AFRAME.registerComponent("free-move", {
     const baseLayer = getCurrentScene().data.find(
       (sceneLayer) => sceneLayer.layer === 0
     );
-
     if (!baseLayer) return false;
 
     const currentScene = getCurrentScene();
@@ -133,97 +132,91 @@ AFRAME.registerComponent("free-move", {
       currentScene && currentScene.size ? parseInt(currentScene.size) : 10;
     const gridBlockSize = 10;
 
-    // Calculate grid coordinates from world position
-    const gridX = Math.floor(position.x / gridBlockSize + sceneSize / 2);
-    const gridZ = Math.floor(position.z / gridBlockSize + sceneSize / 2);
+    // Use Math.round to match grid-move
+    const gridX = Math.round(position.x / gridBlockSize);
+    const gridZ = Math.round(position.z / gridBlockSize);
 
-    // Check for world boundaries
+    // If your grid array is zero-indexed and centered,
+    // convert grid coordinates to array indices.
+    // Assuming grid cell (0, 0) is at the center:
+    const halfScene = Math.floor(sceneSize / 2);
+    const indexX = gridX + halfScene;
+    const indexZ = gridZ + halfScene;
+
+    // Check boundaries based on array indices
     if (
-      gridX < 0 ||
-      gridX >= sceneSize ||
-      gridZ < 0 ||
-      gridZ >= sceneSize ||
-      position.x < -((sceneSize / 2) * gridBlockSize) ||
-      position.z < -((sceneSize / 2) * gridBlockSize)
+      indexX < 0 ||
+      indexX >= sceneSize ||
+      indexZ < 0 ||
+      indexZ >= sceneSize
     ) {
-      return true; // Collision with world boundary
+      return true; // Outside the grid boundaries
     }
 
-    // Check if there's a wall at this position
+    // Check for a wall in the base layer
     try {
-      const cellSpriteId = baseLayer.layerData[gridZ][gridX];
+      const cellSpriteId = baseLayer.layerData[indexZ][indexX];
       if (cellSpriteId === "0" || cellSpriteId === "void") {
-        return false; // No wall here
+        return false;
       }
-
-      // Find the sprite for this cell
       const sprite = findSpriteById(cellSpriteId);
-
-      // Check for collision property
       return sprite && sprite.collision;
     } catch (e) {
       console.error("Error checking collision:", e);
-      return true; // Default to collision on error
+      return true;
     }
   },
 
   tick: function (time, delta) {
-    // Skip if not enabled or movement is locked
     if (!window.freeMoveEnabled || window.playerMovementLocked) {
       return;
     }
 
-    // Calculate direction from key input
+    // Reset and determine movement direction from keyboard input
     this.direction.set(0, 0, 0);
-
-    // Get keyboard input
     const keys = this.getKeysState();
-
-    // Handle WASD and arrow keys
     if (keys["w"] || keys["arrowup"]) this.direction.z -= 1;
     if (keys["s"] || keys["arrowdown"]) this.direction.z += 1;
     if (keys["a"] || keys["arrowleft"]) this.direction.x -= 1;
     if (keys["d"] || keys["arrowright"]) this.direction.x += 1;
 
-    // If we have joystick input, override keyboard input
+    // Override with joystick input if available
     if (this.joystickDirection && this.joystickDirection.length() > 0) {
       this.direction.copy(this.joystickDirection);
     }
 
-    // Skip if no movement
+    // No movement? Bail.
     if (this.direction.length() === 0) {
       return;
     }
 
-    // Normalize the direction vector for consistent speed
+    // Normalize direction and calculate movement velocity based on delta time
     if (this.direction.length() > 1) {
       this.direction.normalize();
     }
-
-    // Calculate movement speed based on delta time
-    const speed = this.data.speed * (delta / 16.667); // normalized for 60fps
-
-    // Get the camera's rotation
+    const speed = this.data.speed * (delta / 16.667);
     const rotation = this.el.object3D.rotation.y;
-
-    // Apply camera rotation to movement direction
     this.direction.applyAxisAngle(new THREE.Vector3(0, 1, 0), rotation);
-
-    // Calculate velocity
     this.velocity.copy(this.direction).multiplyScalar(speed);
 
-    // Store last safe position
-    this.lastSafePosition.copy(this.el.object3D.position);
+    // Calculate the new (potential) position
+    const potentialPosition = this.el.object3D.position
+      .clone()
+      .add(this.velocity);
 
-    // Update position
-    this.el.object3D.position.add(this.velocity);
+    // Define a margin offset (e.g., the collider radius)
+    const margin = 1;
+    // Offset the potential position by the normalized direction multiplied by margin
+    const collisionCheckPos = potentialPosition
+      .clone()
+      .add(this.direction.clone().normalize().multiplyScalar(margin));
 
-    // Check for collisions with walls
-    if (this.checkWallCollision(this.el.object3D.position)) {
-      // Revert to last safe position if collision
-      this.el.object3D.position.copy(this.lastSafePosition);
-    } else {
-      // Check for damage collisions using the grid-move component's method
+    // Only update if the collision check (with margin) passes
+    if (!this.checkWallCollision(collisionCheckPos)) {
+      this.lastSafePosition.copy(this.el.object3D.position);
+      this.el.object3D.position.copy(potentialPosition);
+
+      // Optionally check for damage collisions using grid-move's method
       const gridMove = this.el.components["grid-move"];
       if (gridMove) {
         gridMove.checkDamageCollision(
@@ -231,6 +224,8 @@ AFRAME.registerComponent("free-move", {
           this.el.object3D.position
         );
       }
+    } else {
+      // Optionally, log or handle the collision response here
     }
   },
 });
