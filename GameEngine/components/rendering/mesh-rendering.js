@@ -2,6 +2,7 @@ AFRAME.registerComponent("mesh-rendering", {
   schema: {
     src: { type: "string", default: "default.glb" },
     animation: { type: "string", default: "" }, // Optional animation to play
+    autoPlayAnimation: { type: "boolean", default: true }, // Auto-play first animation
     scale: { type: "vec3", default: { x: 1, y: 1, z: 1 } },
     position: { type: "vec3", default: { x: 0, y: 0, z: 0 } },
     rotation: { type: "vec3", default: { x: 0, y: 0, z: 0 } },
@@ -18,6 +19,9 @@ AFRAME.registerComponent("mesh-rendering", {
     // Create model entity
     this.modelEl = document.createElement("a-entity");
     this.el.appendChild(this.modelEl);
+
+    // Setup animation clock
+    this.animationClock = new THREE.Clock();
 
     // Set up the model
     this.setupMesh();
@@ -65,53 +69,98 @@ AFRAME.registerComponent("mesh-rendering", {
   onModelLoaded: function (evt) {
     console.log("Model loaded successfully");
 
-    // Get the model object
+    // Get the full loaded model instead of just the mesh
     const model = evt.detail.model;
 
-    // Apply any post-loading modifications
+    // Apply post-loading modifications
     model.traverse((node) => {
       if (node.isMesh) {
         node.castShadow = this.data.castShadow;
         node.receiveShadow = this.data.receiveShadow;
-
-        // Optionally improve material settings
-        if (node.material) {
-          // Enable pixel-perfect rendering if using standard materials
-          if (node.material.map) {
-            node.material.map.generateMipmaps = false;
-            node.material.map.minFilter = THREE.NearestFilter;
-            node.material.map.magFilter = THREE.NearestFilter;
-          }
+        if (node.material && node.material.map) {
+          node.material.map.generateMipmaps = false;
+          node.material.map.minFilter = THREE.NearestFilter;
+          node.material.map.magFilter = THREE.NearestFilter;
         }
       }
     });
 
-    // Play animation if specified
-    if (
-      this.data.animation &&
-      model.animations &&
-      model.animations.length > 0
-    ) {
-      // Find the animation mixer
-      const mixer = this.modelEl.getObject3D("mesh").animations;
-      if (mixer) {
-        // Find the specified animation
+    // Check if model has animations
+    if (model.animations && model.animations.length > 0) {
+      console.log(
+        `Model has ${model.animations.length} animations:`,
+        model.animations.map((a) => a.name).join(", ")
+      );
+
+      // Create animation mixer on the full model
+      if (!this.mixer) {
+        this.mixer = new THREE.AnimationMixer(model);
+        this.animationClock.start();
+        this.tick = AFRAME.utils.throttleTick(this.tickAnimation, 16, this);
+      }
+
+      // Play specific animation if provided
+      if (this.data.animation) {
         const clip = model.animations.find(
           (anim) => anim.name === this.data.animation
         );
         if (clip) {
-          const action = mixer.clipAction(clip);
-          action.play();
+          const action = this.mixer.clipAction(clip);
+          action.reset().play();
+          console.log(`Playing specified animation: ${this.data.animation}`);
         } else {
           console.warn(`Animation '${this.data.animation}' not found in model`);
+          if (this.data.autoPlayAnimation) {
+            this.playFirstAnimation(model.animations);
+          }
         }
       }
+      // Otherwise, auto-play the first animation if enabled
+      else if (this.data.autoPlayAnimation) {
+        this.playFirstAnimation(model.animations);
+      }
+    }
+  },
+
+  tickAnimation: function (time, timeDelta) {
+    // Update animation mixer on every frame
+    if (this.mixer) {
+      const delta = this.animationClock.getDelta();
+      this.mixer.update(delta);
+    }
+  },
+
+  tick: function (time, timeDelta) {
+    if (this.mixer) {
+      // Convert timeDelta from milliseconds to seconds.
+      const delta = timeDelta / 1000;
+      this.mixer.update(delta);
+    }
+  },
+
+  playFirstAnimation: function (animations) {
+    if (animations && animations.length > 0) {
+      const action = this.mixer.clipAction(animations[0]);
+      // Make sure animation loops and plays correctly
+      action.reset();
+      action.setLoop(THREE.LoopRepeat);
+      action.clampWhenFinished = false;
+      action.timeScale = 1.0;
+      action.enabled = true;
+      action.play();
+      console.log(`Auto-playing first animation: ${animations[0].name}`);
     }
   },
 
   handleSceneChange: function () {
     console.log("Scene changed, reloading mesh model");
     setTimeout(() => {
+      // Clean up any existing animation mixer
+      if (this.mixer) {
+        this.mixer.stopAllAction();
+        this.mixer = null;
+      }
+
       // Reinitialize the model
       if (this.modelEl) {
         this.el.removeChild(this.modelEl);
@@ -127,6 +176,12 @@ AFRAME.registerComponent("mesh-rendering", {
     if (oldData.src !== this.data.src) {
       this.modelPath = this.data.src;
       console.log("Model source changed, reloading:", this.modelPath);
+
+      // Clean up any existing animation mixer
+      if (this.mixer) {
+        this.mixer.stopAllAction();
+        this.mixer = null;
+      }
 
       // Remove old model and create new one
       if (this.modelEl) {
@@ -179,8 +234,16 @@ AFRAME.registerComponent("mesh-rendering", {
 
   remove: function () {
     // Clean up when the component is removed
+    if (this.mixer) {
+      this.mixer.stopAllAction();
+      this.mixer = null;
+    }
+
     if (this.modelEl) {
       this.el.removeChild(this.modelEl);
     }
+
+    // Remove the tick function
+    this.tick = null;
   },
 });
