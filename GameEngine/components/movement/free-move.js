@@ -1,4 +1,4 @@
-import { getCurrentScene } from "../../core/scene-manager.js";
+import { getCurrentScene, loadScene } from "../../core/scene-manager.js";
 import { findSpriteById } from "../../core/sprite-manager.js";
 
 AFRAME.registerComponent("free-move", {
@@ -160,6 +160,10 @@ AFRAME.registerComponent("free-move", {
         return false;
       }
       const sprite = findSpriteById(cellSpriteId);
+      if (sprite && sprite.changeScene) {
+        loadScene(sprite.changeScene);
+        return true;
+      }
       return sprite && sprite.collision;
     } catch (e) {
       console.error("Error checking collision:", e);
