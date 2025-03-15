@@ -158,6 +158,10 @@ export function createPlayer() {
   rightHandEl.setAttribute("oculus-touch-controls", "hand: right");
   playerEl.appendChild(rightHandEl);
 
+  playerEl.setAttribute("free-move", { active: true });
+  playerEl.setAttribute("grid-move", { active: false });
+  playerEl.setAttribute("movement-toggle", "");
+
   return playerEl;
 }
 

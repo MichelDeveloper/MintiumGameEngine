@@ -11,8 +11,15 @@ AFRAME.registerComponent("grid-move", {
   },
 
   init: function () {
+    // Initialize global flag if not exists
+    if (typeof window.gridMoveEnabled === "undefined") {
+      window.gridMoveEnabled = false;
+    }
+
     this.el.addEventListener("axismove", this.onAxisMove.bind(this));
     this.canExecuteEvent = true;
+
+    console.log("Grid-move component initialized");
   },
 
   checkDamageCollision: function (currentPosition, potentialPosition) {
@@ -122,8 +129,12 @@ AFRAME.registerComponent("grid-move", {
   },
 
   onAxisMove: function (evt) {
-    // First check the global lock
+    // First check the global enable flag
+    if (!window.gridMoveEnabled) return;
+
+    // Then check the global lock
     if (window.playerMovementLocked) return;
+
     // Then check the component lock
     if (!this.canExecuteEvent) return;
 

@@ -19,6 +19,8 @@ import "./components/gameplay/life-system.js";
 import "./components/gameplay/player-health.js";
 import "./components/rendering/gaussian-splatting.js";
 import "./components/rendering/mesh-rendering.js";
+import "./components/movement/movement-toggle.js";
+import "./components/movement/free-move.js";
 
 let gameData;
 

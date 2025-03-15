@@ -32,15 +32,40 @@ AFRAME.registerComponent("custom-keyboard-controls", {
     const player = document.getElementById("player");
     if (!player) return;
 
-    // Handle movement (WASD and Arrow keys)
-    let directionVector = new THREE.Vector3(0, 0, 0);
+    // Handle movement (WASD and Arrow keys) only if grid mode is enabled
+    if (window.gridMoveEnabled) {
+      let directionVector = new THREE.Vector3(0, 0, 0);
 
-    if (this.keys["w"] || this.keys["arrowup"]) directionVector.z = -1;
-    if (this.keys["s"] || this.keys["arrowdown"]) directionVector.z = 1;
-    if (this.keys["a"] || this.keys["arrowleft"]) directionVector.x = -1;
-    if (this.keys["d"] || this.keys["arrowright"]) directionVector.x = 1;
+      if (this.keys["w"] || this.keys["arrowup"]) directionVector.z = -1;
+      if (this.keys["s"] || this.keys["arrowdown"]) directionVector.z = 1;
+      if (this.keys["a"] || this.keys["arrowleft"]) directionVector.x = -1;
+      if (this.keys["d"] || this.keys["arrowright"]) directionVector.x = 1;
 
-    // Handle rotation (Q and E keys)
+      // Handle movement if direction is set
+      if (directionVector.length() > 0) {
+        const gridBlockSize = 10;
+        directionVector.multiplyScalar(gridBlockSize);
+
+        const currentPosition = new THREE.Vector3().copy(
+          player.object3D.position
+        );
+        const potentialPosition = currentPosition.clone().add(directionVector);
+
+        // Get grid-move component and use its collision check
+        const gridMove = player.components["grid-move"];
+        if (gridMove) {
+          // Check wall collisions first
+          const shouldMove = !gridMove.checkWallCollision(potentialPosition);
+          if (shouldMove) {
+            gridMove.checkDamageCollision(currentPosition, potentialPosition);
+            player.object3D.position.copy(potentialPosition);
+          }
+        }
+        this.addCooldown();
+      }
+    }
+
+    // Handle rotation (Q and E keys) for both modes
     if (this.keys["q"]) {
       const currentRotation = player.getAttribute("rotation");
       player.setAttribute("rotation", {
@@ -57,29 +82,6 @@ AFRAME.registerComponent("custom-keyboard-controls", {
         y: currentRotation.y - 90,
         z: currentRotation.z,
       });
-      this.addCooldown();
-    }
-
-    // Handle movement if direction is set
-    if (directionVector.length() > 0) {
-      const gridBlockSize = 10;
-      directionVector.multiplyScalar(gridBlockSize);
-
-      const currentPosition = new THREE.Vector3().copy(
-        player.object3D.position
-      );
-      const potentialPosition = currentPosition.clone().add(directionVector);
-
-      // Get grid-move component and use its collision check
-      const gridMove = player.components["grid-move"];
-      if (gridMove) {
-        // Check wall collisions first
-        const shouldMove = !gridMove.checkWallCollision(potentialPosition);
-        if (shouldMove) {
-          gridMove.checkDamageCollision(currentPosition, potentialPosition);
-          player.object3D.position.copy(potentialPosition);
-        }
-      }
       this.addCooldown();
     }
   },
