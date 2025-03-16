@@ -40,8 +40,8 @@ document.addEventListener("gameDataLoaded", function () {
 
   let mode = "draw";
   let selectedColor = colorPicker.value;
-  let textureFileName = null;
-  let attackTextureFileName = null;
+  let textureFileName = "";
+  let attackTextureFileName = "";
 
   // Populate the changeSceneSelector with available scenes
   function populateSceneSelector() {
@@ -307,6 +307,11 @@ document.addEventListener("gameDataLoaded", function () {
     }
   });
 
+  // Add event listener for main texture upload
+  textureUpload.addEventListener("change", function () {
+    textureFileName = this.value;
+  });
+
   saveSpriteBtn.addEventListener("click", function () {
     const spriteId = spriteIdInput.value.trim();
 
@@ -454,6 +459,10 @@ document.addEventListener("gameDataLoaded", function () {
       if (selectedSprite.textureType === "texture") {
         textureUpload.value = selectedSprite.texturePath || "";
         attackTextureUpload.value = selectedSprite.attackImage || "";
+
+        // Update the filename variables when loading
+        textureFileName = selectedSprite.texturePath || "";
+        attackTextureFileName = selectedSprite.attackImage || "";
       } else {
         populateGrid(selectedSprite.pixels);
       }
@@ -471,8 +480,6 @@ document.addEventListener("gameDataLoaded", function () {
 
     // Update the UI based on sprite type
     updateSpriteTypeUI(selectedSprite.type);
-
-    // Any other code that was in the original event listener
   });
 
   // Update sprite type selector to use the new function
