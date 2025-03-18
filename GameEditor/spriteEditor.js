@@ -4,8 +4,183 @@ import {
   reloadGame,
   getCurrentScene,
 } from "../GameEngine/core/scene-manager.js";
+import { ComponentRegistry } from "../GameEngine/core/component-registry.js";
+
+// Define just the components we want to make dynamic
+const dynamicComponents = [
+  {
+    id: "whenNearShowText",
+    type: "textarea",
+    label: "Show Text When Near",
+    inputId: "whenNearShowText",
+    placeholder: "Text to show when player is near this sprite",
+    description: "This text will appear when the player approaches the sprite",
+    aframeComponent: "show-text-near",
+  },
+  {
+    id: "hudText",
+    type: "textarea",
+    label: "HUD Text",
+    inputId: "hudText",
+    placeholder: "Text to show on player HUD",
+    description: "This text will appear on the player's heads-up display",
+    aframeComponent: "show-hud-text",
+  },
+];
+
+// This function will generate just these two components dynamically
+function renderComponentsFromRegistry() {
+  const container = document.getElementById("dynamic-sprite-components");
+  if (!container) return;
+
+  // Clear existing content
+  container.innerHTML = "";
+
+  // Render each component from the registry
+  ComponentRegistry.availableComponents.forEach((component) => {
+    // Create a card-like container for the component
+    const componentCard = document.createElement("div");
+    componentCard.className = "component-card";
+
+    // Add a header with the component name
+    const header = document.createElement("div");
+    header.className = "component-header";
+
+    // Add an icon based on the component type
+    const icon = document.createElement("i");
+    icon.className = component.icon || "bi-gear";
+    header.appendChild(icon);
+
+    // Add the label
+    const label = document.createElement("span");
+    label.textContent = component.label;
+    header.appendChild(label);
+
+    componentCard.appendChild(header);
+
+    // Add the description
+    const description = document.createElement("div");
+    description.className = "component-description";
+    description.textContent = component.description;
+    componentCard.appendChild(description);
+
+    // Create input elements for each property in the schema
+    Object.entries(component.schema).forEach(([propName, propSchema]) => {
+      const propContainer = document.createElement("div");
+      propContainer.className = "component-property";
+
+      // Add label for the property
+      const propLabel = document.createElement("label");
+      propLabel.textContent = propSchema.label || propName;
+      propContainer.appendChild(propLabel);
+
+      // Create appropriate input based on property type
+      let inputElement;
+
+      switch (propSchema.type) {
+        case "string":
+          if (propName === "text") {
+            inputElement = document.createElement("textarea");
+            inputElement.rows = 3;
+          } else {
+            inputElement = document.createElement("input");
+            inputElement.type = "text";
+          }
+          break;
+
+        case "number":
+          inputElement = document.createElement("input");
+          inputElement.type = "number";
+          inputElement.step = "any";
+          if (propSchema.min !== undefined) inputElement.min = propSchema.min;
+          if (propSchema.max !== undefined) inputElement.max = propSchema.max;
+          break;
+
+        case "boolean":
+          const checkboxContainer = document.createElement("div");
+          checkboxContainer.className = "form-check";
+
+          inputElement = document.createElement("input");
+          inputElement.type = "checkbox";
+          inputElement.className = "form-check-input";
+
+          checkboxContainer.appendChild(inputElement);
+          propContainer.appendChild(checkboxContainer);
+          break;
+
+        default:
+          inputElement = document.createElement("input");
+          inputElement.type = "text";
+      }
+
+      // Set common attributes
+      if (propSchema.type !== "boolean") {
+        inputElement.className = "form-control";
+        inputElement.placeholder = `Enter ${propSchema.label || propName}...`;
+        propContainer.appendChild(inputElement);
+      }
+
+      // Set unique ID for accessing this input later
+      inputElement.id = `${component.name}-${propName}`;
+
+      componentCard.appendChild(propContainer);
+    });
+
+    container.appendChild(componentCard);
+  });
+
+  // Add styling
+  if (!document.getElementById("dynamic-component-styles")) {
+    const style = document.createElement("style");
+    style.id = "dynamic-component-styles";
+    style.textContent = `
+      .component-container {
+        display: flex;
+        flex-direction: column;
+        gap: 1.5rem;
+        margin-top: 1rem;
+      }
+      .component-card {
+        border: 1px solid var(--border-color, #dee2e6);
+        border-radius: 0.5rem;
+        padding: 1rem;
+        background-color: var(--section-bg, #2a2a2a);
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        transition: box-shadow 0.3s ease;
+      }
+      .component-card:hover {
+        box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+      }
+      .component-header {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        margin-bottom: 0.5rem;
+        font-weight: bold;
+        color: var(--bs-primary, #0d6efd);
+      }
+      .component-description {
+        margin-bottom: 0.75rem;
+        font-size: 0.875rem;
+        opacity: 0.8;
+      }
+      .component-property {
+        margin-bottom: 0.75rem;
+      }
+      .component-property label {
+        display: block;
+        margin-bottom: 0.25rem;
+        font-size: 0.9rem;
+      }
+    `;
+    document.head.appendChild(style);
+  }
+}
 
 document.addEventListener("gameDataLoaded", function () {
+  // Render dynamic components first, before getting element references
+  renderComponentsFromRegistry();
+
   const grid = document.querySelector(".grid");
   const generateCodeBtn = document.getElementById("generateCode");
   const resetGridBtn = document.getElementById("resetGrid");
@@ -326,8 +501,6 @@ document.addEventListener("gameDataLoaded", function () {
       type: spriteTypeSelector.value,
       collision: spriteCollisionCheckbox.checked,
       changeScene: changeSceneSelector.value.trim() || "",
-      whenNearShowText: whenNearShowTextArea.value.trim() || "",
-      hudText: hudTextArea.value.trim() || "",
       size:
         spriteSizeSelector.value === "custom"
           ? undefined
@@ -356,6 +529,51 @@ document.addEventListener("gameDataLoaded", function () {
         newSpriteData.attackImage = attackTextureFileName;
       } else {
         newSpriteData.pixels = collectPixelData();
+      }
+    }
+
+    // Collect data from legacy fields for backward compatibility
+    newSpriteData.whenNearShowText = whenNearShowTextArea.value.trim();
+    newSpriteData.hudText = hudTextArea.value.trim();
+
+    // Also collect data from component inputs if they exist
+    const textNearTextInput = document.getElementById("show-text-near-text");
+    const textNearDistanceInput = document.getElementById(
+      "show-text-near-distance"
+    );
+
+    if (textNearTextInput && textNearTextInput.value.trim()) {
+      // Update both the legacy field and the component data
+      newSpriteData.whenNearShowText = textNearTextInput.value.trim();
+
+      // Only add component data if we have text
+      if (newSpriteData.whenNearShowText) {
+        newSpriteData["show-text-near"] = {
+          text: newSpriteData.whenNearShowText,
+          distance: textNearDistanceInput
+            ? parseFloat(textNearDistanceInput.value) || 2
+            : 2,
+        };
+      }
+    }
+
+    const hudTextInput = document.getElementById("show-hud-text-text");
+    const hudDistanceInput = document.getElementById("show-hud-text-distance");
+    const viewAngleInput = document.getElementById("show-hud-text-viewAngle");
+
+    if (hudTextInput && hudTextInput.value.trim()) {
+      // Update both the legacy field and the component data
+      newSpriteData.hudText = hudTextInput.value.trim();
+
+      // Only add component data if we have text
+      if (newSpriteData.hudText) {
+        newSpriteData["show-hud-text"] = {
+          text: newSpriteData.hudText,
+          distance: hudDistanceInput
+            ? parseFloat(hudDistanceInput.value) || 2
+            : 2,
+          viewAngle: viewAngleInput ? viewAngleInput.checked : true,
+        };
       }
     }
 
@@ -445,8 +663,42 @@ document.addEventListener("gameDataLoaded", function () {
     spriteTypeSelector.value = selectedSprite.type || "block";
     spriteCollisionCheckbox.checked = selectedSprite.collision || false;
     changeSceneSelector.value = selectedSprite.changeScene || "";
+
+    // Update the legacy text fields for backward compatibility
     whenNearShowTextArea.value = selectedSprite.whenNearShowText || "";
     hudTextArea.value = selectedSprite.hudText || "";
+
+    // Update component inputs from the registry
+    // First set the show-text-near component (using legacy field for compatibility)
+    const textNearTextInput = document.getElementById("show-text-near-text");
+    if (textNearTextInput) {
+      textNearTextInput.value = selectedSprite.whenNearShowText || "";
+    }
+
+    const textNearDistanceInput = document.getElementById(
+      "show-text-near-distance"
+    );
+    if (textNearDistanceInput) {
+      textNearDistanceInput.value =
+        selectedSprite["show-text-near"]?.distance || 2;
+    }
+
+    // Then set the show-hud-text component
+    const hudTextInput = document.getElementById("show-hud-text-text");
+    if (hudTextInput) {
+      hudTextInput.value = selectedSprite.hudText || "";
+    }
+
+    const hudDistanceInput = document.getElementById("show-hud-text-distance");
+    if (hudDistanceInput) {
+      hudDistanceInput.value = selectedSprite["show-hud-text"]?.distance || 2;
+    }
+
+    const viewAngleInput = document.getElementById("show-hud-text-viewAngle");
+    if (viewAngleInput) {
+      viewAngleInput.checked =
+        selectedSprite["show-hud-text"]?.viewAngle !== false; // Default to true
+    }
 
     // Set type-specific properties
     if (selectedSprite.type === "gaussian") {
