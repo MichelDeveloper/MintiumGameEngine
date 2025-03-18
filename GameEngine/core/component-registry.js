@@ -26,6 +26,21 @@ export const ComponentRegistry = {
       description: "Shows text on player HUD when near the object",
       icon: "bi-display",
     },
+    {
+      name: "life-system",
+      label: "Health System",
+      schema: {
+        maxLife: { type: "number", default: 100, label: "Max Health", min: 0 },
+        currentLife: {
+          type: "number",
+          default: 100,
+          label: "Current Health",
+          min: 0,
+        },
+      },
+      description: "Adds health and damage capabilities to this object",
+      icon: "bi-heart-fill",
+    },
   ],
 
   // Get component definition by name

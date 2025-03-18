@@ -555,6 +555,43 @@ document.addEventListener("gameDataLoaded", function () {
       }
     }
 
+    // Get life-system component values
+    const maxLifeInput = document.getElementById("life-system-maxLife");
+    const currentLifeInput = document.getElementById("life-system-currentLife");
+
+    if (maxLifeInput && parseFloat(maxLifeInput.value) > 0) {
+      // Set the legacy lifePoints property for backward compatibility
+      newSpriteData.lifePoints = parseFloat(maxLifeInput.value);
+
+      // Also add the component data
+      newSpriteData["life-system"] = {
+        maxLife: parseFloat(maxLifeInput.value),
+        currentLife:
+          currentLifeInput && parseFloat(currentLifeInput.value) > 0
+            ? parseFloat(currentLifeInput.value)
+            : parseFloat(maxLifeInput.value),
+      };
+    } else {
+      // If max life is 0 or empty, ensure lifePoints is set to 0
+      newSpriteData.lifePoints = 0;
+    }
+
+    // If we're using the legacy lifePoints input field, ensure it's used
+    const lifePointsInput = document.getElementById("spriteLifePoints");
+    if (lifePointsInput && parseFloat(lifePointsInput.value) > 0) {
+      const lifePoints = parseFloat(lifePointsInput.value);
+      // Only override if this value is higher (to avoid conflicts)
+      if (!newSpriteData.lifePoints || lifePoints > newSpriteData.lifePoints) {
+        newSpriteData.lifePoints = lifePoints;
+
+        // Also update the component data
+        newSpriteData["life-system"] = {
+          maxLife: lifePoints,
+          currentLife: lifePoints,
+        };
+      }
+    }
+
     // Update or add the sprite
     const existingIndex = globalGameData.sprites.findIndex(
       (sprite) => sprite.id === spriteId
@@ -676,6 +713,31 @@ document.addEventListener("gameDataLoaded", function () {
     if (viewAngleInput) {
       viewAngleInput.checked =
         selectedSprite["show-hud-text"]?.viewAngle !== false; // Default to true
+    }
+
+    // Update the life-system component fields
+    const maxLifeInput = document.getElementById("life-system-maxLife");
+    if (maxLifeInput) {
+      // Try to get value from the component data first, then fall back to legacy property
+      maxLifeInput.value =
+        selectedSprite["life-system"]?.maxLife ||
+        selectedSprite.lifePoints ||
+        0;
+    }
+
+    const currentLifeInput = document.getElementById("life-system-currentLife");
+    if (currentLifeInput) {
+      // Try to get value from the component data first, then fall back to legacy property
+      currentLifeInput.value =
+        selectedSprite["life-system"]?.currentLife ||
+        selectedSprite.lifePoints ||
+        0;
+    }
+
+    // Also update the legacy lifePoints field if it exists
+    const lifePointsInput = document.getElementById("spriteLifePoints");
+    if (lifePointsInput) {
+      lifePointsInput.value = selectedSprite.lifePoints || 0;
     }
 
     // Set type-specific properties
