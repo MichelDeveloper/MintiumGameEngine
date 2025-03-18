@@ -31,7 +31,7 @@ export async function generateTexture(sprite, isAttacking = false) {
 
     try {
       // Create proper path to the texture
-      const fullPath = `/Resources/Textures/${imagePath}`;
+      const fullPath = `Resources/Textures/${imagePath}`;
 
       // Cache the result before returning
       textureCache.set(cacheKey, fullPath);

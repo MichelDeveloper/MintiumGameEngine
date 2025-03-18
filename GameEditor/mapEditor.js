@@ -390,7 +390,7 @@ document.addEventListener("gameDataLoaded", function () {
         await new Promise((resolve, reject) => {
           img.onload = resolve;
           img.onerror = reject;
-          img.src = `/Resources/Textures/${sprite.texturePath}`;
+          img.src = `Resources/Textures/${sprite.texturePath}`;
         });
         ctx.drawImage(img, 0, 0, 40, 40);
         return canvas.toDataURL();
