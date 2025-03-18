@@ -6,28 +6,6 @@ import {
 } from "../GameEngine/core/scene-manager.js";
 import { ComponentRegistry } from "../GameEngine/core/component-registry.js";
 
-// Define just the components we want to make dynamic
-const dynamicComponents = [
-  {
-    id: "whenNearShowText",
-    type: "textarea",
-    label: "Show Text When Near",
-    inputId: "whenNearShowText",
-    placeholder: "Text to show when player is near this sprite",
-    description: "This text will appear when the player approaches the sprite",
-    aframeComponent: "show-text-near",
-  },
-  {
-    id: "hudText",
-    type: "textarea",
-    label: "HUD Text",
-    inputId: "hudText",
-    placeholder: "Text to show on player HUD",
-    description: "This text will appear on the player's heads-up display",
-    aframeComponent: "show-hud-text",
-  },
-];
-
 // This function will generate just these two components dynamically
 function renderComponentsFromRegistry() {
   const container = document.getElementById("dynamic-sprite-components");
