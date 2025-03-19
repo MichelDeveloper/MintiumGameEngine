@@ -175,14 +175,12 @@ document.addEventListener("gameDataLoaded", function () {
     "spriteCollisionCheckbox"
   );
   const changeSceneSelector = document.getElementById("changeSceneSelector");
-  const whenNearShowTextArea = document.getElementById("whenNearShowText");
   const textureTypeSelector = document.getElementById("textureTypeSelector");
   const textureUpload = document.getElementById("textureUpload");
   const attackTextureUpload = document.getElementById("attackTextureUpload");
   const attackTextureContainer = document.getElementById(
     "attackTextureContainer"
   );
-  const hudTextArea = document.getElementById("hudText");
   const spriteSizeSelector = document.getElementById("spriteSizeSelector");
   const gaussianPathInput = document.getElementById("gaussianPath");
   const meshPathInput = document.getElementById("meshPath");
@@ -230,11 +228,13 @@ document.addEventListener("gameDataLoaded", function () {
     textureTypeSelector.value = firstSprite.textureType || "pixels";
     spriteCollisionCheckbox.checked = firstSprite.collision || false;
     changeSceneSelector.value = firstSprite.changeScene || "";
-    whenNearShowTextArea.value = firstSprite.whenNearShowText || "";
-    hudTextArea.value = firstSprite.hudText || "";
     spriteSizeSelector.value = firstSprite.size || "normal";
-    document.getElementById("spriteLifePoints").value =
-      firstSprite.lifePoints || 0;
+
+    // Update to use component-based life system instead of legacy lifePoints
+    const lifePointsInput = document.getElementById("spriteLifePoints");
+    if (lifePointsInput) {
+      lifePointsInput.value = firstSprite["life-system"]?.maxLife || 0;
+    }
 
     if (firstSprite.textureType === "texture") {
       textureFileName = firstSprite.texturePath;
@@ -259,7 +259,6 @@ document.addEventListener("gameDataLoaded", function () {
     spriteTypeSelector.value = "block";
     spriteCollisionCheckbox.checked = false;
     changeSceneSelector.value = "";
-    whenNearShowTextArea.value = "";
     populateGrid(Array(64).fill("rgba(0,0,0,0)"));
   }
 
@@ -511,10 +510,6 @@ document.addEventListener("gameDataLoaded", function () {
     }
 
     // Collect data from legacy fields for backward compatibility
-    newSpriteData.whenNearShowText = whenNearShowTextArea.value.trim();
-    newSpriteData.hudText = hudTextArea.value.trim();
-
-    // Also collect data from component inputs if they exist
     const textNearTextInput = document.getElementById("show-text-near-text");
     const textNearDistanceInput = document.getElementById(
       "show-text-near-distance"
@@ -679,15 +674,11 @@ document.addEventListener("gameDataLoaded", function () {
     spriteCollisionCheckbox.checked = selectedSprite.collision || false;
     changeSceneSelector.value = selectedSprite.changeScene || "";
 
-    // Update the legacy text fields for backward compatibility
-    whenNearShowTextArea.value = selectedSprite.whenNearShowText || "";
-    hudTextArea.value = selectedSprite.hudText || "";
-
     // Update component inputs from the registry
-    // First set the show-text-near component (using legacy field for compatibility)
+    // Remove the legacy-component conversion and use pure component data
     const textNearTextInput = document.getElementById("show-text-near-text");
     if (textNearTextInput) {
-      textNearTextInput.value = selectedSprite.whenNearShowText || "";
+      textNearTextInput.value = selectedSprite["show-text-near"]?.text || "";
     }
 
     const textNearDistanceInput = document.getElementById(
@@ -701,7 +692,7 @@ document.addEventListener("gameDataLoaded", function () {
     // Then set the show-hud-text component
     const hudTextInput = document.getElementById("show-hud-text-text");
     if (hudTextInput) {
-      hudTextInput.value = selectedSprite.hudText || "";
+      hudTextInput.value = selectedSprite["show-hud-text"]?.text || "";
     }
 
     const hudDistanceInput = document.getElementById("show-hud-text-distance");
@@ -718,26 +709,12 @@ document.addEventListener("gameDataLoaded", function () {
     // Update the life-system component fields
     const maxLifeInput = document.getElementById("life-system-maxLife");
     if (maxLifeInput) {
-      // Try to get value from the component data first, then fall back to legacy property
-      maxLifeInput.value =
-        selectedSprite["life-system"]?.maxLife ||
-        selectedSprite.lifePoints ||
-        0;
+      maxLifeInput.value = selectedSprite["life-system"]?.maxLife || 0;
     }
 
     const currentLifeInput = document.getElementById("life-system-currentLife");
     if (currentLifeInput) {
-      // Try to get value from the component data first, then fall back to legacy property
-      currentLifeInput.value =
-        selectedSprite["life-system"]?.currentLife ||
-        selectedSprite.lifePoints ||
-        0;
-    }
-
-    // Also update the legacy lifePoints field if it exists
-    const lifePointsInput = document.getElementById("spriteLifePoints");
-    if (lifePointsInput) {
-      lifePointsInput.value = selectedSprite.lifePoints || 0;
+      currentLifeInput.value = selectedSprite["life-system"]?.currentLife || 0;
     }
 
     // Set type-specific properties

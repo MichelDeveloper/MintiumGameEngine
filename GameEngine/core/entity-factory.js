@@ -80,16 +80,17 @@ export async function createCube(x, y, z, spriteId, type) {
     }
   }
 
-  if (sprite.lifePoints > 0) {
+  if (sprite["life-system"] && sprite["life-system"].maxLife > 0) {
     console.log(
       "Adding life system to sprite:",
       sprite.id,
       "with life:",
-      sprite.lifePoints
+      sprite["life-system"].maxLife
     );
     cubeEl.setAttribute("life-system", {
-      maxLife: sprite.lifePoints,
-      currentLife: sprite.lifePoints,
+      maxLife: sprite["life-system"].maxLife,
+      currentLife:
+        sprite["life-system"].currentLife || sprite["life-system"].maxLife,
     });
   }
 
@@ -98,18 +99,26 @@ export async function createCube(x, y, z, spriteId, type) {
     cubeEl.setAttribute("pixelated", "");
   }
 
-  if (sprite.whenNearShowText && sprite.collision) {
+  if (
+    sprite["show-text-near"] &&
+    sprite["show-text-near"].text &&
+    sprite.collision
+  ) {
     cubeEl.setAttribute("show-text-near", {
-      text: sprite.whenNearShowText,
-      distance: 2,
+      text: sprite["show-text-near"].text,
+      distance: sprite["show-text-near"].distance || 2,
     });
   }
 
-  if (sprite.hudText && sprite.collision) {
+  if (
+    sprite["show-hud-text"] &&
+    sprite["show-hud-text"].text &&
+    sprite.collision
+  ) {
     cubeEl.setAttribute("show-hud-text", {
-      text: sprite.hudText,
-      distance: 2,
-      viewAngle: true,
+      text: sprite["show-hud-text"].text,
+      distance: sprite["show-hud-text"].distance || 2,
+      viewAngle: sprite["show-hud-text"].viewAngle !== false,
     });
   }
 
