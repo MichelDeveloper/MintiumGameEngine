@@ -16,6 +16,9 @@ function renderComponentsFromRegistry() {
 
   // Render each component from the registry
   ComponentRegistry.availableComponents.forEach((component) => {
+    // Skip disabled components
+    if (component.enabled === false) return;
+
     // Create a card-like container for the component
     const componentCard = document.createElement("div");
     componentCard.className = "component-card";
@@ -42,68 +45,49 @@ function renderComponentsFromRegistry() {
     description.textContent = component.description;
     componentCard.appendChild(description);
 
-    // Create input elements for each property in the schema
-    Object.entries(component.schema).forEach(([propName, propSchema]) => {
-      const propContainer = document.createElement("div");
-      propContainer.className = "component-property";
+    // Create inputs for each property in the schema
+    const propertiesContainer = document.createElement("div");
+    propertiesContainer.className = "component-properties";
 
-      // Add label for the property
-      const propLabel = document.createElement("label");
-      propLabel.textContent = propSchema.label || propName;
-      propContainer.appendChild(propLabel);
+    Object.entries(component.schema).forEach(([propName, schema]) => {
+      const propertyDiv = document.createElement("div");
+      propertyDiv.className = "component-property";
 
-      // Create appropriate input based on property type
+      // Add label
+      const propertyLabel = document.createElement("label");
+      propertyLabel.textContent = schema.label || propName;
+      propertyDiv.appendChild(propertyLabel);
+
+      // Create appropriate input based on type
       let inputElement;
 
-      switch (propSchema.type) {
-        case "string":
-          if (propName === "text") {
-            inputElement = document.createElement("textarea");
-            inputElement.rows = 3;
-          } else {
-            inputElement = document.createElement("input");
-            inputElement.type = "text";
-          }
-          break;
-
-        case "number":
-          inputElement = document.createElement("input");
-          inputElement.type = "number";
-          inputElement.step = "any";
-          if (propSchema.min !== undefined) inputElement.min = propSchema.min;
-          if (propSchema.max !== undefined) inputElement.max = propSchema.max;
-          break;
-
-        case "boolean":
-          const checkboxContainer = document.createElement("div");
-          checkboxContainer.className = "form-check";
-
-          inputElement = document.createElement("input");
-          inputElement.type = "checkbox";
-          inputElement.className = "form-check-input";
-
-          checkboxContainer.appendChild(inputElement);
-          propContainer.appendChild(checkboxContainer);
-          break;
-
-        default:
-          inputElement = document.createElement("input");
-          inputElement.type = "text";
+      if (schema.type === "boolean") {
+        inputElement = document.createElement("input");
+        inputElement.type = "checkbox";
+        inputElement.checked = schema.default;
+      } else if (schema.type === "number") {
+        inputElement = document.createElement("input");
+        inputElement.type = "number";
+        inputElement.value = schema.default;
+        if (schema.min !== undefined) inputElement.min = schema.min;
+        if (schema.max !== undefined) inputElement.max = schema.max;
+      } else {
+        // Default to text input
+        inputElement = document.createElement("input");
+        inputElement.type = "text";
+        inputElement.value = schema.default;
+        inputElement.placeholder =
+          schema.placeholder || `Enter ${schema.label || propName}`;
       }
 
-      // Set common attributes
-      if (propSchema.type !== "boolean") {
-        inputElement.className = "form-control";
-        inputElement.placeholder = `Enter ${propSchema.label || propName}...`;
-        propContainer.appendChild(inputElement);
-      }
+      // Important: Set a consistent ID pattern for finding these inputs later
+      inputElement.id = ComponentRegistry.getInputId(component.name, propName);
+      propertyDiv.appendChild(inputElement);
 
-      // Set unique ID for accessing this input later
-      inputElement.id = `${component.name}-${propName}`;
-
-      componentCard.appendChild(propContainer);
+      propertiesContainer.appendChild(propertyDiv);
     });
 
+    componentCard.appendChild(propertiesContainer);
     container.appendChild(componentCard);
   });
 
@@ -153,6 +137,87 @@ function renderComponentsFromRegistry() {
     `;
     document.head.appendChild(style);
   }
+}
+
+// Add this function after renderComponentsFromRegistry
+function loadComponentValues(sprite) {
+  // For each component in the registry
+  ComponentRegistry.getEnabledComponents().forEach((component) => {
+    // For each property in the component schema
+    Object.entries(component.schema).forEach(([propName, schema]) => {
+      // Get the input element by its ID
+      const inputId = ComponentRegistry.getInputId(component.name, propName);
+      const inputElement = document.getElementById(inputId);
+
+      if (inputElement) {
+        // If the sprite has this component data, use it; otherwise use default
+        if (
+          sprite[component.name] &&
+          sprite[component.name][propName] !== undefined
+        ) {
+          // Handle different input types
+          if (schema.type === "boolean" && inputElement.type === "checkbox") {
+            inputElement.checked = sprite[component.name][propName];
+          } else {
+            inputElement.value = sprite[component.name][propName];
+          }
+        } else {
+          // Use default value from schema
+          if (schema.type === "boolean" && inputElement.type === "checkbox") {
+            inputElement.checked = schema.default;
+          } else {
+            inputElement.value = schema.default;
+          }
+        }
+      }
+    });
+  });
+}
+
+// Add this function to collect component data during sprite saving
+function collectComponentData(spriteData) {
+  ComponentRegistry.getEnabledComponents().forEach((component) => {
+    // Initialize empty component data
+    const componentData = {};
+    let hasData = false;
+
+    // For each property in the schema
+    Object.entries(component.schema).forEach(([propName, schema]) => {
+      const inputId = ComponentRegistry.getInputId(component.name, propName);
+      const inputElement = document.getElementById(inputId);
+
+      if (inputElement) {
+        let value;
+
+        // Handle different input types
+        if (schema.type === "boolean" && inputElement.type === "checkbox") {
+          value = inputElement.checked;
+        } else if (schema.type === "number") {
+          value = parseFloat(inputElement.value) || schema.default;
+        } else {
+          value = inputElement.value.trim();
+        }
+
+        // Check if this is a non-empty value (for text fields)
+        if (schema.type === "string") {
+          if (value) {
+            hasData = true;
+          }
+        } else {
+          hasData = true;
+        }
+
+        componentData[propName] = value;
+      }
+    });
+
+    // Only add component data if it has meaningful values
+    if (hasData) {
+      spriteData[component.name] = componentData;
+    }
+  });
+
+  return spriteData;
 }
 
 document.addEventListener("gameDataLoaded", function () {
@@ -465,131 +530,58 @@ document.addEventListener("gameDataLoaded", function () {
   });
 
   saveSpriteBtn.addEventListener("click", function () {
+    // Get the sprite ID
     const spriteId = spriteIdInput.value.trim();
-
     if (!spriteId) {
-      alert("Please enter a valid Sprite ID!");
+      alert("Please enter a sprite ID.");
       return;
     }
 
-    // Create new sprite data
-    const newSpriteData = {
+    // Get other basic properties
+    const spriteType = spriteTypeSelector.value;
+    const collision = spriteCollisionCheckbox.checked;
+    const changeScene = changeSceneSelector.value;
+
+    // Create the new sprite data object
+    let newSpriteData = {
       id: spriteId,
-      type: spriteTypeSelector.value,
-      collision: spriteCollisionCheckbox.checked,
-      changeScene: changeSceneSelector.value.trim() || "",
-      size:
-        spriteSizeSelector.value === "custom"
-          ? undefined
-          : spriteSizeSelector.value,
-      lifePoints:
-        parseInt(document.getElementById("spriteLifePoints").value) || 0,
+      type: spriteType,
+      collision: collision,
+      changeScene: changeScene,
     };
 
-    // Add custom size if selected
-    if (spriteSizeSelector.value === "custom") {
-      newSpriteData.customSize = parseFloat(customSizeInput.value) || 10;
-    }
+    // Collect component data dynamically
+    newSpriteData = collectComponentData(newSpriteData);
 
-    // Handle gaussian splatting specific data
-    if (spriteTypeSelector.value === "gaussian") {
+    // Handle type-specific data
+    if (spriteType === "gaussian") {
       newSpriteData.gaussianPath = gaussianPathInput.value.trim();
-    } else if (spriteTypeSelector.value === "mesh") {
+    } else if (spriteType === "mesh") {
       newSpriteData.meshPath = meshPathInput.value.trim();
       newSpriteData.meshYOffset = parseFloat(meshYOffsetInput.value) || 0;
     } else {
-      // Handle texture type specific data
-      newSpriteData.textureType = textureTypeSelector.value;
+      const textureType = textureTypeSelector.value;
+      newSpriteData.textureType = textureType;
 
-      if (textureTypeSelector.value === "texture") {
+      if (textureType === "texture") {
         newSpriteData.texturePath = textureFileName;
         newSpriteData.attackImage = attackTextureFileName;
       } else {
+        // Get pixel data from grid
         newSpriteData.pixels = collectPixelData();
       }
     }
 
-    // Collect data from legacy fields for backward compatibility
-    const textNearTextInput = document.getElementById("show-text-near-text");
-    const textNearDistanceInput = document.getElementById(
-      "show-text-near-distance"
-    );
-
-    if (textNearTextInput && textNearTextInput.value.trim()) {
-      // Update both the legacy field and the component data
-      newSpriteData.whenNearShowText = textNearTextInput.value.trim();
-
-      // Only add component data if we have text
-      if (newSpriteData.whenNearShowText) {
-        newSpriteData["show-text-near"] = {
-          text: newSpriteData.whenNearShowText,
-          distance: textNearDistanceInput
-            ? parseFloat(textNearDistanceInput.value) || 2
-            : 2,
-        };
-      }
-    }
-
-    const hudTextInput = document.getElementById("show-hud-text-text");
-    const hudDistanceInput = document.getElementById("show-hud-text-distance");
-    const viewAngleInput = document.getElementById("show-hud-text-viewAngle");
-
-    if (hudTextInput && hudTextInput.value.trim()) {
-      // Update both the legacy field and the component data
-      newSpriteData.hudText = hudTextInput.value.trim();
-
-      // Only add component data if we have text
-      if (newSpriteData.hudText) {
-        newSpriteData["show-hud-text"] = {
-          text: newSpriteData.hudText,
-          distance: hudDistanceInput
-            ? parseFloat(hudDistanceInput.value) || 2
-            : 2,
-          viewAngle: viewAngleInput ? viewAngleInput.checked : true,
-        };
-      }
-    }
-
-    // Get life-system component values
-    const maxLifeInput = document.getElementById("life-system-maxLife");
-    const currentLifeInput = document.getElementById("life-system-currentLife");
-
-    if (maxLifeInput && parseFloat(maxLifeInput.value) > 0) {
-      // Set the legacy lifePoints property for backward compatibility
-      newSpriteData.lifePoints = parseFloat(maxLifeInput.value);
-
-      // Also add the component data
-      newSpriteData["life-system"] = {
-        maxLife: parseFloat(maxLifeInput.value),
-        currentLife:
-          currentLifeInput && parseFloat(currentLifeInput.value) > 0
-            ? parseFloat(currentLifeInput.value)
-            : parseFloat(maxLifeInput.value),
-      };
+    // Handle size data
+    if (spriteSizeSelector.value === "custom") {
+      newSpriteData.customSize = parseFloat(customSizeInput.value);
     } else {
-      // If max life is 0 or empty, ensure lifePoints is set to 0
-      newSpriteData.lifePoints = 0;
+      newSpriteData.size = spriteSizeSelector.value;
     }
 
-    // If we're using the legacy lifePoints input field, ensure it's used
-    const lifePointsInput = document.getElementById("spriteLifePoints");
-    if (lifePointsInput && parseFloat(lifePointsInput.value) > 0) {
-      const lifePoints = parseFloat(lifePointsInput.value);
-      // Only override if this value is higher (to avoid conflicts)
-      if (!newSpriteData.lifePoints || lifePoints > newSpriteData.lifePoints) {
-        newSpriteData.lifePoints = lifePoints;
-
-        // Also update the component data
-        newSpriteData["life-system"] = {
-          maxLife: lifePoints,
-          currentLife: lifePoints,
-        };
-      }
-    }
-
-    // Update or add the sprite
+    // Check if sprite exists and update or add
     const existingIndex = globalGameData.sprites.findIndex(
-      (sprite) => sprite.id === spriteId
+      (s) => s.id === spriteId
     );
 
     if (existingIndex !== -1) {
@@ -674,48 +666,8 @@ document.addEventListener("gameDataLoaded", function () {
     spriteCollisionCheckbox.checked = selectedSprite.collision || false;
     changeSceneSelector.value = selectedSprite.changeScene || "";
 
-    // Update component inputs from the registry
-    // Remove the legacy-component conversion and use pure component data
-    const textNearTextInput = document.getElementById("show-text-near-text");
-    if (textNearTextInput) {
-      textNearTextInput.value = selectedSprite["show-text-near"]?.text || "";
-    }
-
-    const textNearDistanceInput = document.getElementById(
-      "show-text-near-distance"
-    );
-    if (textNearDistanceInput) {
-      textNearDistanceInput.value =
-        selectedSprite["show-text-near"]?.distance || 2;
-    }
-
-    // Then set the show-hud-text component
-    const hudTextInput = document.getElementById("show-hud-text-text");
-    if (hudTextInput) {
-      hudTextInput.value = selectedSprite["show-hud-text"]?.text || "";
-    }
-
-    const hudDistanceInput = document.getElementById("show-hud-text-distance");
-    if (hudDistanceInput) {
-      hudDistanceInput.value = selectedSprite["show-hud-text"]?.distance || 2;
-    }
-
-    const viewAngleInput = document.getElementById("show-hud-text-viewAngle");
-    if (viewAngleInput) {
-      viewAngleInput.checked =
-        selectedSprite["show-hud-text"]?.viewAngle !== false; // Default to true
-    }
-
-    // Update the life-system component fields
-    const maxLifeInput = document.getElementById("life-system-maxLife");
-    if (maxLifeInput) {
-      maxLifeInput.value = selectedSprite["life-system"]?.maxLife || 0;
-    }
-
-    const currentLifeInput = document.getElementById("life-system-currentLife");
-    if (currentLifeInput) {
-      currentLifeInput.value = selectedSprite["life-system"]?.currentLife || 0;
-    }
+    // Dynamically load component values
+    loadComponentValues(selectedSprite);
 
     // Set type-specific properties
     if (selectedSprite.type === "gaussian") {

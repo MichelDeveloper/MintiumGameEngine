@@ -10,6 +10,7 @@ export const ComponentRegistry = {
       },
       description: "Displays text when player is nearby",
       icon: "bi-chat-text",
+      enabled: true,
     },
     {
       name: "show-hud-text",
@@ -25,21 +26,23 @@ export const ComponentRegistry = {
       },
       description: "Shows text on player HUD when near the object",
       icon: "bi-display",
+      enabled: true,
     },
     {
       name: "life-system",
       label: "Health System",
       schema: {
-        maxLife: { type: "number", default: 100, label: "Max Health", min: 0 },
+        maxLife: { type: "number", default: 0, label: "Max Health", min: 0 },
         currentLife: {
           type: "number",
-          default: 100,
+          default: 0,
           label: "Current Health",
           min: 0,
         },
       },
       description: "Adds health and damage capabilities to this object",
       icon: "bi-heart-fill",
+      enabled: true,
     },
   ],
 
@@ -58,5 +61,15 @@ export const ComponentRegistry = {
       data[key] = schema.default;
     });
     return data;
+  },
+
+  // Add these new helper methods
+  getEnabledComponents() {
+    return this.availableComponents.filter((comp) => comp.enabled);
+  },
+
+  // Get input element ID for a component property
+  getInputId(componentName, propertyName) {
+    return `${componentName}-${propertyName}`;
   },
 };
