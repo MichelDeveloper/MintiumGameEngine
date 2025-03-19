@@ -1,5 +1,6 @@
 import { findSpriteById, generateTexture } from "./sprite-manager.js";
 import { engineConstants } from "../engineConstants.js";
+import { ComponentRegistry } from "./component-registry.js";
 
 // Entity Creation
 export async function createCube(x, y, z, spriteId, type) {
@@ -80,52 +81,46 @@ export async function createCube(x, y, z, spriteId, type) {
     }
   }
 
-  if (sprite["life-system"] && sprite["life-system"].maxLife > 0) {
-    console.log(
-      "Adding life system to sprite:",
-      sprite.id,
-      "with life:",
-      sprite["life-system"].maxLife
-    );
-    cubeEl.setAttribute("life-system", {
-      maxLife: sprite["life-system"].maxLife,
-      currentLife:
-        sprite["life-system"].currentLife || sprite["life-system"].maxLife,
-    });
-  }
-
   // Only add pixelated component to non-gaussian types
   if (type !== "gaussian" && type !== "mesh") {
     cubeEl.setAttribute("pixelated", "");
   }
 
-  if (
-    sprite["show-text-near"] &&
-    sprite["show-text-near"].text &&
-    sprite.collision
-  ) {
-    cubeEl.setAttribute("show-text-near", {
-      text: sprite["show-text-near"].text,
-      distance: sprite["show-text-near"].distance || 2,
-    });
-  }
-
-  if (
-    sprite["show-hud-text"] &&
-    sprite["show-hud-text"].text &&
-    sprite.collision
-  ) {
-    cubeEl.setAttribute("show-hud-text", {
-      text: sprite["show-hud-text"].text,
-      distance: sprite["show-hud-text"].distance || 2,
-      viewAngle: sprite["show-hud-text"].viewAngle !== false,
-    });
-  }
+  // DYNAMIC COMPONENT HANDLING - Add components based on registry
+  applyComponentsFromRegistry(cubeEl, sprite);
 
   const container = document.getElementById("dynamic-content");
   container.appendChild(cubeEl);
 
   return cubeEl;
+}
+
+// Helper function to dynamically apply components from registry
+function applyComponentsFromRegistry(entity, sprite) {
+  // Get all enabled components from registry
+  const enabledComponents = ComponentRegistry.getEnabledComponents();
+
+  // For each component, check if sprite has it and apply if it does
+  enabledComponents.forEach((component) => {
+    const componentName = component.name;
+
+    // Check if sprite has this component data
+    if (sprite[componentName]) {
+      // Special case handling for components that require collision
+      const requiresCollision = ["show-text-near", "show-hud-text"].includes(
+        componentName
+      );
+
+      // Skip if requires collision but sprite doesn't have it
+      if (requiresCollision && !sprite.collision) return;
+
+      // If we reach here, we should apply the component
+      console.log(`Applying ${componentName} to sprite:`, sprite.id);
+
+      // Set the component with its data
+      entity.setAttribute(componentName, sprite[componentName]);
+    }
+  });
 }
 
 export function createPlayer() {
