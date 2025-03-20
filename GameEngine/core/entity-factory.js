@@ -114,6 +114,17 @@ function applyComponentsFromRegistry(entity, sprite) {
       // Skip if requires collision but sprite doesn't have it
       if (requiresCollision && !sprite.collision) return;
 
+      // Skip life-system if maxLife is 0 or less - TREAT AS DISABLED
+      if (
+        componentName === "life-system" &&
+        (!sprite[componentName].maxLife || sprite[componentName].maxLife <= 0)
+      ) {
+        console.log(
+          `Skipping ${componentName} for ${sprite.id} - disabled with maxLife=${sprite[componentName].maxLife}`
+        );
+        return;
+      }
+
       // If we reach here, we should apply the component
       console.log(`Applying ${componentName} to sprite:`, sprite.id);
 
