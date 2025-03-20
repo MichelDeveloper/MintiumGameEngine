@@ -23,6 +23,12 @@ AFRAME.registerComponent("life-system", {
     } else {
       this.initCamera();
     }
+
+    // Listen for scene changes to reinitialize
+    this.el.sceneEl.addEventListener(
+      "scene-changed",
+      this.handleSceneChanged.bind(this)
+    );
   },
 
   initCamera: function () {
@@ -30,39 +36,58 @@ AFRAME.registerComponent("life-system", {
   },
 
   takeDamage: function (amount) {
+    // Safety check - if health bar doesn't exist, try to recreate it
+    if (!this.healthBar || !this.healthBar.isConnected) {
+      console.log("Health bar missing, attempting to recreate");
+      this.createLifeBar();
+
+      // If still not available after recreating, exit
+      if (!this.healthBar) {
+        console.error("Cannot apply damage - health bar couldn't be created");
+        return;
+      }
+    }
+
+    // Update health value
     this.currentLife = Math.max(0, this.currentLife - amount);
     const healthPercent = this.currentLife / this.data.maxLife;
     const newWidth = 1.9 * healthPercent;
 
-    // Update the width of the health bar
-    this.healthBar.setAttribute("width", newWidth);
+    try {
+      // Update the width of the health bar
+      this.healthBar.setAttribute("width", newWidth);
 
-    // Calculate the new center position so the left edge stays fixed
-    const baseLeft = -1.9 / 2; // For full health, left edge is at -0.95
-    const newCenter = baseLeft + newWidth / 2;
-    this.healthBar.setAttribute("position", `${newCenter} 0 0.01`);
+      // Calculate the new center position so the left edge stays fixed
+      const baseLeft = -1.9 / 2; // For full health, left edge is at -0.95
+      const newCenter = baseLeft + newWidth / 2;
+      this.healthBar.setAttribute("position", `${newCenter} 0 0.01`);
 
-    // Apply damage flash effect
-    this.applyDamageFlash();
+      // Apply damage flash effect
+      this.applyDamageFlash();
 
-    // Show damage number effect immediately
-    this.showDamageNumberEffect(amount);
+      // Show damage number effect immediately
+      this.showDamageNumberEffect(amount);
 
-    // Lock player movement during combat sequence
-    this.lockPlayerMovement();
+      // Lock player movement during combat sequence
+      this.lockPlayerMovement();
 
-    // Check if enemy is still alive immediately
-    if (this.currentLife <= 0) {
-      // If enemy is dead, show death animation with delay then remove
-      setTimeout(() => {
-        this.removeFromScene();
-        this.unlockPlayerMovement();
-      }, 1000);
-    } else {
-      // Only counter-attack if the enemy is still alive
-      setTimeout(() => {
-        this.counterAttack();
-      }, 1000); // 1000ms delay before counter-attack
+      // Check if enemy is still alive immediately
+      if (this.currentLife <= 0) {
+        // If enemy is dead, show death animation with delay then remove
+        setTimeout(() => {
+          this.removeFromScene();
+          this.unlockPlayerMovement();
+        }, 1000);
+      } else {
+        // Only counter-attack if the enemy is still alive
+        setTimeout(() => {
+          this.counterAttack();
+        }, 1000); // 1000ms delay before counter-attack
+      }
+    } catch (error) {
+      console.error("Error in takeDamage:", error);
+      // Make sure player movement isn't locked if something fails
+      this.unlockPlayerMovement();
     }
   },
 
@@ -344,39 +369,53 @@ AFRAME.registerComponent("life-system", {
   },
 
   createLifeBar: function () {
-    this.lifeBarContainer = document.createElement("a-entity");
-    this.lifeBarContainer.setAttribute("position", "0 3 0");
+    try {
+      // Clean up any existing life bar elements
+      if (this.lifeBarContainer && this.lifeBarContainer.parentNode) {
+        this.lifeBarContainer.parentNode.removeChild(this.lifeBarContainer);
+      }
 
-    // Background bar
-    this.backgroundBar = document.createElement("a-plane");
-    this.backgroundBar.setAttribute("color", "#333");
-    this.backgroundBar.setAttribute("height", "0.3");
-    this.backgroundBar.setAttribute("width", "2");
-    // Add depth and transparency settings
-    this.backgroundBar.setAttribute("material", {
-      shader: "standard",
-      transparent: true,
-      opacity: 0.8,
-      depthTest: true,
-    });
+      // Create a container for the health UI
+      this.lifeBarContainer = document.createElement("a-entity");
+      this.lifeBarContainer.setAttribute("position", "0 3 0");
 
-    // Health bar
-    this.healthBar = document.createElement("a-plane");
-    this.healthBar.setAttribute("color", "#ff0000");
-    this.healthBar.setAttribute("height", "0.25");
-    this.healthBar.setAttribute("width", "1.9");
-    this.healthBar.setAttribute("position", "0 0 0.01"); // Slight offset
-    // Add depth and transparency settings
-    this.healthBar.setAttribute("material", {
-      shader: "standard",
-      transparent: true,
-      opacity: 0.9,
-      depthTest: true,
-    });
+      // Create a background plane for the health bar
+      this.backgroundBar = document.createElement("a-plane");
+      this.backgroundBar.setAttribute("color", "#333");
+      this.backgroundBar.setAttribute("height", "0.3");
+      this.backgroundBar.setAttribute("width", "2");
+      this.backgroundBar.setAttribute("material", {
+        shader: "standard",
+        transparent: true,
+        opacity: 0.8,
+      });
 
-    this.lifeBarContainer.appendChild(this.backgroundBar);
-    this.lifeBarContainer.appendChild(this.healthBar);
-    this.el.appendChild(this.lifeBarContainer);
+      // Create the actual health bar
+      this.healthBar = document.createElement("a-plane");
+      this.healthBar.setAttribute("color", "#ff0000");
+      this.healthBar.setAttribute("height", "0.25");
+      this.healthBar.setAttribute("width", "1.9");
+      this.healthBar.setAttribute("position", "0 0 0.01");
+      this.healthBar.setAttribute("material", {
+        shader: "standard",
+        transparent: true,
+        opacity: 0.9,
+      });
+
+      // Add elements to container
+      this.lifeBarContainer.appendChild(this.backgroundBar);
+      this.lifeBarContainer.appendChild(this.healthBar);
+
+      // Add container to entity
+      this.el.appendChild(this.lifeBarContainer);
+
+      console.log(
+        "Life bar created for entity",
+        this.el.getAttribute("data-entity-id")
+      );
+    } catch (error) {
+      console.error("Error creating life bar:", error);
+    }
   },
 
   tick: function () {
@@ -432,41 +471,63 @@ AFRAME.registerComponent("life-system", {
 
   // Add this new method to create damage flash effect
   applyDamageFlash: function () {
-    // Get current material
-    const currentMaterial = this.el.getAttribute("material");
-    if (!currentMaterial) return;
+    try {
+      // Get current material
+      const currentMaterial = this.el.getAttribute("material");
+      if (!currentMaterial) return;
 
-    // Store original emissive color if not already stored
-    if (!this.originalEmissive) {
-      this.originalEmissive = currentMaterial.emissive || "#000000";
+      // Store original emissive color if not already stored
+      if (!this.originalEmissive) {
+        this.originalEmissive = currentMaterial.emissive || "#000000";
+      }
+
+      // Apply red emissive glow
+      this.el.setAttribute("material", "emissive", "#ff0000");
+      this.el.setAttribute("material", "emissiveIntensity", 0.25);
+
+      // Flash 3 times
+      let flashCount = 0;
+      const flashInterval = setInterval(() => {
+        // Check if entity still exists
+        if (!this.el || !this.el.isConnected) {
+          clearInterval(flashInterval);
+          return;
+        }
+
+        // Toggle emissive between red and off
+        if (flashCount % 2 === 0) {
+          // Turn off red
+          this.el.setAttribute("material", "emissive", this.originalEmissive);
+          this.el.setAttribute("material", "emissiveIntensity", 0);
+        } else {
+          // Turn on red
+          this.el.setAttribute("material", "emissive", "#ff0000");
+          this.el.setAttribute("material", "emissiveIntensity", 0.25);
+        }
+
+        flashCount++;
+        if (flashCount >= 6) {
+          // 3 complete flashes (on-off cycles)
+          clearInterval(flashInterval);
+          // Ensure we end with the original state
+          if (this.el && this.el.isConnected) {
+            this.el.setAttribute("material", "emissive", this.originalEmissive);
+            this.el.setAttribute("material", "emissiveIntensity", 0);
+          }
+        }
+      }, 100); // 100ms per state change
+    } catch (error) {
+      console.error("Error in applyDamageFlash:", error);
     }
+  },
 
-    // Apply red emissive glow
-    this.el.setAttribute("material", "emissive", "#ff0000");
-    this.el.setAttribute("material", "emissiveIntensity", 0.25);
-
-    // Flash 3 times
-    let flashCount = 0;
-    const flashInterval = setInterval(() => {
-      // Toggle emissive between red and off
-      if (flashCount % 2 === 0) {
-        // Turn off red
-        this.el.setAttribute("material", "emissive", this.originalEmissive);
-        this.el.setAttribute("material", "emissiveIntensity", 0);
-      } else {
-        // Turn on red
-        this.el.setAttribute("material", "emissive", "#ff0000");
-        this.el.setAttribute("material", "emissiveIntensity", 0.25);
+  handleSceneChanged: function () {
+    console.log("Scene changed, reinitializing life system");
+    // Recreate health bar
+    setTimeout(() => {
+      if (this.el && this.el.isConnected) {
+        this.createLifeBar();
       }
-
-      flashCount++;
-      if (flashCount >= 6) {
-        // 3 complete flashes (on-off cycles)
-        clearInterval(flashInterval);
-        // Ensure we end with the original state
-        this.el.setAttribute("material", "emissive", this.originalEmissive);
-        this.el.setAttribute("material", "emissiveIntensity", 0);
-      }
-    }, 100); // 100ms per state change
+    }, 100); // Small delay to ensure DOM is ready
   },
 });

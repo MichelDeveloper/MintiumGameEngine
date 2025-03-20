@@ -23,47 +23,73 @@ AFRAME.registerComponent("grid-move", {
   },
 
   checkDamageCollision: function (currentPosition, potentialPosition) {
-    const damageSprites = Array.from(
-      document.querySelectorAll("[life-system]")
-    );
+    try {
+      const damageSprites = Array.from(
+        document.querySelectorAll("[life-system]")
+      );
 
-    damageSprites.forEach((sprite) => {
-      if (!sprite.components["life-system"]) return;
+      damageSprites.forEach((sprite) => {
+        // Skip if sprite is the player or if it's not connected to the scene
+        if (sprite.id === "player" || !sprite.isConnected) return;
 
-      const spritePos = sprite.object3D.position;
-      const distance = Math.round(spritePos.distanceTo(currentPosition) / 10);
-
-      if (distance < 2) {
-        // Calculate movement direction vector
-        const moveDirection = new THREE.Vector3()
-          .subVectors(potentialPosition, currentPosition)
-          .normalize();
-
-        // Calculate vector pointing to sprite
-        const toSprite = new THREE.Vector3()
-          .subVectors(spritePos, currentPosition)
-          .normalize();
-
-        // Calculate angle between movement direction and direction to sprite
-        const angle = moveDirection.angleTo(toSprite);
-
-        // Convert angle to degrees (it's in radians by default)
-        const degrees = THREE.MathUtils.radToDeg(angle);
-
-        // Only damage if moving towards sprite (angle less than 45 degrees)
-        if (degrees < 45) {
-          const now = Date.now();
-          const lastDamageTime =
-            sprite.components["life-system"].lastDamageTime || 0;
-
-          if (now - lastDamageTime > 1000) {
-            // Apply damage
-            sprite.components["life-system"].takeDamage(10);
-            sprite.components["life-system"].lastDamageTime = now;
-          }
+        // Skip if life-system component is not available
+        if (!sprite.components || !sprite.components["life-system"]) {
+          console.warn(
+            "Entity has life-system attribute but component is not loaded"
+          );
+          return;
         }
-      }
-    });
+
+        try {
+          const spritePos = sprite.object3D.position;
+          const distance = Math.round(
+            spritePos.distanceTo(currentPosition) / 10
+          );
+
+          if (distance < 2) {
+            // Calculate movement direction vector
+            const moveDirection = new THREE.Vector3()
+              .subVectors(potentialPosition, currentPosition)
+              .normalize();
+
+            // Calculate vector pointing to sprite
+            const toSprite = new THREE.Vector3()
+              .subVectors(spritePos, currentPosition)
+              .normalize();
+
+            // Calculate angle between movement direction and direction to sprite
+            const angle = moveDirection.angleTo(toSprite);
+
+            // Convert angle to degrees (it's in radians by default)
+            const degrees = THREE.MathUtils.radToDeg(angle);
+
+            // Only damage if moving towards sprite (angle less than 45 degrees)
+            if (degrees < 45) {
+              const now = Date.now();
+              const lastDamageTime =
+                sprite.components["life-system"].lastDamageTime || 0;
+
+              if (now - lastDamageTime > 1000) {
+                console.log(
+                  "Applying damage to entity:",
+                  sprite.getAttribute("data-entity-id")
+                );
+                // Apply damage
+                sprite.components["life-system"].takeDamage(10);
+                sprite.components["life-system"].lastDamageTime = now;
+              }
+            }
+          }
+        } catch (error) {
+          console.error(
+            "Error processing entity in checkDamageCollision:",
+            error
+          );
+        }
+      });
+    } catch (error) {
+      console.error("Error in checkDamageCollision:", error);
+    }
   },
 
   checkWallCollision: function (potentialPosition) {
