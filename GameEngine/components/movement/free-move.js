@@ -211,19 +211,18 @@ AFRAME.registerComponent("free-move", {
       .clone()
       .add(this.velocity);
 
-    // Define a margin offset (to account for player "radius")
-    const margin = 1;
-    // Offset the potential position by the normalized direction multiplied by margin
+    // Define a margin offset - IMPORTANT: use a smaller margin here too
+    const margin = 0.4; // Reduced from 1.0
+    // Offset the potential position by the normalized direction
     const collisionCheckPos = potentialPosition
       .clone()
       .add(this.direction.clone().normalize().multiplyScalar(margin));
 
-    // Check with the margin offset to avoid the offset issues
+    // Only update if the collision check passes
     if (!this.checkWallCollision(collisionCheckPos)) {
-      // Store current position before moving
       this.lastSafePosition.copy(this.el.object3D.position);
 
-      // Move the player
+      // Use normal movement, we handle sliding in tryMove
       this.el.object3D.position.copy(potentialPosition);
 
       // Check for damage collisions using grid-move if available
@@ -234,6 +233,10 @@ AFRAME.registerComponent("free-move", {
           this.el.object3D.position
         );
       }
+    }
+    // ONLY use sliding logic if a collision is detected
+    else if (this.data.slideAlongWalls) {
+      this.tryMove(this.velocity.x, this.velocity.z, delta);
     }
 
     // Apply gravity after horizontal movement is done
@@ -525,42 +528,50 @@ AFRAME.registerComponent("free-move", {
     const targetX = currentPosition.x + xChange;
     const targetZ = currentPosition.z + zChange;
 
-    // Check if full movement would cause collision
+    // Use direction for margin offset - IMPORTANT: reduce margin from 1.0 to 0.4
+    const direction = new THREE.Vector3(xChange, 0, zChange).normalize();
+    const margin = 0.4; // Smaller margin means less stickiness
+
+    // Check with margin
     const fullTargetPos = new THREE.Vector3(
       targetX,
       currentPosition.y,
       targetZ
-    );
+    ).add(direction.clone().multiplyScalar(margin));
+
     if (!this.checkWallCollision(fullTargetPos)) {
-      // Movement is clear, go ahead
       currentPosition.x = targetX;
       currentPosition.z = targetZ;
       return true;
     }
 
-    // If full movement fails, try X-axis only
+    // Try X-axis only with even smaller margin for sliding
+    const xDir = new THREE.Vector3(Math.sign(xChange), 0, 0);
+    const slidingMargin = 0.25; // Even smaller for sliding
     const xOnlyPos = new THREE.Vector3(
       targetX,
       currentPosition.y,
       currentPosition.z
-    );
+    ).add(xDir.multiplyScalar(slidingMargin));
+
     if (!this.checkWallCollision(xOnlyPos)) {
       currentPosition.x = targetX;
       return true;
     }
 
-    // If X fails, try Z-axis only
+    // Try Z-axis only with smaller margin for sliding
+    const zDir = new THREE.Vector3(0, 0, Math.sign(zChange));
     const zOnlyPos = new THREE.Vector3(
       currentPosition.x,
       currentPosition.y,
       targetZ
-    );
+    ).add(zDir.multiplyScalar(slidingMargin));
+
     if (!this.checkWallCollision(zOnlyPos)) {
       currentPosition.z = targetZ;
       return true;
     }
 
-    // Both individual movements failed
     return false;
   },
 });
