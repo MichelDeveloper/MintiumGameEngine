@@ -178,6 +178,9 @@ AFRAME.registerComponent("free-move", {
       return;
     }
 
+    // Add this line to increment the ground check timer
+    this.timeSinceLastGroundCheck += delta;
+
     // Get input direction - either from VR joystick or keyboard
     const inputDir = this.getInputDirection();
 
@@ -228,9 +231,6 @@ AFRAME.registerComponent("free-move", {
     if (this.data.gravity) {
       this.applyGravity(delta);
     }
-
-    // Track time since last ground check
-    this.timeSinceLastGroundCheck += delta;
   },
 
   checkWallCollision: function (position) {
@@ -309,9 +309,7 @@ AFRAME.registerComponent("free-move", {
       this._lastGroundHeight !== null &&
       this._lastRayX !== null &&
       this._lastRayZ !== null &&
-      Math.abs(x - this._lastRayX) < 0.5 &&
-      Math.abs(z - this._lastRayZ) < 0.5 &&
-      this.timeSinceLastGroundCheck < 1000 / this.data.groundedUpdateInterval
+      this.timeSinceLastGroundCheck < this.data.groundedUpdateInterval
     ) {
       return this._lastGroundHeight;
     }
@@ -388,12 +386,6 @@ AFRAME.registerComponent("free-move", {
   applyGravity: function (delta) {
     const currentPosition = this.el.object3D.position;
 
-    // Always force a ground check during initial frames
-    if (this.frameCount < 10) {
-      this.isGrounded = false;
-      this.frameCount++;
-    }
-
     // Find the ground height at current x,z position
     const groundHeight = this.findGroundHeight(
       currentPosition.x,
@@ -423,22 +415,30 @@ AFRAME.registerComponent("free-move", {
         }
       }
 
-      // Handle ground contact
-      if (heightAboveGround < this.data.groundOffset * 1.5) {
+      // CHANGE THIS SECTION - Allow a small amount of floating/falling
+      if (heightAboveGround <= this.data.groundOffset + 0.1) {
         // We're on or very close to the ground
-        currentPosition.y = groundHeight + this.data.groundOffset; // Keep slightly above ground
+        // Don't snap exactly to ground, apply a gentle transition
+        if (heightAboveGround < this.data.groundOffset) {
+          currentPosition.y = groundHeight + this.data.groundOffset;
+        }
         this.isGrounded = true;
-
-        // Store ground info for simplified checks
         this.previousGroundHeight = groundHeight;
       } else {
-        // We're above the ground, apply gravity
-        currentPosition.y -= this.data.fallSpeed * (delta / 16.67);
+        // We're above the ground, apply gravity with some damping
+        let fallAmount = this.data.fallSpeed * (delta / 16.67);
+
+        // Apply slightly less gravity when close to the ground
+        if (heightAboveGround < this.data.groundOffset * 2) {
+          fallAmount *= 0.8; // Reduce fall speed when getting close
+        }
+
+        currentPosition.y -= fallAmount;
         this.isGrounded = false;
 
         // Check if we fell below ground after applying gravity
         if (currentPosition.y < groundHeight + this.data.groundOffset) {
-          currentPosition.y = groundHeight + this.data.groundOffset; // Snap to ground
+          currentPosition.y = groundHeight + this.data.groundOffset;
           this.isGrounded = true;
           this.previousGroundHeight = groundHeight;
         }
