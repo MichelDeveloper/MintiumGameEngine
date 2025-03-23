@@ -168,7 +168,7 @@
               "0",
               "0",
               "0",
-              "0",
+              "slime",
               "Stone Wall"
             ],
             [
@@ -176,10 +176,10 @@
               "0",
               "TreeMesh",
               "0",
-              "slime",
+              "void",
               "0",
               "0",
-              "TreeMesh",
+              "void",
               "0",
               "Stone Wall"
             ],
@@ -199,22 +199,22 @@
               "Stone Wall",
               "0",
               "0",
-              "slime",
+              "void",
+              "Church",
+              "0",
+              "0",
+              "0",
+              "0",
+              "Stone Wall"
+            ],
+            [
+              "Stone Wall",
+              "TreeMesh",
               "void",
               "0",
+              "void",
               "0",
-              "0",
-              "0",
-              "Stone Wall"
-            ],
-            [
-              "Stone Wall",
-              "TreeMesh",
-              "TreeMesh",
-              "0",
-              "TreeMesh",
-              "0",
-              "slime",
+              "void",
               "TreeMesh",
               "TreeMesh",
               "Stone Wall"
@@ -222,7 +222,7 @@
             [
               "Stone Wall",
               "0",
-              "TreeMesh",
+              "void",
               "0",
               "0",
               "0",
@@ -3486,13 +3486,28 @@
     {
       "id": "Grass",
       "type": "block",
-      "textureType": "texture",
-      "texturePath": "grass_pixel_01.png",
       "collision": false,
       "changeScene": "",
-      "whenNearShowText": "",
-      "hudText": "",
-      "pixels": null,
+      "show-text-near": {
+        "text": "",
+        "distance": 2
+      },
+      "show-hud-text": {
+        "text": "",
+        "distance": 2,
+        "viewAngle": true
+      },
+      "life-system": {
+        "maxLife": 0,
+        "currentLife": 0
+      },
+      "mesh-collision": {
+        "enabled": true,
+        "debug": true
+      },
+      "textureType": "texture",
+      "texturePath": "grass_pixel_01.png",
+      "attackImage": "",
       "size": "normal"
     },
     {
@@ -4439,13 +4454,24 @@
     {
       "id": "mage",
       "type": "billboard",
-      "textureType": "texture",
-      "texturePath": "mage_01.png",
       "collision": true,
       "changeScene": "",
-      "whenNearShowText": "",
-      "hudText": "Beware the old cave!",
-      "pixels": null,
+      "show-text-near": {
+        "text": "Beware the dangers!",
+        "distance": 2
+      },
+      "show-hud-text": {
+        "text": "",
+        "distance": 2,
+        "viewAngle": true
+      },
+      "life-system": {
+        "maxLife": 0,
+        "currentLife": 0
+      },
+      "textureType": "texture",
+      "texturePath": "mage_01.png",
+      "attackImage": "",
       "size": "normal"
     },
     {
@@ -4549,6 +4575,54 @@
       },
       "meshPath": "dino.glb",
       "meshYOffset": 0,
+      "size": "small"
+    },
+    {
+      "id": "Ruins",
+      "type": "mesh",
+      "collision": true,
+      "changeScene": "",
+      "show-text-near": {
+        "text": "",
+        "distance": 2
+      },
+      "show-hud-text": {
+        "text": "",
+        "distance": 2,
+        "viewAngle": true
+      },
+      "life-system": {
+        "maxLife": 0,
+        "currentLife": 0
+      },
+      "mesh-collision": {
+        "enabled": true,
+        "debug": true
+      },
+      "meshPath": "ruins.glb",
+      "meshYOffset": -0.6,
+      "size": "normal"
+    },
+    {
+      "id": "Church",
+      "type": "mesh",
+      "collision": true,
+      "changeScene": "",
+      "show-text-near": {
+        "text": "",
+        "distance": 2
+      },
+      "show-hud-text": {
+        "text": "",
+        "distance": 2,
+        "viewAngle": true
+      },
+      "life-system": {
+        "maxLife": 0,
+        "currentLife": 0
+      },
+      "meshPath": "church.glb",
+      "meshYOffset": -1.6,
       "size": "small"
     }
   ]
