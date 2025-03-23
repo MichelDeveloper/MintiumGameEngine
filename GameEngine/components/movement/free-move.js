@@ -206,27 +206,34 @@ AFRAME.registerComponent("free-move", {
     this.direction.applyAxisAngle(new THREE.Vector3(0, 1, 0), rotation);
     this.velocity.copy(this.direction).multiplyScalar(speed);
 
-    // Store the current position before attempting movement
-    this.lastSafePosition.copy(this.el.object3D.position);
+    // Calculate the new (potential) position
+    const potentialPosition = this.el.object3D.position
+      .clone()
+      .add(this.velocity);
 
-    // Try to move with the slide logic if enabled
-    if (this.data.slideAlongWalls) {
-      this.tryMove(this.velocity.x, this.velocity.z, delta);
-    } else {
-      // Simple movement without sliding
-      const potentialPos = this.el.object3D.position.clone().add(this.velocity);
-      if (!this.checkWallCollision(potentialPos)) {
-        this.el.object3D.position.copy(potentialPos);
+    // Define a margin offset (to account for player "radius")
+    const margin = 1;
+    // Offset the potential position by the normalized direction multiplied by margin
+    const collisionCheckPos = potentialPosition
+      .clone()
+      .add(this.direction.clone().normalize().multiplyScalar(margin));
+
+    // Check with the margin offset to avoid the offset issues
+    if (!this.checkWallCollision(collisionCheckPos)) {
+      // Store current position before moving
+      this.lastSafePosition.copy(this.el.object3D.position);
+
+      // Move the player
+      this.el.object3D.position.copy(potentialPosition);
+
+      // Check for damage collisions using grid-move if available
+      const gridMove = this.el.components["grid-move"];
+      if (gridMove) {
+        gridMove.checkDamageCollision(
+          this.lastSafePosition,
+          this.el.object3D.position
+        );
       }
-    }
-
-    // Check for damage collisions using grid-move if available
-    const gridMove = this.el.components["grid-move"];
-    if (gridMove) {
-      gridMove.checkDamageCollision(
-        this.lastSafePosition,
-        this.el.object3D.position
-      );
     }
 
     // Apply gravity after horizontal movement is done
@@ -239,7 +246,6 @@ AFRAME.registerComponent("free-move", {
     const baseLayer = getCurrentScene().data.find(
       (sceneLayer) => sceneLayer.layer === 0
     );
-
     if (!baseLayer) return false;
 
     const currentScene = getCurrentScene();
@@ -247,40 +253,41 @@ AFRAME.registerComponent("free-move", {
       currentScene && currentScene.size ? parseInt(currentScene.size) : 10;
     const gridBlockSize = 10;
 
-    // Calculate grid coordinates from world position
-    const gridX = Math.floor(position.x / gridBlockSize + sceneSize / 2);
-    const gridZ = Math.floor(position.z / gridBlockSize + sceneSize / 2);
+    // Use Math.round to match grid-move, which fixes the offset issue
+    const gridX = Math.round(position.x / gridBlockSize);
+    const gridZ = Math.round(position.z / gridBlockSize);
 
-    // Check for world boundaries
+    // Convert grid coordinates to array indices correctly
+    const halfScene = Math.floor(sceneSize / 2);
+    const indexX = gridX + halfScene;
+    const indexZ = gridZ + halfScene;
+
+    // Check boundaries based on array indices
     if (
-      gridX < 0 ||
-      gridX >= sceneSize ||
-      gridZ < 0 ||
-      gridZ >= sceneSize ||
-      position.x < -((sceneSize / 2) * gridBlockSize) ||
-      position.z < -((sceneSize / 2) * gridBlockSize)
+      indexX < 0 ||
+      indexX >= sceneSize ||
+      indexZ < 0 ||
+      indexZ >= sceneSize
     ) {
-      return true; // Collision with world boundary
+      return true; // Outside the grid boundaries
     }
 
-    // Check for wall collision in the scene data
-    if (
-      baseLayer.layerData &&
-      baseLayer.layerData[gridZ] &&
-      baseLayer.layerData[gridZ][gridX]
-    ) {
-      const cellValue = baseLayer.layerData[gridZ][gridX];
-
-      // If the cell has a value other than "0", check if it's a wall
-      if (cellValue && cellValue !== "0") {
-        const sprite = findSpriteById(cellValue);
-        if (sprite && sprite.collision) {
-          return true; // Collision with a wall sprite
-        }
+    // Check for a wall in the base layer
+    try {
+      const cellSpriteId = baseLayer.layerData[indexZ][indexX];
+      if (cellSpriteId === "0" || cellSpriteId === "void") {
+        return false;
       }
+      const sprite = findSpriteById(cellSpriteId);
+      if (sprite && sprite.changeScene) {
+        loadScene(sprite.changeScene);
+        return true;
+      }
+      return sprite && sprite.collision;
+    } catch (e) {
+      console.error("Error checking collision:", e);
+      return true;
     }
-
-    return false; // No collision
   },
 
   getInputDirection: function () {
