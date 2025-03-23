@@ -256,16 +256,16 @@ AFRAME.registerComponent("free-move", {
       currentScene && currentScene.size ? parseInt(currentScene.size) : 10;
     const gridBlockSize = 10;
 
-    // Use Math.round to match grid-move, which fixes the offset issue
+    // Use Math.round to match the original grid-move
     const gridX = Math.round(position.x / gridBlockSize);
     const gridZ = Math.round(position.z / gridBlockSize);
 
-    // Convert grid coordinates to array indices correctly
+    // Convert grid coordinates to array indices
     const halfScene = Math.floor(sceneSize / 2);
     const indexX = gridX + halfScene;
     const indexZ = gridZ + halfScene;
 
-    // Check boundaries based on array indices
+    // Check boundaries
     if (
       indexX < 0 ||
       indexX >= sceneSize ||
