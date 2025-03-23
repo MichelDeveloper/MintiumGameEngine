@@ -114,6 +114,17 @@ function applyComponentsFromRegistry(entity, sprite) {
       // Skip if requires collision but sprite doesn't have it
       if (requiresCollision && !sprite.collision) return;
 
+      if (
+        component.schema.hasOwnProperty("enabled") &&
+        sprite[componentName].hasOwnProperty("enabled") &&
+        sprite[componentName].enabled === false
+      ) {
+        console.log(
+          `Skipping ${componentName} for ${sprite.id} - explicitly disabled`
+        );
+        return;
+      }
+
       // Skip life-system if maxLife is 0 or less - TREAT AS DISABLED
       if (
         componentName === "life-system" &&

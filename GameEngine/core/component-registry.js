@@ -44,6 +44,26 @@ export const ComponentRegistry = {
       icon: "bi-heart-fill",
       enabled: true,
     },
+    {
+      name: "raycast-collider",
+      label: "Raycast Collider",
+      icon: "bi-bullseye",
+      description:
+        "Marks this entity as a raycast target for terrain detection",
+      schema: {
+        enabled: {
+          type: "boolean",
+          default: false,
+          label: "Enable Raycast Collider",
+        },
+        debug: {
+          type: "boolean",
+          default: false,
+          label: "Show Debug Visual",
+        },
+      },
+      enabled: true,
+    },
   ],
 
   // Get component definition by name

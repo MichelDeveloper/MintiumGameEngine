@@ -21,6 +21,7 @@ import "./components/rendering/gaussian-splatting.js";
 import "./components/rendering/mesh-rendering.js";
 import "./components/movement/movement-toggle.js";
 import "./components/movement/free-move.js";
+import "./components/collision/raycast-collider.js";
 
 let gameData;
 

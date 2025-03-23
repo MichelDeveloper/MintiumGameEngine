@@ -12,6 +12,8 @@ AFRAME.registerComponent("free-move", {
     groundOffset: { type: "number", default: 5 },
     debugRay: { type: "boolean", default: false },
     maxStepHeight: { type: "number", default: 2.5 },
+    groundedUpdateInterval: { type: "number", default: 10 },
+    useRaycastColliders: { type: "boolean", default: true },
   },
 
   init: function () {
@@ -59,9 +61,46 @@ AFRAME.registerComponent("free-move", {
     // Track if player is on the ground
     this.isGrounded = false;
 
-    // Reset previous ground height during scene changes
+    // For ground height tracking
+    this.previousGroundHeight = null;
+    this._lastGroundHeight = null;
+    this._lastRayX = null;
+    this._lastRayZ = null;
+
+    // Frame counter for initial forced updates
+    this.frameCount = 0;
+    this.isFalling = false;
+    this.framesSinceLastFullCheck = 0;
+
+    // For ground check timing
+    this.timeSinceLastGroundCheck = 0;
+
+    // For simplified ground checks
+    this.lastGroundObject = null;
+    this.groundObjectPosition = new THREE.Vector3();
+
+    // Reset tracking on scene changes
     this.el.sceneEl.addEventListener("scene-changed", () => {
       this.previousGroundHeight = null;
+      this._lastGroundHeight = null;
+      this._lastRayX = null;
+      this._lastRayZ = null;
+      this.frameCount = 0;
+
+      // Force an immediate ground check on scene change
+      setTimeout(() => {
+        this.lastSafePosition.copy(this.el.object3D.position);
+        const groundHeight = this.findGroundHeight(
+          this.el.object3D.position.x,
+          this.el.object3D.position.z
+        );
+        if (groundHeight !== null) {
+          this.el.object3D.position.y = groundHeight + this.data.groundOffset;
+          this.isGrounded = true;
+          this.previousGroundHeight = groundHeight;
+          this._lastGroundHeight = groundHeight;
+        }
+      }, 100);
     });
   },
 
@@ -94,8 +133,6 @@ AFRAME.registerComponent("free-move", {
     const x = axis[2]; // Left thumbstick X-axis
     const y = axis[3]; // Left thumbstick Y-axis
 
-    console.log("Free Move - Axis values:", axis);
-
     // Only process if thumbstick is moved significantly
     if (Math.abs(x) < 0.2 && Math.abs(y) < 0.2) {
       this.joystickDirection.set(0, 0, 0);
@@ -105,120 +142,58 @@ AFRAME.registerComponent("free-move", {
     // Create a direction vector from the joystick input (matching grid-move's logic)
     // Important: In VR, the axes might be reversed compared to what you'd expect
     this.joystickDirection.set(x, 0, y);
-
-    console.log("Free Move - Joystick direction:", this.joystickDirection);
   },
 
   onKeyDown: function (event) {
-    // Only used as fallback if custom-keyboard-controls isn't found
-    this.keys[event.key.toLowerCase()] = true;
+    if (event.key) {
+      this.keys[event.key.toLowerCase()] = true;
+    }
   },
 
   onKeyUp: function (event) {
-    // Only used as fallback if custom-keyboard-controls isn't found
-    this.keys[event.key.toLowerCase()] = false;
+    if (event.key) {
+      this.keys[event.key.toLowerCase()] = false;
+    }
   },
 
   remove: function () {
-    // Only remove listeners if we added them
+    if (this.leftHand && this.boundAxisMove) {
+      this.leftHand.removeEventListener("axismove", this.boundAxisMove);
+    }
+
     if (!this.keyboardControls) {
       window.removeEventListener("keydown", this.onKeyDown);
       window.removeEventListener("keyup", this.onKeyUp);
     }
 
-    // Remove VR controller listener
-    if (this.leftHand && this.boundAxisMove) {
-      this.leftHand.removeEventListener("axismove", this.boundAxisMove);
-    }
-  },
-
-  getKeysState: function () {
-    // Get key states either from custom-keyboard-controls or our local keys object
-    if (this.keyboardControls) {
-      return this.keyboardControls.keys;
-    }
-    return this.keys || {};
-  },
-
-  checkWallCollision: function (position) {
-    const baseLayer = getCurrentScene().data.find(
-      (sceneLayer) => sceneLayer.layer === 0
-    );
-    if (!baseLayer) return false;
-
-    const currentScene = getCurrentScene();
-    const sceneSize =
-      currentScene && currentScene.size ? parseInt(currentScene.size) : 10;
-    const gridBlockSize = 10;
-
-    // Use Math.round to match grid-move
-    const gridX = Math.round(position.x / gridBlockSize);
-    const gridZ = Math.round(position.z / gridBlockSize);
-
-    // If your grid array is zero-indexed and centered,
-    // convert grid coordinates to array indices.
-    // Assuming grid cell (0, 0) is at the center:
-    const halfScene = Math.floor(sceneSize / 2);
-    const indexX = gridX + halfScene;
-    const indexZ = gridZ + halfScene;
-
-    // Check boundaries based on array indices
-    if (
-      indexX < 0 ||
-      indexX >= sceneSize ||
-      indexZ < 0 ||
-      indexZ >= sceneSize
-    ) {
-      return true; // Outside the grid boundaries
-    }
-
-    // Check for a wall in the base layer
-    try {
-      const cellSpriteId = baseLayer.layerData[indexZ][indexX];
-      if (cellSpriteId === "0" || cellSpriteId === "void") {
-        return false;
-      }
-      const sprite = findSpriteById(cellSpriteId);
-      if (sprite && sprite.changeScene) {
-        loadScene(sprite.changeScene);
-        return true;
-      }
-      return sprite && sprite.collision;
-    } catch (e) {
-      console.error("Error checking collision:", e);
-      return true;
+    // Clean up debug visuals
+    if (this.debugLine && this.debugLine.parent) {
+      this.debugLine.parent.remove(this.debugLine);
     }
   },
 
   tick: function (time, delta) {
+    // Skip if free move is not enabled or if player movement is locked
     if (!window.freeMoveEnabled || window.playerMovementLocked) {
       return;
     }
 
-    // Reset and determine movement direction from keyboard input
-    this.direction.set(0, 0, 0);
-    const keys = this.getKeysState();
-    if (keys["w"] || keys["arrowup"]) this.direction.z -= 1;
-    if (keys["s"] || keys["arrowdown"]) this.direction.z += 1;
-    if (keys["a"] || keys["arrowleft"]) this.direction.x -= 1;
-    if (keys["d"] || keys["arrowright"]) this.direction.x += 1;
+    // Get input direction - either from VR joystick or keyboard
+    const inputDir = this.getInputDirection();
 
-    // Override with joystick input if available
-    if (this.joystickDirection && this.joystickDirection.length() > 0) {
-      this.direction.copy(this.joystickDirection);
-    }
-
-    // No movement? Bail.
-    if (this.direction.length() === 0) {
+    // Skip if no movement input
+    if (inputDir.lengthSq() === 0) {
       return;
     }
 
-    // Normalize direction and calculate movement velocity based on delta time
-    if (this.direction.length() > 1) {
-      this.direction.normalize();
-    }
-    const speed = this.data.speed * (delta / 16.667);
+    // Calculate speed based on delta time for smooth movement
+    const speed = this.data.speed * (delta / 16.67); // Normalize by expected frame time
+
+    // Get player rotation - we need this to move relative to player's facing direction
     const rotation = this.el.object3D.rotation.y;
+
+    // Apply rotation to input direction to get world-space direction
+    this.direction.copy(inputDir);
     this.direction.applyAxisAngle(new THREE.Vector3(0, 1, 0), rotation);
     this.velocity.copy(this.direction).multiplyScalar(speed);
 
@@ -247,18 +222,107 @@ AFRAME.registerComponent("free-move", {
           this.el.object3D.position
         );
       }
-    } else {
-      // Optionally, log or handle the collision response here
     }
 
     // Apply gravity after horizontal movement is done
     if (this.data.gravity) {
       this.applyGravity(delta);
     }
+
+    // Track time since last ground check
+    this.timeSinceLastGroundCheck += delta;
   },
 
-  // Improved ground height detection with better alignment
+  checkWallCollision: function (position) {
+    const baseLayer = getCurrentScene().data.find(
+      (sceneLayer) => sceneLayer.layer === 0
+    );
+    if (!baseLayer) return false;
+
+    const currentScene = getCurrentScene();
+    const sceneSize =
+      currentScene && currentScene.size ? parseInt(currentScene.size) : 10;
+    const gridBlockSize = 10;
+
+    // Calculate grid coordinates from world position
+    const gridX = Math.floor(position.x / gridBlockSize + sceneSize / 2);
+    const gridZ = Math.floor(position.z / gridBlockSize + sceneSize / 2);
+
+    // Check scene boundaries
+    if (gridX < 0 || gridX >= sceneSize || gridZ < 0 || gridZ >= sceneSize) {
+      return true; // Collision with world boundary
+    }
+
+    // Check for wall collision (sprite with collision property)
+    try {
+      const cellValue = baseLayer.layerData[gridZ][gridX];
+      if (cellValue && cellValue !== "0") {
+        const sprite = findSpriteById(cellValue);
+        if (sprite && sprite.collision) {
+          return true; // Collision with a wall sprite
+        }
+      }
+    } catch (error) {
+      console.error("Error checking wall collision:", error);
+    }
+
+    return false; // No collision
+  },
+
+  getInputDirection: function () {
+    const direction = new THREE.Vector3();
+
+    // If we have joystick input, use that
+    if (this.joystickDirection.lengthSq() > 0) {
+      direction.copy(this.joystickDirection);
+    }
+    // Otherwise, check keyboard input
+    else if (this.keyboardControls) {
+      // Use the keyboardControls system's key state
+      const keys = this.keyboardControls.keys;
+      if (keys["w"] || keys["arrowup"]) direction.z -= 1;
+      if (keys["s"] || keys["arrowdown"]) direction.z += 1;
+      if (keys["a"] || keys["arrowleft"]) direction.x -= 1;
+      if (keys["d"] || keys["arrowright"]) direction.x += 1;
+    }
+    // Fallback to direct key handling
+    else if (this.keys) {
+      if (this.keys["w"] || this.keys["arrowup"]) direction.z -= 1;
+      if (this.keys["s"] || this.keys["arrowdown"]) direction.z += 1;
+      if (this.keys["a"] || this.keys["arrowleft"]) direction.x -= 1;
+      if (this.keys["d"] || this.keys["arrowright"]) direction.x += 1;
+    }
+
+    // Normalize so that diagonal movement isn't faster
+    if (direction.lengthSq() > 0) {
+      direction.normalize();
+    }
+
+    return direction;
+  },
+
   findGroundHeight: function (x, z) {
+    // Don't raycast every frame when player isn't moving much and is already grounded
+    if (
+      this.isGrounded &&
+      this.data.groundedUpdateInterval > 0 &&
+      this._lastGroundHeight !== null &&
+      this._lastRayX !== null &&
+      this._lastRayZ !== null &&
+      Math.abs(x - this._lastRayX) < 0.5 &&
+      Math.abs(z - this._lastRayZ) < 0.5 &&
+      this.timeSinceLastGroundCheck < 1000 / this.data.groundedUpdateInterval
+    ) {
+      return this._lastGroundHeight;
+    }
+
+    // Reset timer if we're doing a new check
+    this.timeSinceLastGroundCheck = 0;
+
+    // Store values for checking next time
+    this._lastRayX = x;
+    this._lastRayZ = z;
+
     // Apply offsets to better match player's center
     x += this.data.rayOffsetX;
     z += this.data.rayOffsetZ;
@@ -268,11 +332,25 @@ AFRAME.registerComponent("free-move", {
     const rayDirection = new THREE.Vector3(0, -1, 0);
     this.raycaster.set(rayStart, rayDirection);
 
+    // Get objects to test against
+    let objectsToTest = [];
+    if (
+      this.data.useRaycastColliders &&
+      window.raycastColliders &&
+      window.raycastColliders.length > 0
+    ) {
+      objectsToTest = window.raycastColliders.map((el) => el.object3D);
+    } else {
+      objectsToTest = this.el.sceneEl.object3D.children;
+    }
+
+    // No objects to test
+    if (objectsToTest.length === 0) {
+      return null;
+    }
+
     // Cast the ray against all objects in the scene
-    const intersections = this.raycaster.intersectObjects(
-      this.el.sceneEl.object3D.children,
-      true // Recursive - check all descendents
-    );
+    const intersections = this.raycaster.intersectObjects(objectsToTest, true);
 
     // Filter out intersections with the player itself
     const validIntersections = intersections.filter((hit) => {
@@ -297,10 +375,12 @@ AFRAME.registerComponent("free-move", {
 
     // If we found an intersection, return the y position
     if (validIntersections.length > 0) {
+      this._lastGroundHeight = validIntersections[0].point.y;
       return validIntersections[0].point.y;
     }
 
     // No valid ground found
+    this._lastGroundHeight = null;
     return null;
   },
 
@@ -308,14 +388,20 @@ AFRAME.registerComponent("free-move", {
   applyGravity: function (delta) {
     const currentPosition = this.el.object3D.position;
 
+    // Always force a ground check during initial frames
+    if (this.frameCount < 10) {
+      this.isGrounded = false;
+      this.frameCount++;
+    }
+
     // Find the ground height at current x,z position
     const groundHeight = this.findGroundHeight(
       currentPosition.x,
       currentPosition.z
     );
 
-    // Store previous ground height for stair detection
-    if (!this.previousGroundHeight) {
+    // If there is no previous ground height, initialize it
+    if (this.previousGroundHeight === null && groundHeight !== null) {
       this.previousGroundHeight = groundHeight;
     }
 
@@ -323,31 +409,28 @@ AFRAME.registerComponent("free-move", {
       // Calculate how high above ground we are
       const heightAboveGround = currentPosition.y - groundHeight;
 
-      // Check if this is a stair/step that's too high to climb
-      if (this.isGrounded && groundHeight > this.previousGroundHeight) {
+      // Check if this is a step that's too high to climb
+      if (
+        this.isGrounded &&
+        this.previousGroundHeight !== null &&
+        groundHeight > this.previousGroundHeight
+      ) {
         const stepHeight = groundHeight - this.previousGroundHeight;
         if (stepHeight > this.data.maxStepHeight) {
           // Step is too high to climb, prevent movement
-          console.log(`Step too high: ${stepHeight.toFixed(2)} units`);
-
-          // Move player back to previous position
           this.el.object3D.position.copy(this.lastSafePosition);
-
-          // Set to current height plus offset
-          this.el.object3D.position.y =
-            this.previousGroundHeight + this.data.groundOffset;
-
-          // Update previous ground height
-          this.previousGroundHeight = this.previousGroundHeight;
           return;
         }
       }
 
-      // Are we close to the ground?
+      // Handle ground contact
       if (heightAboveGround < this.data.groundOffset * 1.5) {
         // We're on or very close to the ground
         currentPosition.y = groundHeight + this.data.groundOffset; // Keep slightly above ground
         this.isGrounded = true;
+
+        // Store ground info for simplified checks
+        this.previousGroundHeight = groundHeight;
       } else {
         // We're above the ground, apply gravity
         currentPosition.y -= this.data.fallSpeed * (delta / 16.67);
@@ -357,11 +440,9 @@ AFRAME.registerComponent("free-move", {
         if (currentPosition.y < groundHeight + this.data.groundOffset) {
           currentPosition.y = groundHeight + this.data.groundOffset; // Snap to ground
           this.isGrounded = true;
+          this.previousGroundHeight = groundHeight;
         }
       }
-
-      // Update previous ground height
-      this.previousGroundHeight = groundHeight;
     } else {
       // No ground detected, continue falling
       currentPosition.y -= this.data.fallSpeed * (delta / 16.67);
@@ -374,7 +455,7 @@ AFRAME.registerComponent("free-move", {
     }
   },
 
-  // Add this helper function for debugging
+  // Debug helper function for visualization
   drawDebugRay: function (start, direction, length, color) {
     // Remove old debug line if it exists
     if (this.debugLine && this.debugLine.parent) {
