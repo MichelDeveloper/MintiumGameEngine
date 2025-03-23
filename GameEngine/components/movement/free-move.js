@@ -14,6 +14,8 @@ AFRAME.registerComponent("free-move", {
     maxStepHeight: { type: "number", default: 2.5 },
     groundedUpdateInterval: { type: "number", default: 10 },
     useRaycastColliders: { type: "boolean", default: true },
+    moveBlockedTime: { type: "number", default: 0 },
+    slideAlongWalls: { type: "boolean", default: true },
   },
 
   init: function () {
@@ -186,6 +188,10 @@ AFRAME.registerComponent("free-move", {
 
     // Skip if no movement input
     if (inputDir.lengthSq() === 0) {
+      // Apply gravity even when not moving horizontally
+      if (this.data.gravity) {
+        this.applyGravity(delta);
+      }
       return;
     }
 
@@ -200,31 +206,27 @@ AFRAME.registerComponent("free-move", {
     this.direction.applyAxisAngle(new THREE.Vector3(0, 1, 0), rotation);
     this.velocity.copy(this.direction).multiplyScalar(speed);
 
-    // Calculate the new (potential) position
-    const potentialPosition = this.el.object3D.position
-      .clone()
-      .add(this.velocity);
+    // Store the current position before attempting movement
+    this.lastSafePosition.copy(this.el.object3D.position);
 
-    // Define a margin offset (e.g., the collider radius)
-    const margin = 1;
-    // Offset the potential position by the normalized direction multiplied by margin
-    const collisionCheckPos = potentialPosition
-      .clone()
-      .add(this.direction.clone().normalize().multiplyScalar(margin));
-
-    // Only update if the collision check (with margin) passes
-    if (!this.checkWallCollision(collisionCheckPos)) {
-      this.lastSafePosition.copy(this.el.object3D.position);
-      this.el.object3D.position.copy(potentialPosition);
-
-      // Optionally check for damage collisions using grid-move's method
-      const gridMove = this.el.components["grid-move"];
-      if (gridMove) {
-        gridMove.checkDamageCollision(
-          this.lastSafePosition,
-          this.el.object3D.position
-        );
+    // Try to move with the slide logic if enabled
+    if (this.data.slideAlongWalls) {
+      this.tryMove(this.velocity.x, this.velocity.z, delta);
+    } else {
+      // Simple movement without sliding
+      const potentialPos = this.el.object3D.position.clone().add(this.velocity);
+      if (!this.checkWallCollision(potentialPos)) {
+        this.el.object3D.position.copy(potentialPos);
       }
+    }
+
+    // Check for damage collisions using grid-move if available
+    const gridMove = this.el.components["grid-move"];
+    if (gridMove) {
+      gridMove.checkDamageCollision(
+        this.lastSafePosition,
+        this.el.object3D.position
+      );
     }
 
     // Apply gravity after horizontal movement is done
@@ -237,6 +239,7 @@ AFRAME.registerComponent("free-move", {
     const baseLayer = getCurrentScene().data.find(
       (sceneLayer) => sceneLayer.layer === 0
     );
+
     if (!baseLayer) return false;
 
     const currentScene = getCurrentScene();
@@ -248,22 +251,33 @@ AFRAME.registerComponent("free-move", {
     const gridX = Math.floor(position.x / gridBlockSize + sceneSize / 2);
     const gridZ = Math.floor(position.z / gridBlockSize + sceneSize / 2);
 
-    // Check scene boundaries
-    if (gridX < 0 || gridX >= sceneSize || gridZ < 0 || gridZ >= sceneSize) {
+    // Check for world boundaries
+    if (
+      gridX < 0 ||
+      gridX >= sceneSize ||
+      gridZ < 0 ||
+      gridZ >= sceneSize ||
+      position.x < -((sceneSize / 2) * gridBlockSize) ||
+      position.z < -((sceneSize / 2) * gridBlockSize)
+    ) {
       return true; // Collision with world boundary
     }
 
-    // Check for wall collision (sprite with collision property)
-    try {
+    // Check for wall collision in the scene data
+    if (
+      baseLayer.layerData &&
+      baseLayer.layerData[gridZ] &&
+      baseLayer.layerData[gridZ][gridX]
+    ) {
       const cellValue = baseLayer.layerData[gridZ][gridX];
+
+      // If the cell has a value other than "0", check if it's a wall
       if (cellValue && cellValue !== "0") {
         const sprite = findSpriteById(cellValue);
         if (sprite && sprite.collision) {
           return true; // Collision with a wall sprite
         }
       }
-    } catch (error) {
-      console.error("Error checking wall collision:", error);
     }
 
     return false; // No collision
@@ -409,28 +423,44 @@ AFRAME.registerComponent("free-move", {
       ) {
         const stepHeight = groundHeight - this.previousGroundHeight;
         if (stepHeight > this.data.maxStepHeight) {
-          // Step is too high to climb, prevent movement
-          this.el.object3D.position.copy(this.lastSafePosition);
+          // Instead of reverting X/Z immediately, attempt to smoothly slide
+          // This will reduce the feeling of getting "stuck"
+          const moveVector = new THREE.Vector3(
+            currentPosition.x - this.lastSafePosition.x,
+            0,
+            currentPosition.z - this.lastSafePosition.z
+          );
+
+          // If we're moving into a wall, gradually push back
+          if (moveVector.length() > 0) {
+            moveVector.normalize().multiplyScalar(-0.05);
+            currentPosition.x += moveVector.x;
+            currentPosition.z += moveVector.z;
+          }
+
+          // Record the block time
+          this.moveBlockedTime = Date.now();
           return;
         }
       }
 
-      // CHANGE THIS SECTION - Allow a small amount of floating/falling
+      // Ground snapping with smoothing for small heights
       if (heightAboveGround <= this.data.groundOffset + 0.1) {
-        // We're on or very close to the ground
-        // Don't snap exactly to ground, apply a gentle transition
+        // When very close to the ground, gently adjust to match exactly
         if (heightAboveGround < this.data.groundOffset) {
-          currentPosition.y = groundHeight + this.data.groundOffset;
+          // Smooth the transition when close to ground
+          const adjustment = (this.data.groundOffset - heightAboveGround) * 0.5;
+          currentPosition.y += Math.min(adjustment, 0.5); // Cap maximum adjustment
         }
         this.isGrounded = true;
         this.previousGroundHeight = groundHeight;
       } else {
-        // We're above the ground, apply gravity with some damping
+        // Apply gravity when above ground
         let fallAmount = this.data.fallSpeed * (delta / 16.67);
 
-        // Apply slightly less gravity when close to the ground
-        if (heightAboveGround < this.data.groundOffset * 2) {
-          fallAmount *= 0.8; // Reduce fall speed when getting close
+        // Only reduce fall speed when very close to landing
+        if (heightAboveGround < this.data.groundOffset * 1.5) {
+          fallAmount *= 0.7;
         }
 
         currentPosition.y -= fallAmount;
@@ -449,8 +479,9 @@ AFRAME.registerComponent("free-move", {
       this.isGrounded = false;
     }
 
-    // If we're on ground, update our last safe position
-    if (this.isGrounded) {
+    // Update safe position regularly when grounded, or after timeout
+    if (this.isGrounded || Date.now() - this.moveBlockedTime > 800) {
+      // Reduced to 800ms
       this.lastSafePosition.copy(currentPosition);
     }
   },
@@ -477,5 +508,52 @@ AFRAME.registerComponent("free-move", {
 
     this.debugLine = new THREE.Line(geometry, material);
     this.el.sceneEl.object3D.add(this.debugLine);
+  },
+
+  // Simplify the tryMove function
+  tryMove: function (xChange, zChange, delta) {
+    const currentPosition = this.el.object3D.position;
+
+    // First try moving in both directions
+    const targetX = currentPosition.x + xChange;
+    const targetZ = currentPosition.z + zChange;
+
+    // Check if full movement would cause collision
+    const fullTargetPos = new THREE.Vector3(
+      targetX,
+      currentPosition.y,
+      targetZ
+    );
+    if (!this.checkWallCollision(fullTargetPos)) {
+      // Movement is clear, go ahead
+      currentPosition.x = targetX;
+      currentPosition.z = targetZ;
+      return true;
+    }
+
+    // If full movement fails, try X-axis only
+    const xOnlyPos = new THREE.Vector3(
+      targetX,
+      currentPosition.y,
+      currentPosition.z
+    );
+    if (!this.checkWallCollision(xOnlyPos)) {
+      currentPosition.x = targetX;
+      return true;
+    }
+
+    // If X fails, try Z-axis only
+    const zOnlyPos = new THREE.Vector3(
+      currentPosition.x,
+      currentPosition.y,
+      targetZ
+    );
+    if (!this.checkWallCollision(zOnlyPos)) {
+      currentPosition.z = targetZ;
+      return true;
+    }
+
+    // Both individual movements failed
+    return false;
   },
 });
