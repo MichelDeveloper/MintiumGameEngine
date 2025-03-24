@@ -49,7 +49,7 @@ export const ComponentRegistry = {
       label: "Raycast Collider",
       icon: "bi-bullseye",
       description:
-        "Marks this entity as a raycast target for terrain detection",
+        "Marks this entity as a raycast target for terrain detection: For each collider, if its 3D object has a child named 'collision-data', use that child so that only its geometry is taken into account for raycasting.",
       schema: {
         enabled: {
           type: "boolean",

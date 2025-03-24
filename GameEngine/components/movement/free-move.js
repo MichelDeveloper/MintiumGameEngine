@@ -362,6 +362,9 @@ AFRAME.registerComponent("free-move", {
       window.raycastColliders.length > 0
     ) {
       // Filter out objects with disabled raycast-collider
+      // NEW FEATURE:
+      // For each collider, if its 3D object has a child named "collision-data",
+      // use that child so that only its geometry is taken into account for raycasting.
       objectsToTest = window.raycastColliders
         .filter((el) => {
           return (
@@ -370,7 +373,10 @@ AFRAME.registerComponent("free-move", {
             el.components["raycast-collider"].data.enabled === true
           );
         })
-        .map((el) => el.object3D);
+        .map((el) => {
+          const collisionData = el.object3D.getObjectByName("collision-data");
+          return collisionData ? collisionData : el.object3D;
+        });
 
       console.log(
         `Using ${objectsToTest.length} enabled colliders out of ${window.raycastColliders.length} total`
