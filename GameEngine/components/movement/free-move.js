@@ -361,9 +361,30 @@ AFRAME.registerComponent("free-move", {
       window.raycastColliders &&
       window.raycastColliders.length > 0
     ) {
-      objectsToTest = window.raycastColliders.map((el) => el.object3D);
-    } else {
+      // Filter out objects with disabled raycast-collider
+      objectsToTest = window.raycastColliders
+        .filter((el) => {
+          return (
+            el.components &&
+            el.components["raycast-collider"] &&
+            el.components["raycast-collider"].data.enabled === true
+          );
+        })
+        .map((el) => el.object3D);
+
+      console.log(
+        `Using ${objectsToTest.length} enabled colliders out of ${window.raycastColliders.length} total`
+      );
+    } else if (!this.data.useRaycastColliders) {
+      // Only test against ALL scene objects if useRaycastColliders is FALSE
+      console.log("Using all scene objects for raycasting (not recommended)");
       objectsToTest = this.el.sceneEl.object3D.children;
+    } else {
+      // If useRaycastColliders is TRUE but no raycastColliders exist, don't test anything
+      console.log(
+        "No raycast colliders found, and useRaycastColliders is TRUE"
+      );
+      // Intentionally leave objectsToTest as an empty array
     }
 
     // No objects to test

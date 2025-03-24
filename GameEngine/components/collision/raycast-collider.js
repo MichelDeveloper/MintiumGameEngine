@@ -5,14 +5,25 @@ AFRAME.registerComponent("raycast-collider", {
   },
 
   init: function () {
-    // Register with global raycast system
-    this.registerWithSystem();
+    // Only register with system if enabled in schema
+    if (this.data.enabled) {
+      this.registerWithSystem();
+      console.log(
+        `Raycast collider initialized and registered on ${
+          this.el.id || "entity"
+        }`
+      );
+    } else {
+      console.log(
+        `Raycast collider initialized but NOT registered (disabled) on ${
+          this.el.id || "entity"
+        }`
+      );
+    }
 
     if (this.data.debug) {
       this.addDebugVisual();
     }
-
-    console.log(`Raycast collider initialized on ${this.el.id || "entity"}`);
   },
 
   update: function (oldData) {
@@ -43,6 +54,7 @@ AFRAME.registerComponent("raycast-collider", {
 
     // Only add if not already registered and enabled
     if (this.data.enabled && !window.raycastColliders.includes(this.el)) {
+      console.log(`Adding ${this.el.id || "entity"} to raycast colliders`);
       window.raycastColliders.push(this.el);
     }
   },
