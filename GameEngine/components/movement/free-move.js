@@ -325,6 +325,7 @@ AFRAME.registerComponent("free-move", {
     return direction;
   },
 
+  // Updated findGroundHeight function with collision-data handling
   findGroundHeight: function (x, z) {
     // Don't raycast every frame when player isn't moving much and is already grounded
     if (
@@ -361,10 +362,7 @@ AFRAME.registerComponent("free-move", {
       window.raycastColliders &&
       window.raycastColliders.length > 0
     ) {
-      // Filter out objects with disabled raycast-collider
-      // NEW FEATURE:
-      // For each collider, if its 3D object has a child named "collision-data",
-      // use that child so that only its geometry is taken into account for raycasting.
+      // Filter out objects with disabled raycast-collider and check for "collision-data"
       objectsToTest = window.raycastColliders
         .filter((el) => {
           return (
@@ -375,22 +373,26 @@ AFRAME.registerComponent("free-move", {
         })
         .map((el) => {
           const collisionData = el.object3D.getObjectByName("collision-data");
-          return collisionData ? collisionData : el.object3D;
+          if (collisionData) {
+            // Make collision-data invisible but keep its geometry for raycasting
+            collisionData.traverse((child) => {
+              child.visible = false;
+            });
+            return collisionData;
+          }
+          return el.object3D;
         });
 
       console.log(
         `Using ${objectsToTest.length} enabled colliders out of ${window.raycastColliders.length} total`
       );
     } else if (!this.data.useRaycastColliders) {
-      // Only test against ALL scene objects if useRaycastColliders is FALSE
       console.log("Using all scene objects for raycasting (not recommended)");
       objectsToTest = this.el.sceneEl.object3D.children;
     } else {
-      // If useRaycastColliders is TRUE but no raycastColliders exist, don't test anything
       console.log(
         "No raycast colliders found, and useRaycastColliders is TRUE"
       );
-      // Intentionally leave objectsToTest as an empty array
     }
 
     // No objects to test
