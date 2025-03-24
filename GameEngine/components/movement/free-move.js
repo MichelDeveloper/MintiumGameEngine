@@ -12,7 +12,7 @@ AFRAME.registerComponent("free-move", {
     groundOffset: { type: "number", default: 5 },
     debugRay: { type: "boolean", default: false },
     maxStepHeight: { type: "number", default: 2.5 },
-    groundedUpdateInterval: { type: "number", default: 10 },
+    groundedUpdateInterval: { type: "number", default: 33 }, // 33ms ~ 30fps
     useRaycastColliders: { type: "boolean", default: true },
     moveBlockedTime: { type: "number", default: 0 },
     slideAlongWalls: { type: "boolean", default: true },
