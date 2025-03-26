@@ -205,6 +205,7 @@ document.addEventListener("gameDataLoaded", function () {
   // Updated async function to load the map grid based on the current scene/layer data
   async function loadMapEditorScene() {
     const currentScene = getCurrentEditingScene();
+    if (!currentScene) return;
 
     // Update the size selector to match current scene's size
     if (currentScene && currentScene.size) {
@@ -318,6 +319,11 @@ document.addEventListener("gameDataLoaded", function () {
         spawnCell.classList.add("spawn-position");
       }
     }
+
+    // Update the enableMapBorders checkbox to match the scene setting
+    const enableMapBordersCheckbox =
+      document.getElementById("enableMapBorders");
+    enableMapBordersCheckbox.checked = currentScene.enableMapBorders ?? true; // Default to true if undefined
   }
 
   loadMapBtn.addEventListener("click", async function () {
@@ -517,6 +523,10 @@ document.addEventListener("gameDataLoaded", function () {
     currentScene.fogEnabled = fogToggle.checked;
     currentScene.fogDistance = parseInt(fogDistance.value);
 
+    // Save map borders setting
+    currentScene.enableMapBorders =
+      document.getElementById("enableMapBorders").checked;
+
     // Save to localStorage
     localStorage.setItem("gameData", JSON.stringify(globalGameData));
 
@@ -577,6 +587,7 @@ document.addEventListener("gameDataLoaded", function () {
       size: selectedSize,
       fogEnabled: false,
       fogDistance: 50,
+      enableMapBorders: true,
       data: [
         {
           layer: -1, // Background layer

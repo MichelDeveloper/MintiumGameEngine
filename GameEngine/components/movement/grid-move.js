@@ -96,7 +96,6 @@ AFRAME.registerComponent("grid-move", {
     const baseLayer = getCurrentScene().data.find(
       (sceneLayer) => sceneLayer.layer === 0
     );
-
     if (!baseLayer) return true;
 
     const currentScene = getCurrentScene();
@@ -104,8 +103,7 @@ AFRAME.registerComponent("grid-move", {
       currentScene && currentScene.size ? parseInt(currentScene.size) : 10;
     const gridBlockSize = 10;
 
-    // Calculate grid coordinates from world position using floor instead of round
-    // This fixes the off-by-one issue at the upper-left map edges
+    // Calculate grid coordinates from world position using floor
     const gridX = Math.floor(
       potentialPosition.x / gridBlockSize + sceneSize / 2
     );
@@ -113,23 +111,28 @@ AFRAME.registerComponent("grid-move", {
       potentialPosition.z / gridBlockSize + sceneSize / 2
     );
 
-    // Add a small offset check for the edge cases
+    // Enforce world boundaries when enabled
+    if (currentScene.enableMapBorders) {
+      if (gridX < 0 || gridX >= sceneSize || gridZ < 0 || gridZ >= sceneSize) {
+        return true; // Collision with world boundary
+      }
+    }
+
+    // Additional check: ensure grid indices are within the baseLayer data array.
     if (
-      gridX < 0 ||
-      gridX >= sceneSize ||
       gridZ < 0 ||
-      gridZ >= sceneSize ||
-      potentialPosition.x < -((sceneSize / 2) * gridBlockSize) ||
-      potentialPosition.z < -((sceneSize / 2) * gridBlockSize)
+      gridZ >= baseLayer.layerData.length ||
+      gridX < 0 ||
+      gridX >= baseLayer.layerData[0].length
     ) {
-      return true; // Collision with world boundary
+      return currentScene.enableMapBorders ? true : false;
     }
 
     // Check if there's a wall at this position
     try {
       const cellSpriteId = baseLayer.layerData[gridZ][gridX];
       if (cellSpriteId === "0" || cellSpriteId === "void") {
-        return false; // No wall here
+        return false; // No wall here.
       }
 
       // Find the sprite for this cell
@@ -137,20 +140,19 @@ AFRAME.registerComponent("grid-move", {
 
       // Check for scene change trigger
       if (sprite && sprite.changeScene) {
-        // Trigger scene change
         loadScene(sprite.changeScene);
-        return true; // Prevent further movement
+        return true; // Prevent further movement.
       }
 
-      // Check for collision
+      // Check for collision with a wall
       if (sprite && sprite.collision) {
-        return true; // Collision with a wall
+        return true;
       }
 
-      return false; // Default to no collision
+      return false; // Default to no collision.
     } catch (e) {
       console.error("Error checking collision:", e);
-      return true; // Default to collision on error
+      return true;
     }
   },
 
