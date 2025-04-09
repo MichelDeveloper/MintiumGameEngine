@@ -174,8 +174,8 @@
             [
               "Stone Wall",
               "0",
-              "void",
-              "0",
+              "Tree",
+              "Tree",
               "void",
               "0",
               "0",
@@ -4432,7 +4432,7 @@
               "0",
               "0",
               "0",
-              "Church",
+              "city",
               "0",
               "0",
               "0",
@@ -6047,6 +6047,32 @@
       "texturePath": "priest.png",
       "attackImage": "",
       "size": "normal"
+    },
+    {
+      "id": "city",
+      "type": "mesh",
+      "collision": false,
+      "changeScene": "",
+      "show-text-near": {
+        "text": "",
+        "distance": 2
+      },
+      "show-hud-text": {
+        "text": "",
+        "distance": 2,
+        "viewAngle": true
+      },
+      "life-system": {
+        "maxLife": 0,
+        "currentLife": 0
+      },
+      "raycast-collider": {
+        "enabled": true,
+        "debug": false
+      },
+      "meshPath": "city.glb",
+      "meshYOffset": -0.35,
+      "size": "small"
     }
   ]
 }

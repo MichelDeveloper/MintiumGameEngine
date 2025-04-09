@@ -25,9 +25,30 @@
   <body>
     <!-- Game Viewer Section -->
     <div id="gameContainer">
-      <a-scene xr-mode-ui="enabled: true">
+      <a-scene xr-mode-ui="enabled: true" renderer="antialias: true;">
         <!-- Game scene content -->
       </a-scene>
+      <script>
+        // Wait for A-Frame to initialize
+        document.addEventListener("DOMContentLoaded", function () {
+          // Get the scene
+          const scene = document.querySelector("a-scene");
+
+          // Apply non-VR resolution scaling when scene is loaded
+          scene.addEventListener("loaded", function () {
+            // Set non-VR resolution to 80%
+            scene.renderer.setPixelRatio(0.8 * window.devicePixelRatio);
+            console.log("Set desktop resolution scale to 80%");
+
+            // Set up VR resolution scaling
+            scene.addEventListener("enter-vr", function () {
+              // Set VR resolution to 70%
+              scene.renderer.xr.setFramebufferScaleFactor(0.7);
+              console.log("Set VR resolution scale to 70%");
+            });
+          });
+        });
+      </script>
     </div>
 
     <!-- Button Container -->
