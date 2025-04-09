@@ -78,9 +78,15 @@ AFRAME.registerComponent("mesh-rendering", {
         node.castShadow = this.data.castShadow;
         node.receiveShadow = this.data.receiveShadow;
         if (node.material && node.material.map) {
-          node.material.map.generateMipmaps = false;
-          node.material.map.minFilter = THREE.NearestFilter;
-          node.material.map.magFilter = THREE.NearestFilter;
+          node.material.map.generateMipmaps = true;
+          // To give the model a more pixelated look
+          // node.material.map.minFilter = THREE.NearestFilter;
+          // node.material.map.magFilter = THREE.NearestFilter;
+          node.material.map.minFilter = THREE.LinearMipmapLinearFilter;
+          node.material.map.magFilter = THREE.LinearFilter;
+          // For materials with alpha textures
+          node.material.transparent = true;
+          node.material.alphaTest = 0.5; // Adjust threshold as needed (0.01-0.99)
         }
       }
     });
