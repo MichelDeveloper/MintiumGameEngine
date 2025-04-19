@@ -14,8 +14,8 @@ import { findSpritesByDistance } from "../../core/sprite-manager.js";
 AFRAME.registerComponent("ar-move", {
   schema: {
     enabled: { type: "boolean", default: false },
-    damageThreshold: { type: "number", default: 2 }, // meters
-    sceneThreshold: { type: "number", default: 1.5 }, // meters
+    damageThreshold: { type: "number", default: 8 }, // meters
+    sceneThreshold: { type: "number", default: 4 }, // meters
     damageCooldown: { type: "number", default: 1000 }, // ms
   },
 
@@ -130,11 +130,11 @@ AFRAME.registerComponent("ar-move", {
 
     // Process damage sprites
     damageSprites.forEach((sprite) => {
-      // Skip if sprite is the player or if it's not connected to the scene
-      if (sprite.id === "player" || !sprite.isConnected) return;
+      // Skip if sprite is the player
+      if (sprite.id === "player") return;
 
       // Skip if life-system component is not available
-      if (!sprite.components || !sprite.components["life-system"]) {
+      if (!sprite || !sprite["life-system"]) {
         return;
       }
 
@@ -142,11 +142,11 @@ AFRAME.registerComponent("ar-move", {
         // Apply damage with cooldown (same 1 second as grid-move)
         const now = Date.now();
         const lastDamageTime =
-          sprite.components["life-system"].lastDamageTime || 0;
+          sprite.aFrameComponent.components["life-system"].lastDamageTime || 0;
 
         if (now - lastDamageTime > 1000) {
-          sprite.components["life-system"].takeDamage(10);
-          sprite.components["life-system"].lastDamageTime = now;
+          sprite.aFrameComponent.components["life-system"].takeDamage(10);
+          sprite.aFrameComponent.components["life-system"].lastDamageTime = now;
         }
       } catch (error) {
         // Silently handle errors
@@ -158,13 +158,13 @@ AFRAME.registerComponent("ar-move", {
     // Use the new findSpritesByDistance function to find nearby scene change triggers
     const sceneChangeEntities = findSpritesByDistance(
       headPos,
-      500, // this.data.sceneThreshold,
-      "scene-change"
+      this.data.sceneThreshold,
+      "changeScene"
     );
     console.log("sceneChangeEntities", sceneChangeEntities);
     // Process each nearby scene change entity
     sceneChangeEntities.forEach((entity) => {
-      const targetScene = entity.getAttribute("change-scene");
+      const targetScene = entity.changeScene;
       if (targetScene) loadScene(targetScene);
     });
   },

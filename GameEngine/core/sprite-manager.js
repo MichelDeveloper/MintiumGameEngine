@@ -18,35 +18,36 @@ export function findSpriteById(spriteId) {
  */
 export function findSpritesByDistance(position, maxDistance, attribute = null) {
   const sprites = [];
-  const sceneEl = document.querySelector("a-scene");
 
-  if (!sceneEl) return sprites;
+  // Find the dynamic-content element which contains all the sprites
+  const dynamicContent = document.getElementById("dynamic-content");
+  if (!dynamicContent) {
+    console.warn("findSpritesByDistance: dynamic-content element not found");
+    return sprites;
+  }
 
-  const entities = sceneEl.children;
+  const entities = dynamicContent.children;
   for (let i = 0; i < entities.length; i++) {
-    const entity = entities[i];
-    if (!entity.object3D) continue;
-
+    const item = entities[i];
+    if (!item.object3D) continue;
+    let entity = findSpriteById(item.getAttribute("data-entity-id"));
     // Skip if we're filtering by attribute and entity doesn't have it
-    if (
-      attribute &&
-      (!entity.hasAttribute || !entity.hasAttribute(attribute))
-    ) {
+    if (attribute && (!entity || !entity[attribute])) {
       continue;
     }
 
     const entityPos = new THREE.Vector3();
-    entity.object3D.getWorldPosition(entityPos);
+    item.object3D.getWorldPosition(entityPos);
 
     const distance = position.distanceTo(entityPos);
     if (distance <= maxDistance) {
-      sprites.push({ entity, distance });
+      sprites.push({ ...entity, aFrameComponent: item, distance });
     }
   }
 
   // Sort by distance (closest first)
   sprites.sort((a, b) => a.distance - b.distance);
-  return sprites.map((sprite) => sprite.entity);
+  return sprites.map((sprite) => sprite);
 }
 
 export async function generateTexture(sprite, isAttacking = false) {
