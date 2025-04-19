@@ -1,6 +1,7 @@
 AFRAME.registerComponent("ar-move", {
   schema: {
     enabled: { type: "boolean", default: false },
+    playerScale: { type: "number", default: 5.0 }, // Scale factor for the player
   },
 
   init: function () {
@@ -8,11 +9,18 @@ AFRAME.registerComponent("ar-move", {
 
     // Initialize state
     this.arMovementEnabled = this.data.enabled;
+    this.playerScale = this.data.playerScale;
+    this.originalScale = new THREE.Vector3(1, 1, 1);
 
     // Store initial position for reference
     this.initialPosition = new THREE.Vector3();
     this.initialHeadsetPosition = new THREE.Vector3();
     this.headsetOffset = new THREE.Vector3();
+
+    // Store original scale
+    if (this.el.object3D) {
+      this.originalScale.copy(this.el.object3D.scale);
+    }
 
     // Setup XR session listeners
     this.el.sceneEl.addEventListener(
@@ -28,6 +36,7 @@ AFRAME.registerComponent("ar-move", {
 
     // Initial setup based on enabled state
     this.updateCameraControls();
+    this.updatePlayerScale();
   },
 
   updateCameraControls: function () {
@@ -45,8 +54,29 @@ AFRAME.registerComponent("ar-move", {
     }
   },
 
+  updatePlayerScale: function () {
+    if (!this.el.object3D) return;
+
+    if (this.arMovementEnabled) {
+      // Scale up the player in AR mode
+      console.log(`Scaling player to ${this.playerScale}x for AR mode`);
+      this.el.object3D.scale.set(
+        this.originalScale.x * this.playerScale,
+        this.originalScale.y * this.playerScale,
+        this.originalScale.z * this.playerScale
+      );
+    } else {
+      // Restore original scale
+      console.log("Restoring player to original scale");
+      this.el.object3D.scale.copy(this.originalScale);
+    }
+  },
+
   onXRSessionStart: function () {
     if (!this.arMovementEnabled) return;
+
+    // Apply the AR scale when entering XR
+    this.updatePlayerScale();
 
     // Store initial positions when XR session starts
     this.initialPosition.copy(this.el.object3D.position);
@@ -70,7 +100,10 @@ AFRAME.registerComponent("ar-move", {
   },
 
   onXRSessionEnd: function () {
-    // Reset if needed
+    // Reset scale when exiting XR
+    if (this.arMovementEnabled) {
+      this.el.object3D.scale.copy(this.originalScale);
+    }
     console.log("XR session ended");
   },
 
@@ -117,13 +150,30 @@ AFRAME.registerComponent("ar-move", {
   },
 
   update: function (oldData) {
-    // Update enabled state
+    // Update component properties
     this.arMovementEnabled = this.data.enabled;
+    this.playerScale = this.data.playerScale;
     console.log(
-      `AR Movement ${this.arMovementEnabled ? "enabled" : "disabled"}`
+      `AR Movement ${
+        this.arMovementEnabled ? "enabled" : "disabled"
+      } with player scale ${this.playerScale}x`
     );
 
-    // Update camera controls based on the new enabled state
+    // Update camera controls and player scale
     this.updateCameraControls();
+    this.updatePlayerScale();
+  },
+
+  remove: function () {
+    // Restore original scale when component is removed
+    if (this.el.object3D) {
+      this.el.object3D.scale.copy(this.originalScale);
+    }
+
+    // Remove event listeners
+    this.el.sceneEl.removeEventListener("enter-vr", this.onXRSessionStart);
+    this.el.sceneEl.removeEventListener("exit-vr", this.onXRSessionEnd);
+    this.el.sceneEl.removeEventListener("enter-ar", this.onXRSessionStart);
+    this.el.sceneEl.removeEventListener("exit-ar", this.onXRSessionEnd);
   },
 });

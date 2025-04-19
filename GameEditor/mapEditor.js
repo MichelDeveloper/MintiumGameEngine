@@ -555,6 +555,14 @@ document.addEventListener("gameDataLoaded", function () {
     currentScene.enableMapBorders =
       document.getElementById("enableMapBorders").checked;
 
+    // Save AR player scale if using AR mode
+    if (currentScene.movementMode === "ar") {
+      const arPlayerScale = parseFloat(
+        document.getElementById("ar-player-scale").value
+      );
+      currentScene.arPlayerScale = arPlayerScale || 5.0;
+    }
+
     // Save to localStorage
     localStorage.setItem("gameData", JSON.stringify(globalGameData));
 
