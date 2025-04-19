@@ -332,6 +332,16 @@ document.addEventListener("gameDataLoaded", function () {
     } else {
       xrModeSelector.value = "vr"; // Default to vr if not set
     }
+
+    // Update the movement mode selector to match the scene setting
+    const movementModeSelector = document.getElementById(
+      "movementModeSelector"
+    );
+    if (currentScene.movementMode) {
+      movementModeSelector.value = currentScene.movementMode;
+    } else {
+      movementModeSelector.value = "grid"; // Default to grid if not set
+    }
   }
 
   loadMapBtn.addEventListener("click", async function () {
@@ -535,6 +545,12 @@ document.addEventListener("gameDataLoaded", function () {
     const xrModeSelector = document.getElementById("xrModeSelector");
     currentScene.xrMode = xrModeSelector.value;
 
+    // Save movement mode preference
+    const movementModeSelector = document.getElementById(
+      "movementModeSelector"
+    );
+    currentScene.movementMode = movementModeSelector.value;
+
     // Save map borders setting
     currentScene.enableMapBorders =
       document.getElementById("enableMapBorders").checked;
@@ -601,6 +617,7 @@ document.addEventListener("gameDataLoaded", function () {
       fogDistance: 50,
       enableMapBorders: true,
       xrMode: "vr", // Default to vr
+      movementMode: "grid", // Default to grid movement
       data: [
         {
           layer: -1, // Background layer

@@ -1,93 +1,128 @@
 AFRAME.registerComponent("movement-toggle", {
   init: function () {
-    // Initialize with free movement as default
-    this.currentMode = "free";
+    console.log("Movement toggle initialized");
 
-    // Add keyboard listener for toggle
-    this.onKeyDown = this.onKeyDown.bind(this);
-    window.addEventListener("keydown", this.onKeyDown);
+    // Skip the keyboard listener - we'll use scene settings instead
+    // this.el.sceneEl.addEventListener("keydown", this.onKeyDown.bind(this));
 
-    // Create UI for toggle
-    this.createToggleUI();
-
-    // Apply initial mode
+    // Apply initial movement mode based on scene settings
     this.applyMovementMode();
 
-    console.log(
-      "Movement toggle component initialized with mode:",
-      this.currentMode
+    // Listen for scene changes
+    this.el.sceneEl.addEventListener(
+      "scene-changed",
+      this.applyMovementMode.bind(this)
     );
   },
 
-  createToggleUI: function () {
-    // Create a HUD element for displaying current movement mode
-    const hudContainer = document.createElement("div");
-    hudContainer.id = "movement-toggle-hud";
-    hudContainer.style.position = "fixed";
-    hudContainer.style.bottom = "10px";
-    hudContainer.style.right = "10px";
-    hudContainer.style.backgroundColor = "rgba(0, 0, 0, 0.5)";
-    hudContainer.style.color = "white";
-    hudContainer.style.padding = "5px 10px";
-    hudContainer.style.borderRadius = "5px";
-    hudContainer.style.fontFamily = "Arial, sans-serif";
-    hudContainer.style.zIndex = "999";
+  applyMovementMode: function () {
+    // Get current scene
+    const currentScene = window.getCurrentScene
+      ? window.getCurrentScene()
+      : null;
+    if (!currentScene) return;
 
-    this.modeText = document.createElement("div");
-    this.modeText.textContent = "Movement: Free (Press V to toggle)";
+    // Get the movement mode from scene settings
+    const movementMode = currentScene.movementMode || "grid";
+    console.log(`Applying movement mode: ${movementMode}`);
 
-    hudContainer.appendChild(this.modeText);
-    document.body.appendChild(hudContainer);
-  },
+    // Reset all movement modes first
+    window.gridMoveEnabled = false;
+    window.freeMoveEnabled = false;
 
-  updateUI: function () {
-    if (this.modeText) {
-      this.modeText.textContent = `Movement: ${
-        this.currentMode === "grid" ? "Grid" : "Free"
-      } (Press V to toggle)`;
+    // Get player entity
+    const playerEl = document.getElementById("player");
+    if (!playerEl) return;
+
+    // Get camera entity
+    const cameraEl = document.getElementById("camera");
+    if (!cameraEl) return;
+
+    // Disable all movement components first
+    if (playerEl.hasAttribute("ar-move")) {
+      playerEl.setAttribute("ar-move", "enabled", false);
     }
+
+    // Apply the selected movement mode
+    switch (movementMode) {
+      case "grid":
+        window.gridMoveEnabled = true;
+        window.freeMoveEnabled = false;
+
+        // Disable camera look controls
+        if (cameraEl) {
+          cameraEl.setAttribute("look-controls", "enabled", false);
+        }
+        break;
+
+      case "free":
+        window.gridMoveEnabled = false;
+        window.freeMoveEnabled = true;
+
+        // Disable camera look controls
+        if (cameraEl) {
+          cameraEl.setAttribute("look-controls", "enabled", false);
+        }
+        break;
+
+      case "ar":
+        window.gridMoveEnabled = false;
+        window.freeMoveEnabled = false;
+
+        // Enable AR movement with free camera control
+        if (!playerEl.hasAttribute("ar-move")) {
+          playerEl.setAttribute("ar-move", "");
+        }
+        playerEl.setAttribute("ar-move", "enabled", true);
+
+        // Enable camera look controls for AR movement
+        if (cameraEl) {
+          cameraEl.setAttribute("look-controls", "enabled", true);
+        }
+        break;
+    }
+
+    console.log(
+      `Movement mode set: Grid=${window.gridMoveEnabled}, Free=${
+        window.freeMoveEnabled
+      }, AR=${movementMode === "ar"}`
+    );
   },
 
+  // Keep the original keydown handler for debugging/development but comment out its usage
   onKeyDown: function (event) {
-    // Toggle movement mode when V is pressed
-    if (event.key.toLowerCase() === "v") {
+    // For debugging only - allow keyboard toggle during development
+    if (event.key.toLowerCase() === "v" && event.target.tagName !== "INPUT") {
+      console.log("Manual movement toggle via keyboard (for debugging)");
       this.toggleMovementMode();
     }
   },
 
   toggleMovementMode: function () {
-    // Toggle between grid and free movement
-    this.currentMode = this.currentMode === "grid" ? "free" : "grid";
-    console.log(`Switching to ${this.currentMode} movement mode`);
+    // Debugging helper - cycle through modes
+    // This is just for development, not used in production
+    const playerEl = document.getElementById("player");
+    if (!playerEl) return;
 
-    // Apply the new mode
-    this.applyMovementMode();
-
-    // Update UI
-    this.updateUI();
-  },
-
-  applyMovementMode: function () {
-    // Direct DOM manipulation to ensure reliable updating
-    if (this.currentMode === "grid") {
-      // Enable grid movement
-      window.gridMoveEnabled = true;
-      window.freeMoveEnabled = false;
-    } else {
-      // Enable free movement
+    if (window.gridMoveEnabled) {
       window.gridMoveEnabled = false;
       window.freeMoveEnabled = true;
+      playerEl.setAttribute("ar-move", "enabled", false);
+      console.log("Switched to Free Movement (manual)");
+    } else if (window.freeMoveEnabled) {
+      window.gridMoveEnabled = false;
+      window.freeMoveEnabled = false;
+      playerEl.setAttribute("ar-move", "enabled", true);
+      console.log("Switched to AR Movement (manual)");
+    } else {
+      window.gridMoveEnabled = true;
+      window.freeMoveEnabled = false;
+      playerEl.setAttribute("ar-move", "enabled", false);
+      console.log("Switched to Grid Movement (manual)");
     }
-
-    console.log("Updated global movement flags:", {
-      grid: window.gridMoveEnabled,
-      free: window.freeMoveEnabled,
-    });
   },
 
   remove: function () {
-    window.removeEventListener("keydown", this.onKeyDown);
-
     // Remove UI
     const hudElement = document.getElementById("movement-toggle-hud");
     if (hudElement) {

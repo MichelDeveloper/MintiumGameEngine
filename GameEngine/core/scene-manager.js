@@ -157,3 +157,6 @@ export function reloadGame(sceneId = currentScene.sceneId) {
   }
   loadScene(sceneId);
 }
+
+// Add this line to make getCurrentScene globally available
+window.getCurrentScene = getCurrentScene;

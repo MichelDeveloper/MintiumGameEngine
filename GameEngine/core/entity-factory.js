@@ -148,12 +148,31 @@ function applyComponentsFromRegistry(entity, sprite) {
 export function createPlayer() {
   const playerEl = document.createElement("a-entity");
   playerEl.setAttribute("id", "player");
-  playerEl.setAttribute("position", "0 1.5 0");
+
+  // Add all movement components (they'll be enabled/disabled based on scene settings)
+  playerEl.setAttribute("grid-move", "");
+  playerEl.setAttribute("free-move", "");
+  playerEl.setAttribute("ar-move", "enabled: false"); // Disabled by default
+
+  // Add other player components
+  playerEl.setAttribute("custom-keyboard-controls", "");
+  playerEl.setAttribute("movement-toggle", "");
+
   // Add player health system with 100 health
   playerEl.setAttribute("player-health", "maxHealth: 100; currentHealth: 100");
 
   const cameraEl = document.createElement("a-camera");
   cameraEl.setAttribute("id", "camera");
+
+  // By default, disable look-controls (for grid and free movement modes)
+  // We'll enable it conditionally in AR mode through the movement-toggle component
+  cameraEl.setAttribute(
+    "look-controls",
+    "enabled: false; reverseMouseDrag: false"
+  );
+
+  // Also add a position offset for better view
+  cameraEl.setAttribute("position", "0 1.6 0");
 
   // Create HUD container
   const hudEl = document.createElement("a-entity");
@@ -183,10 +202,6 @@ export function createPlayer() {
   rightHandEl.setAttribute("id", "rightHand");
   rightHandEl.setAttribute("oculus-touch-controls", "hand: right");
   playerEl.appendChild(rightHandEl);
-
-  playerEl.setAttribute("free-move", { active: true });
-  playerEl.setAttribute("grid-move", { active: false });
-  playerEl.setAttribute("movement-toggle", "");
 
   return playerEl;
 }
