@@ -1,26 +1,31 @@
 AFRAME.registerComponent("ar-move", {
   schema: {
     enabled: { type: "boolean", default: false },
-    playerScale: { type: "number", default: 5.0 }, // Scale factor for the player
   },
 
   init: function () {
     console.log("AR Movement initialized");
 
-    // Initialize state
+    // Initialize state with hardcoded values
     this.arMovementEnabled = this.data.enabled;
-    this.playerScale = this.data.playerScale;
-    this.originalScale = new THREE.Vector3(1, 1, 1);
+    this.playerScale = 5.0; // Hardcoded scale
+    this.floorOffset = 0; // Hardcoded floor offset
 
-    // Store initial position for reference
+    // Initialize all vectors
+    this.originalScale = new THREE.Vector3(1, 1, 1);
+    this.originalPosition = new THREE.Vector3();
     this.initialPosition = new THREE.Vector3();
     this.initialHeadsetPosition = new THREE.Vector3();
     this.headsetOffset = new THREE.Vector3();
 
-    // Store original scale
+    // Store original scale and position
     if (this.el.object3D) {
       this.originalScale.copy(this.el.object3D.scale);
+      this.originalPosition.copy(this.el.object3D.position);
     }
+
+    // Flag to track if we've aligned the floor
+    this.floorAligned = false;
 
     // Setup XR session listeners
     this.el.sceneEl.addEventListener(
@@ -72,11 +77,40 @@ AFRAME.registerComponent("ar-move", {
     }
   },
 
+  alignFloorLevel: function () {
+    // Only run once per XR session
+    if (this.floorAligned) return;
+
+    const camera = this.el.sceneEl.camera;
+    if (!camera) return;
+
+    // Get current camera height from ground
+    const cameraHeight = camera.position.y;
+
+    // Calculate floor position (camera.y - 1.6 is roughly floor level)
+    // The 1.6 is the standard camera height in A-Frame (eye level)
+    const realFloorLevel = cameraHeight - 1.6;
+
+    // Adjust player position to align virtual floor with real floor
+    // Add floor offset parameter to allow fine-tuning
+    this.el.object3D.position.y = realFloorLevel + this.floorOffset;
+
+    console.log(
+      `Floor aligned: Camera height=${cameraHeight}, Floor level=${realFloorLevel}, Final Y=${this.el.object3D.position.y}`
+    );
+
+    // Mark as aligned
+    this.floorAligned = true;
+  },
+
   onXRSessionStart: function () {
     if (!this.arMovementEnabled) return;
 
     // Apply the AR scale when entering XR
     this.updatePlayerScale();
+
+    // Reset floor alignment flag
+    this.floorAligned = false;
 
     // Store initial positions when XR session starts
     this.initialPosition.copy(this.el.object3D.position);
@@ -97,12 +131,22 @@ AFRAME.registerComponent("ar-move", {
     }
 
     console.log("XR session started, tracking real-world movement");
+
+    // Set timer to align the floor after a short delay
+    // This ensures camera is initialized properly in XR
+    setTimeout(() => {
+      this.alignFloorLevel();
+    }, 500);
   },
 
   onXRSessionEnd: function () {
-    // Reset scale when exiting XR
+    // Reset when exiting XR
     if (this.arMovementEnabled) {
+      // Restore original scale
       this.el.object3D.scale.copy(this.originalScale);
+
+      // Restore original Y position
+      this.el.object3D.position.y = this.originalPosition.y;
     }
     console.log("XR session ended");
   },
@@ -116,6 +160,11 @@ AFRAME.registerComponent("ar-move", {
       return;
     }
 
+    // Attempt to align floor if not done yet
+    if (!this.floorAligned) {
+      this.alignFloorLevel();
+    }
+
     // Get current camera/headset position
     const camera = this.el.sceneEl.camera;
     if (!camera) return;
@@ -123,7 +172,7 @@ AFRAME.registerComponent("ar-move", {
     // Calculate movement in world space
     const currentHeadsetPos = new THREE.Vector3(
       camera.position.x,
-      0, // Ignore Y to keep player on ground
+      0, // Ignore Y to keep player on ground level
       camera.position.z
     );
 
@@ -144,7 +193,7 @@ AFRAME.registerComponent("ar-move", {
       newPosition.z = Math.max(-halfSize, Math.min(halfSize, newPosition.z));
     }
 
-    // Update player position, keeping original Y value
+    // Update player position, preserving the Y value we set for floor alignment
     this.el.object3D.position.x = newPosition.x;
     this.el.object3D.position.z = newPosition.z;
   },
@@ -152,22 +201,30 @@ AFRAME.registerComponent("ar-move", {
   update: function (oldData) {
     // Update component properties
     this.arMovementEnabled = this.data.enabled;
-    this.playerScale = this.data.playerScale;
+    this.playerScale = 5.0; // Hardcoded scale
+    this.floorOffset = 0; // Hardcoded floor offset
+
     console.log(
       `AR Movement ${
         this.arMovementEnabled ? "enabled" : "disabled"
-      } with player scale ${this.playerScale}x`
+      } with player scale ${this.playerScale}x and floor offset ${
+        this.floorOffset
+      }`
     );
 
     // Update camera controls and player scale
     this.updateCameraControls();
     this.updatePlayerScale();
+
+    // Reset floor alignment flag to trigger realignment if needed
+    this.floorAligned = false;
   },
 
   remove: function () {
-    // Restore original scale when component is removed
+    // Restore original scale and position when component is removed
     if (this.el.object3D) {
       this.el.object3D.scale.copy(this.originalScale);
+      this.el.object3D.position.y = this.originalPosition.y;
     }
 
     // Remove event listeners

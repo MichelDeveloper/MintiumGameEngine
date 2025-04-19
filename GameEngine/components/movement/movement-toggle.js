@@ -69,17 +69,11 @@ AFRAME.registerComponent("movement-toggle", {
         window.gridMoveEnabled = false;
         window.freeMoveEnabled = false;
 
-        // Get the AR player scale from scene settings or use default
-        const arPlayerScale = currentScene.arPlayerScale || 5.0;
-
-        // Enable AR movement with free camera control and custom player scale
+        // Enable AR movement with default settings
         if (!playerEl.hasAttribute("ar-move")) {
           playerEl.setAttribute("ar-move", "");
         }
-        playerEl.setAttribute("ar-move", {
-          enabled: true,
-          playerScale: arPlayerScale,
-        });
+        playerEl.setAttribute("ar-move", "enabled", true);
 
         // Enable camera look controls for AR movement
         if (cameraEl) {
