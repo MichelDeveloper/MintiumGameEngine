@@ -4,17 +4,13 @@ AFRAME.registerComponent("ar-move", {
   },
 
   init: function () {
-    console.log("AR Movement initialized");
-
     // Initialize state with hardcoded values
     this.arMovementEnabled = this.data.enabled;
-    this.playerScale = 5.0; // Hardcoded scale
+    this.playerScale = 5.0;
 
-    // Manual floor offset - set to 0 initially, will be adjusted based on debug info
-    this.manualFloorOffset = 0;
-
-    // Extra floor offset - always applied as an additional adjustment
-    this.extraFloorOffset = -3.5; // Extra offset
+    // Floor offset values that work for the system
+    this.defaultFloorOffset = -3.5;
+    this.fineAdjustOffset = -0.0;
 
     // Initialize all vectors
     this.originalScale = new THREE.Vector3(1, 1, 1);
@@ -50,164 +46,6 @@ AFRAME.registerComponent("ar-move", {
     // Initial setup based on enabled state
     this.updateCameraControls();
     this.updatePlayerScale();
-
-    // Make this component accessible globally for debugging
-    window.arMoveComponent = this;
-
-    // Expose adjustment method globally
-    window.adjustFloorHeight = (amount) => {
-      this.manualFloorOffset = amount; // Directly set the offset
-      console.log(
-        `Manual floor offset set to: ${this.manualFloorOffset} (plus extra offset: ${this.extraFloorOffset})`
-      );
-      this.forceCameraHeight();
-      return this.manualFloorOffset;
-    };
-
-    // Expose a function to get WebXR details
-    window.getXRInfo = () => {
-      return this.logXRDetails();
-    };
-
-    // Start a debug interval to log position details
-    this.debugInterval = setInterval(() => {
-      if (
-        this.arMovementEnabled &&
-        (this.el.sceneEl.is("ar-mode") || this.el.sceneEl.is("vr-mode"))
-      ) {
-        this.logPositionDebug();
-      }
-    }, 3000);
-  },
-
-  logXRDetails: function () {
-    // Get detailed info about the XR system
-    const xrSession = this.el.sceneEl.xrSession;
-    const xrSpace = this.el.sceneEl.xrSpace;
-    const xrFrame = this.el.sceneEl.frame;
-
-    console.log("============ XR DETAILS ============");
-    console.log("Has XR Session:", !!xrSession);
-    console.log("Has XR Space:", !!xrSpace);
-    console.log("Has XR Frame:", !!xrFrame);
-
-    if (xrSession) {
-      console.log("XR Session Info:");
-      console.log("- environmentBlendMode:", xrSession.environmentBlendMode);
-      console.log("- visibilityState:", xrSession.visibilityState);
-      console.log("- supportedFrameRates:", xrSession.supportedFrameRates);
-      console.log("- renderState:", xrSession.renderState);
-
-      // Try to access available reference spaces
-      try {
-        xrSession
-          .requestReferenceSpace("local-floor")
-          .then((space) => console.log("local-floor space available"))
-          .catch((err) => console.log("local-floor space NOT available:", err));
-
-        xrSession
-          .requestReferenceSpace("local")
-          .then((space) => console.log("local space available"))
-          .catch((err) => console.log("local space NOT available:", err));
-
-        xrSession
-          .requestReferenceSpace("viewer")
-          .then((space) => console.log("viewer space available"))
-          .catch((err) => console.log("viewer space NOT available:", err));
-      } catch (err) {
-        console.log("Error checking reference spaces:", err);
-      }
-    }
-
-    if (xrFrame) {
-      console.log(
-        "XR Frame available (can't detail contents for security reasons)"
-      );
-    }
-
-    // Log a-scene properties
-    const sceneEl = this.el.sceneEl;
-    console.log("A-Scene XR Properties:");
-    console.log("- is VR mode:", sceneEl.is("vr-mode"));
-    console.log("- is AR mode:", sceneEl.is("ar-mode"));
-    console.log("- camera:", !!sceneEl.camera);
-
-    if (sceneEl.camera) {
-      const camPos = sceneEl.camera.position;
-      console.log(
-        `- camera position: (${camPos.x.toFixed(3)}, ${camPos.y.toFixed(
-          3
-        )}, ${camPos.z.toFixed(3)})`
-      );
-
-      // This is the key value we need for floor alignment!
-      console.log(`CAMERA Y POSITION: ${camPos.y.toFixed(3)}`);
-    }
-
-    console.log("====================================");
-
-    return {
-      cameraY: sceneEl.camera ? sceneEl.camera.position.y : null,
-      isVRMode: sceneEl.is("vr-mode"),
-      isARMode: sceneEl.is("ar-mode"),
-      hasXRSession: !!xrSession,
-    };
-  },
-
-  logPositionDebug: function () {
-    // Log position data for debugging
-    if (!this.cameraEl) {
-      this.cameraEl = document.querySelector("#camera");
-      if (!this.cameraEl) return;
-    }
-
-    // Get camera position data
-    const cameraWorldPos = new THREE.Vector3();
-    this.cameraEl.object3D.getWorldPosition(cameraWorldPos);
-
-    const cameraLocalPos = this.cameraEl.getAttribute("position");
-    const playerWorldPos = new THREE.Vector3();
-    this.el.object3D.getWorldPosition(playerWorldPos);
-
-    // Get XR camera position directly
-    const xrCameraPos = this.el.sceneEl.camera
-      ? this.el.sceneEl.camera.position
-      : null;
-
-    console.log("------------- Position Debug -------------");
-    console.log(
-      `Camera world pos: (${cameraWorldPos.x.toFixed(
-        2
-      )}, ${cameraWorldPos.y.toFixed(2)}, ${cameraWorldPos.z.toFixed(2)})`
-    );
-    console.log(
-      `Camera local pos: (${cameraLocalPos.x}, ${cameraLocalPos.y}, ${cameraLocalPos.z})`
-    );
-    console.log(
-      `Player world pos: (${playerWorldPos.x.toFixed(
-        2
-      )}, ${playerWorldPos.y.toFixed(2)}, ${playerWorldPos.z.toFixed(2)})`
-    );
-
-    if (xrCameraPos) {
-      console.log(
-        `XR Camera direct pos: (${xrCameraPos.x.toFixed(
-          2
-        )}, ${xrCameraPos.y.toFixed(2)}, ${xrCameraPos.z.toFixed(2)})`
-      );
-      console.log(`>>> XR CAMERA HEIGHT: ${xrCameraPos.y.toFixed(3)} <<<`);
-    }
-
-    console.log(`Manual floor offset: ${this.manualFloorOffset}`);
-    console.log(`Floor aligned: ${this.floorAligned}`);
-    console.log("------------------------------------------");
-
-    return {
-      cameraWorldY: cameraWorldPos.y,
-      cameraLocalY: cameraLocalPos.y,
-      playerWorldY: playerWorldPos.y,
-      xrCameraY: xrCameraPos ? xrCameraPos.y : null,
-    };
   },
 
   updateCameraControls: function () {
@@ -218,10 +56,8 @@ AFRAME.registerComponent("ar-move", {
 
     // Enable or disable look-controls based on AR movement mode
     if (this.arMovementEnabled) {
-      console.log("Enabling camera look-controls for AR movement");
       this.cameraEl.setAttribute("look-controls", "enabled", true);
     } else {
-      console.log("Disabling camera look-controls for standard movement");
       this.cameraEl.setAttribute("look-controls", "enabled", false);
     }
   },
@@ -231,7 +67,6 @@ AFRAME.registerComponent("ar-move", {
 
     if (this.arMovementEnabled) {
       // Scale up the player in AR mode
-      console.log(`Scaling player to ${this.playerScale}x for AR mode`);
       this.el.object3D.scale.set(
         this.originalScale.x * this.playerScale,
         this.originalScale.y * this.playerScale,
@@ -239,7 +74,6 @@ AFRAME.registerComponent("ar-move", {
       );
     } else {
       // Restore original scale
-      console.log("Restoring player to original scale");
       this.el.object3D.scale.copy(this.originalScale);
     }
   },
@@ -250,46 +84,17 @@ AFRAME.registerComponent("ar-move", {
       if (!this.cameraEl) return;
     }
 
-    // Get the current XR camera height - this is the critical value!
-    const xrCameraY = this.el.sceneEl.camera
-      ? this.el.sceneEl.camera.position.y
-      : 1.6;
-
-    console.log("------- APPLYING FLOOR OFFSET -------");
-    console.log(`XR camera height detected: ${xrCameraY.toFixed(3)}`);
-
-    // Local camera height in the player's coordinate system
-    const localCameraHeight = this.cameraEl.getAttribute("position").y;
-    console.log(`Local camera height: ${localCameraHeight}`);
-
-    // Calculate the floor level: xrCameraY - localCameraHeight
-    // This is how far below the camera the floor should be
-    const calculatedFloorY = xrCameraY - localCameraHeight;
-    console.log(`Calculated floor level: ${calculatedFloorY.toFixed(3)}`);
-
-    // Apply manual offset and extra offset
-    const finalPlayerY =
-      calculatedFloorY + this.manualFloorOffset + this.extraFloorOffset;
-    console.log(
-      `Final player Y: ${finalPlayerY.toFixed(3)} (with manual offset ${
-        this.manualFloorOffset
-      } and extra offset ${this.extraFloorOffset})`
-    );
+    // Apply the combined offset directly
+    const finalPlayerY = this.defaultFloorOffset + this.fineAdjustOffset;
 
     // Set the player's Y position
     this.el.object3D.position.y = finalPlayerY;
-
-    // Log confirmation
-    console.log(`Set player position to Y=${finalPlayerY.toFixed(3)}`);
-    console.log("--------------------------------------");
 
     this.floorAligned = true;
   },
 
   onXRSessionStart: function () {
     if (!this.arMovementEnabled) return;
-
-    console.log("XR session started");
 
     // Apply the AR scale when entering XR
     this.updatePlayerScale();
@@ -315,22 +120,10 @@ AFRAME.registerComponent("ar-move", {
         .sub(this.initialHeadsetPosition);
     }
 
-    console.log("Tracking real-world movement");
-
-    // Log XR details right away
-    this.logXRDetails();
-
     // Set timer to align with floor after camera is fully initialized
     setTimeout(() => {
-      this.logXRDetails();
       this.forceCameraHeight();
-    }, 1000);
-
-    // Try one more time after a longer delay
-    setTimeout(() => {
-      this.logXRDetails();
-      this.forceCameraHeight();
-    }, 3000);
+    }, 500);
   },
 
   onXRSessionEnd: function () {
@@ -342,9 +135,6 @@ AFRAME.registerComponent("ar-move", {
       // Restore original Y position
       this.el.object3D.position.y = this.originalPosition.y;
     }
-
-    console.log("XR session ended");
-    clearInterval(this.debugInterval);
   },
 
   tick: function () {
@@ -398,12 +188,6 @@ AFRAME.registerComponent("ar-move", {
     // Update component properties
     this.arMovementEnabled = this.data.enabled;
 
-    console.log(
-      `AR Movement ${
-        this.arMovementEnabled ? "enabled" : "disabled"
-      } with player scale ${this.playerScale}x`
-    );
-
     // Update camera controls and player scale
     this.updateCameraControls();
     this.updatePlayerScale();
@@ -418,9 +202,6 @@ AFRAME.registerComponent("ar-move", {
       this.el.object3D.scale.copy(this.originalScale);
       this.el.object3D.position.y = this.originalPosition.y;
     }
-
-    // Clear intervals
-    clearInterval(this.debugInterval);
 
     // Remove event listeners
     this.el.sceneEl.removeEventListener("enter-vr", this.onXRSessionStart);
