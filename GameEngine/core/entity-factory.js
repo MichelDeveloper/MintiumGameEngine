@@ -164,15 +164,17 @@ export function createPlayer() {
   const cameraEl = document.createElement("a-camera");
   cameraEl.setAttribute("id", "camera");
 
-  // By default, disable look-controls (for grid and free movement modes)
-  // We'll enable it conditionally in AR mode through the movement-toggle component
+  // Set camera height to approximate eye level (1.6m is standard for A-Frame)
+  cameraEl.setAttribute("position", "0 1.6 0");
+
+  // By default, disable look-controls (will be enabled for AR mode)
   cameraEl.setAttribute(
     "look-controls",
     "enabled: false; reverseMouseDrag: false"
   );
 
-  // Also add a position offset for better view
-  cameraEl.setAttribute("position", "0 1.6 0");
+  // Add a way for the ar-move component to access the camera's intended height
+  cameraEl.setAttribute("data-eye-height", "1.6");
 
   // Create HUD container
   const hudEl = document.createElement("a-entity");
