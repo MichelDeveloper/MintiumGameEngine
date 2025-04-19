@@ -14,9 +14,9 @@ import { findSpritesByDistance } from "../../core/sprite-manager.js";
 AFRAME.registerComponent("ar-move", {
   schema: {
     enabled: { type: "boolean", default: false },
-    damageThreshold: { type: "number", default: 8 }, // meters
+    damageThreshold: { type: "number", default: 10 }, // meters
     sceneThreshold: { type: "number", default: 4 }, // meters
-    damageCooldown: { type: "number", default: 1000 }, // ms
+    damageCooldown: { type: "number", default: 2500 }, // ms
   },
 
   init() {
@@ -121,35 +121,71 @@ AFRAME.registerComponent("ar-move", {
   },
 
   checkDamageCollision(playerPosition) {
-    // Use the new findSpritesByDistance function
+    // Use findSpritesByDistance to get sprites within range
     const damageSprites = findSpritesByDistance(
       playerPosition,
       this.data.damageThreshold,
       "life-system"
     );
 
-    // Process damage sprites
+    // Process each sprite
     damageSprites.forEach((sprite) => {
-      // Skip if sprite is the player
-      if (sprite.id === "player") return;
+      // Skip player entity
+      if (
+        sprite.id === "player" ||
+        (sprite.aFrameComponent && sprite.aFrameComponent.id === "player")
+      ) {
+        return;
+      }
 
-      // Skip if life-system component is not available
-      if (!sprite || !sprite["life-system"]) {
+      // Get A-Frame component reference
+      const entityElement = sprite.aFrameComponent;
+      if (!entityElement) {
+        console.log("No A-Frame element associated with sprite:", sprite.id);
         return;
       }
 
       try {
-        // Apply damage with cooldown (same 1 second as grid-move)
-        const now = Date.now();
-        const lastDamageTime =
-          sprite.aFrameComponent.components["life-system"].lastDamageTime || 0;
+        // Check if the A-Frame entity has the life-system component
+        if (
+          !entityElement.components ||
+          !entityElement.components["life-system"]
+        ) {
+          console.log(
+            "Entity missing life-system component:",
+            entityElement.id
+          );
+          return;
+        }
 
-        if (now - lastDamageTime > 1000) {
-          sprite.aFrameComponent.components["life-system"].takeDamage(10);
-          sprite.aFrameComponent.components["life-system"].lastDamageTime = now;
+        const lifeSystem = entityElement.components["life-system"];
+
+        // Get current time for cooldown check
+        const now = Date.now();
+
+        // Ensure lastDamageTime exists
+        if (typeof lifeSystem.lastDamageTime === "undefined") {
+          lifeSystem.lastDamageTime = 0;
+        }
+
+        const timeSinceLastDamage = now - lifeSystem.lastDamageTime;
+
+        // Apply damage only if cooldown has elapsed
+        if (timeSinceLastDamage >= this.data.damageCooldown) {
+          console.log(
+            `Applying damage to entity: ${entityElement.id || sprite.id}`
+          );
+          lifeSystem.takeDamage(10);
+          lifeSystem.lastDamageTime = now;
+        } else {
+          console.log(
+            `Damage on cooldown: ${
+              this.data.damageCooldown - timeSinceLastDamage
+            }ms remaining`
+          );
         }
       } catch (error) {
-        // Silently handle errors
+        console.error("Error applying damage:", error);
       }
     });
   },
