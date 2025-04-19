@@ -67,3 +67,32 @@ document.addEventListener("DOMContentLoaded", async () => {
 
 // Export gameData for other modules
 export { gameData };
+
+// Add this function to handle XR mode changes
+function enterCurrentXRMode() {
+  const sceneEl = document.querySelector("a-scene");
+  if (!sceneEl) return;
+
+  // Get current scene
+  const currentScene = getCurrentScene();
+  if (!currentScene) return;
+
+  // Get XR mode from current scene
+  const xrMode = currentScene.xrMode || "vr";
+
+  console.log(`Entering XR mode: ${xrMode}`);
+
+  // Apply the appropriate mode
+  if (xrMode === "vr") {
+    if (!sceneEl.is("vr-mode")) {
+      sceneEl.enterVR();
+    }
+  } else if (xrMode === "ar") {
+    if (!sceneEl.is("ar-mode")) {
+      sceneEl.enterAR();
+    }
+  }
+}
+
+// Make the function globally available
+window.enterCurrentXRMode = enterCurrentXRMode;

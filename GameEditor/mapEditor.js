@@ -324,6 +324,14 @@ document.addEventListener("gameDataLoaded", function () {
     const enableMapBordersCheckbox =
       document.getElementById("enableMapBorders");
     enableMapBordersCheckbox.checked = currentScene.enableMapBorders ?? true; // Default to true if undefined
+
+    // Update the XR mode selector to match the scene setting
+    const xrModeSelector = document.getElementById("xrModeSelector");
+    if (currentScene.xrMode) {
+      xrModeSelector.value = currentScene.xrMode;
+    } else {
+      xrModeSelector.value = "vr"; // Default to vr if not set
+    }
   }
 
   loadMapBtn.addEventListener("click", async function () {
@@ -523,6 +531,10 @@ document.addEventListener("gameDataLoaded", function () {
     currentScene.fogEnabled = fogToggle.checked;
     currentScene.fogDistance = parseInt(fogDistance.value);
 
+    // Save XR mode preference
+    const xrModeSelector = document.getElementById("xrModeSelector");
+    currentScene.xrMode = xrModeSelector.value;
+
     // Save map borders setting
     currentScene.enableMapBorders =
       document.getElementById("enableMapBorders").checked;
@@ -588,6 +600,7 @@ document.addEventListener("gameDataLoaded", function () {
       fogEnabled: false,
       fogDistance: 50,
       enableMapBorders: true,
+      xrMode: "vr", // Default to vr
       data: [
         {
           layer: -1, // Background layer

@@ -20,12 +20,13 @@
     <script src="https://unpkg.com/aframe-extras/dist/aframe-extras.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
     <!-- Game scripts -->
-    <script type="module" src="./GameEngine/gameEngine.js" defer></script>
+    <script type="module" src="./GameEditor/gameEditor.js"></script>
+    <script type="module" src="./GameEngine/gameEngine.js"></script>
   </head>
   <body>
     <!-- Game Viewer Section -->
     <div id="gameContainer">
-      <a-scene xr-mode-ui="enabled: true" renderer="antialias: true;">
+      <a-scene xr-mode-ui="XRMode: xr" renderer="antialias: true;">
         <!-- Game scene content -->
       </a-scene>
       <script>
@@ -62,14 +63,10 @@
     <script>
       document.addEventListener("DOMContentLoaded", function () {
         var enterVRButton = document.getElementById("enterVRButton");
-        var sceneEl = document.querySelector("a-scene");
 
         enterVRButton.addEventListener("click", function () {
-          if (sceneEl.is("vr-mode")) {
-            console.log("Already in VR mode");
-          } else {
-            sceneEl.enterVR();
-          }
+          // Just call the function from gameEngine
+          window.enterCurrentXRMode();
         });
       });
     </script>
