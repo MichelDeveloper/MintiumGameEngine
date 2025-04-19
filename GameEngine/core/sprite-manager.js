@@ -1,10 +1,52 @@
 import { globalGameData } from "../../GameEditor/gameEditor.js";
+// THREE is already available through A-Frame
+// No need to import it separately
 
 // Cache for generated textures
 const textureCache = new Map();
 
 export function findSpriteById(spriteId) {
   return globalGameData.sprites.find((sprite) => sprite.id === spriteId);
+}
+
+/**
+ * Finds all entities in the scene within a specified distance from a position
+ * @param {THREE.Vector3} position - The position to measure distance from
+ * @param {number} maxDistance - Maximum distance to search within (in world units)
+ * @param {string} [attribute] - Optional attribute filter (only return entities with this attribute)
+ * @returns {Array} Array of entities sorted by distance (closest first)
+ */
+export function findSpritesByDistance(position, maxDistance, attribute = null) {
+  const sprites = [];
+  const sceneEl = document.querySelector("a-scene");
+
+  if (!sceneEl) return sprites;
+
+  const entities = sceneEl.children;
+  for (let i = 0; i < entities.length; i++) {
+    const entity = entities[i];
+    if (!entity.object3D) continue;
+
+    // Skip if we're filtering by attribute and entity doesn't have it
+    if (
+      attribute &&
+      (!entity.hasAttribute || !entity.hasAttribute(attribute))
+    ) {
+      continue;
+    }
+
+    const entityPos = new THREE.Vector3();
+    entity.object3D.getWorldPosition(entityPos);
+
+    const distance = position.distanceTo(entityPos);
+    if (distance <= maxDistance) {
+      sprites.push({ entity, distance });
+    }
+  }
+
+  // Sort by distance (closest first)
+  sprites.sort((a, b) => a.distance - b.distance);
+  return sprites.map((sprite) => sprite.entity);
 }
 
 export async function generateTexture(sprite, isAttacking = false) {
