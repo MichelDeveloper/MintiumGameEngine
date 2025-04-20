@@ -198,11 +198,29 @@ export function createPlayer() {
   const leftHandEl = document.createElement("a-entity");
   leftHandEl.setAttribute("id", "leftHand");
   leftHandEl.setAttribute("oculus-touch-controls", "hand: left");
+  // Add raycaster for detecting grabbable objects
+  leftHandEl.setAttribute("raycaster", {
+    showLine: true,
+    far: 5,
+    interval: 100,
+    objects: ".grabbable",
+    lineColor: "white",
+    lineOpacity: 0.2,
+  });
   playerEl.appendChild(leftHandEl);
 
   const rightHandEl = document.createElement("a-entity");
   rightHandEl.setAttribute("id", "rightHand");
   rightHandEl.setAttribute("oculus-touch-controls", "hand: right");
+  // Add raycaster for detecting grabbable objects
+  rightHandEl.setAttribute("raycaster", {
+    showLine: true,
+    far: 5,
+    interval: 100,
+    objects: ".grabbable",
+    lineColor: "white",
+    lineOpacity: 0.2,
+  });
   playerEl.appendChild(rightHandEl);
 
   return playerEl;
@@ -217,4 +235,26 @@ export function createSceneContainer() {
   sceneContainer.appendChild(dynamicContent);
 
   return sceneContainer;
+}
+
+export function makeGrabbable(entity, options = {}) {
+  // Add the grabbable class for raycaster detection
+  entity.classList.add("grabbable");
+
+  // Set default options if not provided
+  const grabbableOptions = {
+    enabled: options.enabled !== undefined ? options.enabled : true,
+    highlight: options.highlight !== undefined ? options.highlight : true,
+    highlightColor: options.highlightColor || "#FFFF00",
+    grabDistance: options.grabDistance || 0.3,
+    preserveRotation:
+      options.preserveRotation !== undefined ? options.preserveRotation : true,
+    snapToHand: options.snapToHand !== undefined ? options.snapToHand : true,
+    rotationFactor: options.rotationFactor || 1.0,
+  };
+
+  // Add vr-grabbable component with options
+  entity.setAttribute("vr-grabbable", grabbableOptions);
+
+  return entity;
 }

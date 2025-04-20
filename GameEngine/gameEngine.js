@@ -15,6 +15,7 @@ import "./components/movement/custom-keyboard-controls.js";
 import "./components/movement/rotation-control.js";
 import "./components/interaction/show-text-near.js";
 import "./components/interaction/show-hud-text.js";
+import "./components/interaction/vr-grabbable.js";
 import "./components/gameplay/life-system.js";
 import "./components/gameplay/player-health.js";
 import "./components/rendering/gaussian-splatting.js";

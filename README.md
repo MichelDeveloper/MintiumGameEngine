@@ -11,3 +11,7 @@ Features
     •	Sprite Editor: Design sprites pixel by pixel.
     •	Import/Export: Save and load your game data, and export your game as a standalone package.
     •	VR Support: Use A-Frame for VR experiences.
+
+Known bugs:
+
+- switch from ar to vr between scenes does not work.

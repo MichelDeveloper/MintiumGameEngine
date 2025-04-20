@@ -64,6 +64,38 @@ export const ComponentRegistry = {
       },
       enabled: true,
     },
+    {
+      name: "vr-grabbable",
+      label: "VR Grabbable",
+      icon: "bi-hand-index-thumb",
+      description:
+        "Makes this object grabbable in VR. Use grip or trigger buttons to grab and thumbstick to rotate. Works with all entity types including meshes and gaussian splatting.",
+      schema: {
+        enabled: {
+          type: "boolean",
+          default: false,
+          label: "Enable Grabbable",
+        },
+        highlight: {
+          type: "boolean",
+          default: true,
+          label: "Highlight on Hover",
+        },
+        snapToHand: {
+          type: "boolean",
+          default: true,
+          label: "Snap to Controller Hand",
+        },
+        grabDistance: {
+          type: "number",
+          default: 0.3,
+          label: "Grab Distance",
+          min: 0.1,
+          max: 1.0,
+        },
+      },
+      enabled: true,
+    },
   ],
 
   // Get component definition by name

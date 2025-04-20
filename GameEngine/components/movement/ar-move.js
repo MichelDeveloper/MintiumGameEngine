@@ -141,7 +141,6 @@ AFRAME.registerComponent("ar-move", {
       // Get A-Frame component reference
       const entityElement = sprite.aFrameComponent;
       if (!entityElement) {
-        console.log("No A-Frame element associated with sprite:", sprite.id);
         return;
       }
 
@@ -151,10 +150,6 @@ AFRAME.registerComponent("ar-move", {
           !entityElement.components ||
           !entityElement.components["life-system"]
         ) {
-          console.log(
-            "Entity missing life-system component:",
-            entityElement.id
-          );
           return;
         }
 
@@ -197,7 +192,6 @@ AFRAME.registerComponent("ar-move", {
       this.data.sceneThreshold,
       "changeScene"
     );
-    console.log("sceneChangeEntities", sceneChangeEntities);
     // Process each nearby scene change entity
     sceneChangeEntities.forEach((entity) => {
       const targetScene = entity.changeScene;
@@ -217,7 +211,6 @@ AFRAME.registerComponent("ar-move", {
 
     // Current camera world position (flattened)
     const headPos = this.getHeadWorldPos();
-    console.log("headPos", headPos);
     if (!headPos) return;
 
     // Movement vector for angle checks
