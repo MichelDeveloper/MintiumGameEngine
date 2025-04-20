@@ -252,9 +252,10 @@ AFRAME.registerComponent("vr-grabbable", {
     this.initialObjectRotation.copy(this.el.object3D.quaternion);
 
     if (this.data.snapToHand) {
-      // Make the object a child of the controller
-      this.el.object3D.position.set(0, 0, 0);
-      controller.object3D.add(this.el.object3D);
+      // Make the object a child of the controller using attach to preserve world transform
+      // Resetting position might still be desired depending on exact snap behavior needed
+      // this.el.object3D.position.set(0, 0, 0);
+      controller.object3D.attach(this.el.object3D); // Use attach instead of add
     }
 
     // Emit grab event
@@ -264,40 +265,43 @@ AFRAME.registerComponent("vr-grabbable", {
   release: function () {
     if (!this.isGrabbed) return;
 
-    // Restore object to its original parent
-    if (this.data.snapToHand) {
-      const worldPosition = new THREE.Vector3();
-      const worldQuaternion = new THREE.Quaternion();
-      const worldScale = new THREE.Vector3();
+    const object3D = this.el.object3D;
+    const grabberObject3D = this.grabber.object3D;
 
-      // Get current world position, rotation, scale
-      this.el.object3D.getWorldPosition(worldPosition);
-      this.el.object3D.getWorldQuaternion(worldQuaternion);
-      this.el.object3D.getWorldScale(worldScale);
+    // Calculate the world transform before detaching
+    const worldPosition = new THREE.Vector3();
+    const worldQuaternion = new THREE.Quaternion();
+    const worldScale = new THREE.Vector3();
 
-      // Restore original parent
-      this.originalParent.add(this.el.object3D);
+    // It's important to get the world matrix *before* detaching
+    object3D.updateMatrixWorld(true); // Ensure matrixWorld is up-to-date
+    object3D.matrixWorld.decompose(worldPosition, worldQuaternion, worldScale);
 
-      // Apply world transforms
-      this.el.object3D.position.copy(worldPosition);
-      this.el.object3D.quaternion.copy(worldQuaternion);
-      this.el.object3D.scale.copy(worldScale);
-    }
+    // Detach object from controller and re-attach to original parent (or scene)
+    const targetParent = this.originalParent || this.el.sceneEl.object3D;
+
+    // Re-attach to original parent FIRST
+    targetParent.attach(object3D);
+
+    // Restore original scale *immediately after* attaching to the correct parent
+    // This prevents the attach operation from recalculating scale based on the potentially
+    // scaled controller parent it was just detached from.
+    object3D.scale.copy(this.originalScale);
+
+    // A-Frame handles position/rotation updates via attributes,
+    // so setting them directly on object3D after attach might be overridden or cause issues.
+    // We'll rely on the attach maintaining position/rotation and only enforce scale.
+    // If position/rotation issues arise, we might need to update attributes instead.
+    // object3D.position.copy(worldPosition); // Potentially problematic with A-Frame
+    // object3D.quaternion.copy(worldQuaternion); // Potentially problematic with A-Frame
 
     // Reset state
     this.isGrabbed = false;
     this.grabber = null;
+    this.originalParent = null; // Clear original parent reference
 
-    // Restore original material
-    if (this.data.highlight && this.originalMaterial) {
-      const mesh = this.el.getObject3D("mesh");
-      if (mesh && mesh.material) {
-        mesh.material = this.originalMaterial;
-      }
-    }
-
-    // Emit release event
-    this.el.emit("released");
+    // Restore highlight if controller is still hovering (optional, needs refined check)
+    // this.onControllerHover();
   },
 
   tick: function () {
