@@ -24,6 +24,7 @@ import "./components/movement/movement-toggle.js";
 import "./components/movement/free-move.js";
 import "./components/collision/raycast-collider.js";
 import "./components/movement/ar-move.js";
+import "./components/physics/physics-body.js";
 
 let gameData;
 

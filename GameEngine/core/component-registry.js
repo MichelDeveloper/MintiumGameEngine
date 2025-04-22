@@ -96,6 +96,54 @@ export const ComponentRegistry = {
       },
       enabled: true,
     },
+    {
+      name: "physics-body",
+      label: "Physics Body",
+      icon: "bi-box",
+      description:
+        "Adds physics behavior to this object. Can be either static (immovable) or dynamic (affected by gravity and forces).",
+      schema: {
+        enabled: {
+          type: "boolean",
+          default: false,
+          label: "Enable Physics",
+        },
+        type: {
+          type: "string",
+          default: "dynamic",
+          label: "Physics Type",
+          oneOf: ["static", "dynamic"],
+        },
+        mass: {
+          type: "number",
+          default: 1.0,
+          label: "Mass",
+          min: 0.1,
+          max: 100.0,
+        },
+        linearDamping: {
+          type: "number",
+          default: 0.01,
+          label: "Linear Damping",
+          min: 0,
+          max: 1.0,
+        },
+        angularDamping: {
+          type: "number",
+          default: 0.01,
+          label: "Angular Damping",
+          min: 0,
+          max: 1.0,
+        },
+        shape: {
+          type: "string",
+          default: "auto",
+          label: "Collision Shape",
+          oneOf: ["auto", "box", "sphere"],
+        },
+      },
+      enabled: true,
+    },
   ],
 
   // Get component definition by name
