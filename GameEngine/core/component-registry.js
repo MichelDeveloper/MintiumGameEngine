@@ -112,7 +112,11 @@ export const ComponentRegistry = {
           type: "string",
           default: "dynamic",
           label: "Physics Type",
-          oneOf: ["static", "dynamic"],
+          input: "select",
+          options: [
+            { value: "static", label: "Static (Immovable)" },
+            { value: "dynamic", label: "Dynamic (Affected by Physics)" },
+          ],
         },
         mass: {
           type: "number",
@@ -139,7 +143,12 @@ export const ComponentRegistry = {
           type: "string",
           default: "auto",
           label: "Collision Shape",
-          oneOf: ["auto", "box", "sphere"],
+          input: "select",
+          options: [
+            { value: "auto", label: "Auto (Based on Geometry)" },
+            { value: "box", label: "Box" },
+            { value: "sphere", label: "Sphere" },
+          ],
         },
       },
       enabled: true,

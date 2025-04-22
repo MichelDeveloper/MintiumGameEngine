@@ -65,6 +65,18 @@ function renderComponentsFromRegistry() {
         inputElement = document.createElement("input");
         inputElement.type = "checkbox";
         inputElement.checked = schema.default;
+      } else if (schema.input === "select" && Array.isArray(schema.options)) {
+        inputElement = document.createElement("select");
+        // Add options to select
+        schema.options.forEach((option) => {
+          const optionEl = document.createElement("option");
+          optionEl.value = option.value;
+          optionEl.textContent = option.label;
+          if (option.value === schema.default) {
+            optionEl.selected = true;
+          }
+          inputElement.appendChild(optionEl);
+        });
       } else if (schema.type === "number") {
         inputElement = document.createElement("input");
         inputElement.type = "number";
@@ -133,6 +145,22 @@ function renderComponentsFromRegistry() {
         display: block;
         margin-bottom: 0.25rem;
         font-size: 0.9rem;
+      }
+      .component-property select {
+        width: 100%;
+        padding: 0.375rem 0.75rem;
+        font-size: 0.9rem;
+        line-height: 1.5;
+        color: var(--bs-body-color);
+        background-color: var(--bs-body-bg);
+        border: 1px solid var(--border-color, #dee2e6);
+        border-radius: 0.25rem;
+        cursor: pointer;
+      }
+      .component-property select:focus {
+        border-color: var(--bs-primary);
+        outline: 0;
+        box-shadow: 0 0 0 0.2rem rgba(13, 110, 253, 0.25);
       }
     `;
     document.head.appendChild(style);
