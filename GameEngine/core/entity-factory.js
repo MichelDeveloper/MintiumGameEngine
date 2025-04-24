@@ -161,8 +161,12 @@ export function createPlayer() {
   // Add player health system with 100 health
   playerEl.setAttribute("player-health", "maxHealth: 100; currentHealth: 100");
 
-  const cameraEl = document.createElement("a-camera");
+  // Create camera in a way that's compatible with A-Frame 1.7.1 WebXR
+  const cameraEl = document.createElement("a-entity");
   cameraEl.setAttribute("id", "camera");
+
+  // Set camera component with appropriate properties
+  cameraEl.setAttribute("camera", "");
 
   // Set camera height to approximate eye level (1.6m is standard for A-Frame)
   cameraEl.setAttribute("position", "0 1.6 0");
@@ -192,8 +196,33 @@ export function createPlayer() {
   hudText.setAttribute("overlay", "true");
 
   hudEl.appendChild(hudText);
+
+  // FIX: In A-Frame 1.7.1, VR mode initialization can hang when camera is
+  // deeply nested in the scene. Attach HUD to camera, but don't attach camera
+  // to player until after scene is loaded to prevent WebXR initialization issues
   cameraEl.appendChild(hudEl);
-  playerEl.appendChild(cameraEl);
+
+  // Add event listener to attach camera after scene is loaded
+  const scene = document.querySelector("a-scene");
+  if (scene) {
+    if (scene.hasLoaded) {
+      setTimeout(() => {
+        playerEl.appendChild(cameraEl);
+        console.log("Camera attached to player (scene already loaded)");
+      }, 100);
+    } else {
+      scene.addEventListener(
+        "loaded",
+        () => {
+          setTimeout(() => {
+            playerEl.appendChild(cameraEl);
+            console.log("Camera attached to player (after scene loaded)");
+          }, 100);
+        },
+        { once: true }
+      );
+    }
+  }
 
   const leftHandEl = document.createElement("a-entity");
   leftHandEl.setAttribute("id", "leftHand");
@@ -227,14 +256,36 @@ export function createPlayer() {
 }
 
 export function createSceneContainer() {
-  const sceneContainer = document.createElement("a-entity");
-  sceneContainer.setAttribute("id", "game-scene");
+  console.log("Creating scene container");
 
+  // Check if the container already exists
+  let container = document.getElementById("game-scene");
+  if (container) {
+    console.log("Game scene container already exists, reusing it");
+
+    // Check if dynamic-content exists
+    let dynamicContent = document.getElementById("dynamic-content");
+    if (!dynamicContent) {
+      console.log("Dynamic content container missing, creating it");
+      dynamicContent = document.createElement("a-entity");
+      dynamicContent.setAttribute("id", "dynamic-content");
+      container.appendChild(dynamicContent);
+    }
+
+    return container;
+  }
+
+  // Create new container if it doesn't exist
+  container = document.createElement("a-entity");
+  container.setAttribute("id", "game-scene");
+
+  // Create dynamic content container
   const dynamicContent = document.createElement("a-entity");
   dynamicContent.setAttribute("id", "dynamic-content");
-  sceneContainer.appendChild(dynamicContent);
+  container.appendChild(dynamicContent);
 
-  return sceneContainer;
+  console.log("Created new scene containers");
+  return container;
 }
 
 export function makeGrabbable(entity, options = {}) {

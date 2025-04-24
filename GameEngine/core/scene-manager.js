@@ -42,6 +42,8 @@ export function loadScene(sceneId) {
 }
 
 function initScene(sceneId) {
+  console.log("Initializing scene:", sceneId);
+
   const sceneEl = document.querySelector("a-scene");
   if (!sceneEl) {
     console.error("A-Scene not found");
@@ -57,6 +59,7 @@ function initScene(sceneId) {
     return;
   }
   currentScene = newScene;
+  console.log("Current scene set to:", currentScene.sceneId);
 
   // Get scene size (default to 10 if not set)
   const sceneSize = parseInt(newScene.size || 10);
@@ -64,11 +67,13 @@ function initScene(sceneId) {
   // Remove existing scene container if it exists
   const existingContainer = document.getElementById("game-scene");
   if (existingContainer) {
+    console.log("Removing existing scene container");
     existingContainer.parentNode.removeChild(existingContainer);
   }
 
   // Create and setup containers
   const sceneContainer = createSceneContainer();
+  console.log("Adding scene container to A-Frame scene");
   sceneEl.appendChild(sceneContainer);
 
   // Add player and lighting
@@ -108,24 +113,48 @@ function initScene(sceneId) {
   );
 
   // Create scene objects
-  newScene.data.forEach((sceneLayer) => {
-    sceneLayer.layerData.forEach((row, rowIndex) => {
-      row.forEach((cell, cellIndex) => {
-        if (cell !== "0") {
-          const sprite = findSpriteById(cell);
-          if (sprite) {
-            createCube(
-              cellIndex - halfSize,
-              sceneLayer.layer,
-              rowIndex - halfSize,
-              sprite.id,
-              sprite.type
-            );
+  console.log("Building scene objects from layers:", newScene.data.length);
+
+  // Double-check we have the dynamic-content container
+  const container = document.getElementById("dynamic-content");
+  if (!container) {
+    console.error(
+      "dynamic-content container not found, scene objects won't be created"
+    );
+    return;
+  }
+
+  try {
+    let objectsCreated = 0;
+
+    // Process each layer
+    newScene.data.forEach((sceneLayer) => {
+      // Process each cell in the layer
+      sceneLayer.layerData.forEach((row, rowIndex) => {
+        row.forEach((cell, cellIndex) => {
+          if (cell !== "0") {
+            const sprite = findSpriteById(cell);
+            if (sprite) {
+              createCube(
+                cellIndex - halfSize,
+                sceneLayer.layer,
+                rowIndex - halfSize,
+                sprite.id,
+                sprite.type
+              );
+              objectsCreated++;
+            } else {
+              console.warn(`Sprite not found for ID: ${cell}`);
+            }
           }
-        }
+        });
       });
     });
-  });
+
+    console.log(`Created ${objectsCreated} scene objects`);
+  } catch (error) {
+    console.error("Error creating scene objects:", error);
+  }
 
   // Reattach controls to the new player entity
   const leftHand = document.getElementById("leftHand");
@@ -134,6 +163,11 @@ function initScene(sceneId) {
     leftHand.setAttribute("grid-move", "");
     rightHand.setAttribute("rotation-control", "");
   }
+
+  // Dispatch an event to indicate scene initialization is complete
+  sceneEl.dispatchEvent(
+    new CustomEvent("scene-initialized", { detail: { sceneId } })
+  );
 }
 
 export function reloadGame(sceneId = currentScene.sceneId) {
@@ -158,5 +192,7 @@ export function reloadGame(sceneId = currentScene.sceneId) {
   loadScene(sceneId);
 }
 
-// Add this line to make getCurrentScene globally available
+// Add these lines to make functions globally available
 window.getCurrentScene = getCurrentScene;
+window.loadScene = loadScene;
+window.reloadGame = reloadGame;

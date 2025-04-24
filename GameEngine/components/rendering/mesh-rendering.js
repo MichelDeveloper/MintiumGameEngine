@@ -77,19 +77,58 @@ AFRAME.registerComponent("mesh-rendering", {
       if (node.isMesh) {
         node.castShadow = this.data.castShadow;
         node.receiveShadow = this.data.receiveShadow;
-        if (node.material && node.material.map) {
-          node.material.map.generateMipmaps = true;
-          // To give the model a more pixelated look
-          // node.material.map.minFilter = THREE.NearestFilter;
-          // node.material.map.magFilter = THREE.NearestFilter;
-          node.material.map.minFilter = THREE.LinearMipmapLinearFilter;
-          node.material.map.magFilter = THREE.LinearFilter;
+
+        // Quest compatibility: Ensure the mesh will remain visible
+        // when physics is added to the entity
+
+        if (node.material) {
+          // Ensure material is properly initialized
+          node.material.needsUpdate = true;
+
+          if (node.material.map) {
+            node.material.map.generateMipmaps = true;
+            // To give the model a more pixelated look
+            // node.material.map.minFilter = THREE.NearestFilter;
+            // node.material.map.magFilter = THREE.NearestFilter;
+            node.material.map.minFilter = THREE.LinearMipmapLinearFilter;
+            node.material.map.magFilter = THREE.LinearFilter;
+            node.material.map.needsUpdate = true;
+          }
+
           // For materials with alpha textures
           node.material.transparent = true;
           node.material.alphaTest = 0.5; // Adjust threshold as needed (0.01-0.99)
         }
       }
     });
+
+    // Emit an event after model has been processed for other components
+    this.el.emit("mesh-ready", { model: model }, false);
+
+    // For Quest compatibility with physics
+    if (!this.questCompatibilitySetup) {
+      this.questCompatibilitySetup = true;
+
+      // Handle physics body initialization
+      this.el.addEventListener("body-loaded", (e) => {
+        console.log("Physics body loaded on mesh, ensuring visibility");
+        setTimeout(() => {
+          // Re-ensure visibility after physics has loaded
+          const mesh = this.el.getObject3D("mesh");
+          if (mesh) {
+            mesh.visible = true;
+            mesh.traverse((node) => {
+              if (node.isMesh) {
+                node.visible = true;
+                if (node.material) {
+                  node.material.needsUpdate = true;
+                }
+              }
+            });
+          }
+        }, 200);
+      });
+    }
 
     // Check if model has animations
     if (model.animations && model.animations.length > 0) {

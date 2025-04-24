@@ -52,10 +52,50 @@ document.addEventListener("DOMContentLoaded", async () => {
   console.log("--- Game Start ---");
 
   await initGameData();
+  console.log("Game data loaded:", gameData);
+
+  // Check if we have the necessary scene containers
+  const gameScene = document.getElementById("game-scene");
+  const dynamicContent = document.getElementById("dynamic-content");
+
+  if (!gameScene || !dynamicContent) {
+    console.warn("WARNING: Missing scene containers. Creating them now...");
+
+    // Create the containers if they don't exist
+    const sceneEl = document.querySelector("a-scene");
+    if (sceneEl) {
+      // Only create if they don't exist
+      if (!gameScene) {
+        const newGameScene = document.createElement("a-entity");
+        newGameScene.id = "game-scene";
+        sceneEl.appendChild(newGameScene);
+        console.log("Created missing game-scene container");
+      }
+
+      if (!dynamicContent) {
+        const newDynamicContent = document.createElement("a-entity");
+        newDynamicContent.id = "dynamic-content";
+        (gameScene || document.getElementById("game-scene")).appendChild(
+          newDynamicContent
+        );
+        console.log("Created missing dynamic-content container");
+      }
+    }
+  }
 
   // Initialize game state
   initializeGameState(gameData);
-  loadScene(getCurrentScene().sceneId);
+
+  // Wait a moment for A-Frame to initialize before loading the scene
+  setTimeout(() => {
+    const currentScene = getCurrentScene();
+    if (currentScene) {
+      console.log("Loading initial scene:", currentScene.sceneId);
+      loadScene(currentScene.sceneId);
+    } else {
+      console.error("No current scene available to load");
+    }
+  }, 200);
 
   const leftHand = document.getElementById("leftHand");
   const rightHand = document.getElementById("rightHand");
