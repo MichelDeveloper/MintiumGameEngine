@@ -8,6 +8,8 @@ yarn.lock
 
 # Build outputs
 dist/
+www/
+android/
 electron/
 build/
 *.dmg

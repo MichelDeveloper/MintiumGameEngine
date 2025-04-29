@@ -5,7 +5,8 @@
     "scripts": {
         "start": "electron .",
         "build": "electron-builder",
-        "pack-mac": "electron-builder --mac"
+        "pack-mac": "electron-builder --mac",
+        "build-android": "node build-android.js"
     },
     "build": {
         "appId": "com.mintium.app",
@@ -30,5 +31,12 @@
     "devDependencies": {
         "electron": "^33.2.0",
         "electron-builder": "^25.1.8"
+    },
+    "dependencies": {
+        "@capacitor/android": "^7.2.0",
+        "@capacitor/cli": "^7.2.0",
+        "@capacitor/core": "^7.2.0",
+        "@capacitor/ios": "^7.2.0",
+        "fs-extra": "^11.3.0"
     }
 }
